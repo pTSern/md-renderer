@@ -1239,17 +1239,124 @@
       height: auto;
     }
 
-    /* Keybindings Editor Modal Card */
+    /* Keybindings Settings Modal */
     .keybindings-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px;
-      width: 90%;
-      max-width: 580px;
+      border-radius: 10px;
+      padding: 22px;
+      width: 92%;
+      max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+    .kb-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 8px;
+    }
+    .kb-tab-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .kb-tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+    .kb-tab-btn.active {
+      color: var(--accent);
+      background: var(--accent-glow);
+      font-weight: 600;
+    }
+    .kb-group {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .kb-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .kb-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border-light);
+    }
+    .kb-row:last-child {
+      border-bottom: none;
+    }
+    .kb-row-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+    .kb-row-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .kb-row-desc {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+    .kb-input-box {
+      width: 140px;
+      padding: 6px 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .kb-input-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+      background: var(--bg-card);
+    }
+    .kb-alert {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .kb-alert-warning {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #f59e0b;
     }
     .keybindings-textarea {
       width: 100%;
@@ -1263,6 +1370,23 @@
       border-radius: 6px;
       outline: none;
       resize: vertical;
+    }
+    .top-notification-banner {
+      position: fixed;
+      top: 36px;
+      left: 12px;
+      right: 12px;
+      z-index: 999;
+      background: #f59e0b;
+      color: #000;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
 
     /* Status Bar */
@@ -1434,21 +1558,152 @@
     </div>
   </div>
 
-  <!-- Keybindings JSON Config Modal -->
+  <!-- Dismissible Top Warning Banner for Corrupted Keybindings or Errors -->
+  <div id="top-error-banner" class="top-notification-banner" style="display:none;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span>⚠️</span>
+      <span id="top-error-text">Corrupted keybindings detected</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-sm" onclick="App.applyDefaultKeybindings()" style="background:#fff; color:#000; font-weight:600; border:none; padding:3px 8px;">Apply Defaults</button>
+      <button class="btn btn-sm" onclick="App.openKeybindingsModal()" style="background:rgba(0,0,0,0.18); color:#000; font-weight:600; border:none; padding:3px 8px;">Fix in Settings</button>
+      <span style="cursor:pointer; padding:0 6px; font-weight:700;" onclick="document.getElementById('top-error-banner').style.display='none'">✕</span>
+    </div>
+  </div>
+
+  <!-- Keybindings Settings Modal (Visual Form + Raw JSON) -->
   <div class="modal-overlay" id="keybindings-modal">
     <div class="modal-header">
-      <span>Configure NVim Keybindings (JSON)</span>
-      <button class="btn btn-primary" id="kb-modal-close">Close ✕</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span>⌨ Keybindings Settings</span>
+        <span class="diagram-hint" style="font-size:11px;">(NVim Navigation &amp; Hotkeys)</span>
+      </div>
+      <button class="btn btn-primary" id="kb-modal-close" onclick="App.closeKeybindingsModal()">Close ✕</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="align-items:flex-start; padding:16px;">
       <div class="keybindings-card">
-        <div style="font-size:12px; color:var(--text-secondary);">
-          Edit keybindings below. Changes apply instantly to <strong>Preview Mode</strong>.
+        <!-- Corrupted file fallback alert notice -->
+        <div id="kb-corrupt-alert" class="kb-alert kb-alert-warning" style="display:none;">
+          <span style="font-size:15px;">⚠️</span>
+          <div style="flex:1;">
+            <div style="font-weight:600; margin-bottom:2px;">Corrupted Settings Detected!</div>
+            <div id="kb-corrupt-msg" style="opacity:0.9;">Default keybindings were applied as fallback. You can fix the file or click 'Reset to Defaults' below.</div>
+          </div>
         </div>
-        <textarea class="keybindings-textarea" id="kb-textarea" spellcheck="false"></textarea>
-        <div style="display:flex; justify-content:flex-end; gap:8px;">
-          <button class="btn" id="kb-reset-btn">Reset Defaults</button>
-          <button class="btn btn-primary" id="kb-save-btn">Save Keybindings</button>
+
+        <!-- Mode switcher: Visual Form vs Raw JSON -->
+        <div class="kb-tabs">
+          <button class="kb-tab-btn active" id="kb-tab-visual" onclick="App.switchKbTab('visual')">🎛️ Form Fields</button>
+          <button class="kb-tab-btn" id="kb-tab-json" onclick="App.switchKbTab('json')">{ } Raw JSON</button>
+        </div>
+
+        <!-- Tab 1: Visual Dynamic Input Fields for Non-Dev Users -->
+        <div id="kb-view-visual" style="display:flex; flex-direction:column; gap:14px;">
+          <!-- Preview Navigation Group -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>🖱️ Preview Mode Navigation</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Scroll Down</span>
+                <span class="kb-row-desc">Move preview view downward</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_down" spellcheck="false" placeholder="j">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Scroll Up</span>
+                <span class="kb-row-desc">Move preview view upward</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_up" spellcheck="false" placeholder="k">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Scroll Left</span>
+                <span class="kb-row-desc">Pan view leftward</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_left" spellcheck="false" placeholder="h">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Scroll Right</span>
+                <span class="kb-row-desc">Pan view rightward</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_right" spellcheck="false" placeholder="l">
+            </div>
+          </div>
+
+          <!-- File & Window Actions -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>📂 File &amp; Window Management</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Save Current File</span>
+                <span class="kb-row-desc">Quick-save active document in preview</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="save_file" spellcheck="false" placeholder="w">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Previous Tab</span>
+                <span class="kb-row-desc">Switch to previous open file tab</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="prev_file" spellcheck="false" placeholder="Alt+Shift+H">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Next Tab</span>
+                <span class="kb-row-desc">Switch to next open file tab</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="next_file" spellcheck="false" placeholder="Alt+Shift+L">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Close App</span>
+                <span class="kb-row-desc">Exit application</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="close_app" spellcheck="false" placeholder="Ctrl+q">
+            </div>
+          </div>
+
+          <!-- Scroll Speed Settings -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>⚡ Scroll Speed (Pixels)</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Vertical Scroll Step</span>
+                <span class="kb-row-desc">Pixels per keypress for up/down navigation</span>
+              </div>
+              <input type="number" min="10" max="500" step="10" class="kb-input-box" data-cat="settings" data-key="scroll_step_y">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Horizontal Scroll Step</span>
+                <span class="kb-row-desc">Pixels per keypress for left/right navigation</span>
+              </div>
+              <input type="number" min="10" max="500" step="10" class="kb-input-box" data-cat="settings" data-key="scroll_step_x">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Raw JSON Editor (Synchronized) -->
+        <div id="kb-view-json" style="display:none; flex-direction:column; gap:8px;">
+          <div style="font-size:11.5px; color:var(--text-muted);">Directly edit JSON configuration. Form fields update automatically.</div>
+          <textarea class="keybindings-textarea" id="kb-textarea" spellcheck="false"></textarea>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <button class="btn" id="kb-reset-btn" onclick="App.applyDefaultKeybindings()" title="Revert to built-in default settings">↺ Reset to Defaults</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" id="kb-cancel-btn" onclick="App.closeKeybindingsModal()">Cancel</button>
+            <button class="btn btn-primary" id="kb-save-btn" onclick="App.saveKeybindingsFromModal()">💾 Save Keybindings</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1971,7 +2226,7 @@
         state.canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
         state.body.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
 
-        const zoomValEl = state.card.querySelector('.diagram-zoom-val');
+        const zoomValEl = document.getElementById('zoom-val-' + state.cardId) || (state.card ? state.card.querySelector('.diagram-zoom-val') : null);
         if (zoomValEl) {
           zoomValEl.innerText = Math.round(state.scale * 100) + '%';
         }
@@ -1980,9 +2235,9 @@
       openModal(cardId) {
         const card = document.getElementById(cardId);
         if (!card) return;
-        const headerTitle = card.querySelector('.diagram-header span').innerText;
-        const svg = card.querySelector('.diagram-canvas svg');
-        if (!svg) return;
+        const titleEl = card.querySelector('.diagram-header span');
+        const headerTitle = titleEl ? titleEl.innerText : 'Diagram';
+        let svg = card.querySelector('.classic-svg-container svg') || card.querySelector('.diagram-canvas svg') || card.querySelector('svg');
 
         const modal = document.getElementById('diagram-modal');
         const modalTitle = document.getElementById('modal-title');
@@ -1990,9 +2245,29 @@
         const modalBody = document.getElementById('modal-body');
 
         modalTitle.innerText = headerTitle;
+
+        if (!svg) {
+          const rawEl = card.querySelector('.mermaid-raw-code');
+          if (rawEl && window.mermaid) {
+            const renderId = 'modal-render-' + Math.random().toString(36).substr(2, 9);
+            window.mermaid.render(renderId, rawEl.textContent).then(res => {
+              modalCanvas.innerHTML = res.svg;
+              modal.classList.add('show');
+              this.setupModalInstance(modal, modalBody, modalCanvas);
+            }).catch(e => {
+              console.error('Modal mermaid render failed:', e);
+            });
+            return;
+          }
+          return;
+        }
+
         modalCanvas.innerHTML = svg.outerHTML;
         modal.classList.add('show');
+        this.setupModalInstance(modal, modalBody, modalCanvas);
+      },
 
+      setupModalInstance(modal, modalBody, modalCanvas) {
         if (this.modalInstance && this.modalInstance.cleanup) {
           this.modalInstance.cleanup();
         }
@@ -3136,12 +3411,12 @@
                         <button class="btn btn-sm active btn-toggle-dyn" onclick="App.toggleDiagramMode('${blockId}', 'dyn')" title="Dynamic Draggable Boxes">🗔 Dynamic Boxes</button>
                         <button class="btn btn-sm btn-toggle-classic" onclick="App.toggleDiagramMode('${blockId}', 'classic')" title="Classic Mermaid SVG">📊 Classic SVG</button>
                       </div>
-                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.resetLayout('${blockId}')" title="Reset All Boxes to Default Layout">↺ Layout</button>
-                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.zoomWorld('${blockId}', -0.15)" title="Zoom Out">−</button>
-                      <span class="diagram-zoom-val" id="zoom-val-${blockId}" onclick="DynamicGraphRenderer.resetWorld('${blockId}')" title="Click to reset 100%">100%</span>
-                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.zoomWorld('${blockId}', 0.15)" title="Zoom In">+</button>
-                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.fit('${blockId}')" title="Fit All Boxes">Fit</button>
-                      <button class="diagram-zoom-btn" onclick="DiagramPanZoom.openModal('${blockId}')" title="Expand Fullscreen">⛶</button>
+                      <button class="diagram-zoom-btn" onclick="App.resetDiagramLayout('${blockId}')" title="Reset Layout / View">↺ Layout</button>
+                      <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', -0.15)" title="Zoom Out">−</button>
+                      <span class="diagram-zoom-val" id="zoom-val-${blockId}" onclick="App.resetDiagramZoom('${blockId}')" title="Click to reset 100%">100%</span>
+                      <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', 0.15)" title="Zoom In">+</button>
+                      <button class="diagram-zoom-btn" onclick="App.fitDiagram('${blockId}')" title="Fit to Screen">Fit</button>
+                      <button class="diagram-zoom-btn" onclick="App.fullscreenDiagram('${blockId}')" title="Expand Fullscreen">⛶</button>
                       <span class="diagram-badge">FLOWCHART</span>
                     </div>
                   </div>
@@ -3229,6 +3504,22 @@
       mode: 'preview', // Default view mode is Preview
 
       // Keybindings
+      defaultKeybindings: {
+        preview: {
+          scroll_down: "j",
+          scroll_up: "k",
+          scroll_right: "l",
+          scroll_left: "h",
+          prev_file: "Alt+Shift+H",
+          next_file: "Alt+Shift+L",
+          close_app: "Ctrl+q",
+          save_file: "w"
+        },
+        settings: {
+          scroll_step_y: 60,
+          scroll_step_x: 60
+        }
+      },
       keybindings: {
         preview: {
           scroll_down: "j",
@@ -3317,6 +3608,9 @@
           switch (data.type) {
             case 'init':
               if (data.json) this.loadKeybindingsJson(data.json);
+              if (data.message) {
+                this.showTopError(data.message);
+              }
               this.openNewFile(data.path, data.name, data.content);
               break;
             case 'file_opened':
@@ -3324,6 +3618,18 @@
               break;
             case 'file_saved':
               this.onFileSaved(data.path, data.name);
+              break;
+            case 'keybindings_saved':
+              if (data.json) this.loadKeybindingsJson(data.json);
+              this.hideTopError();
+              this.closeKeybindingsModal();
+              alert(data.message || 'Keybindings saved successfully!');
+              break;
+            case 'keybindings_reset':
+              if (data.json) this.loadKeybindingsJson(data.json);
+              this.hideTopError();
+              this.populateKbFields();
+              alert(data.message || 'Keybindings reset to default settings.');
               break;
             case 'error':
               alert('Error: ' + data.message);
@@ -3338,7 +3644,8 @@
       openNewFile(path, name, content) {
         // If file already opened, switch to it
         if (path) {
-          const existingIdx = this.files.findIndex(f => f.path === path);
+          const normPath = path.replace(/[/\\]+/g, '/').toLowerCase();
+          const existingIdx = this.files.findIndex(f => f.path && f.path.replace(/[/\\]+/g, '/').toLowerCase() === normPath);
           if (existingIdx !== -1) {
             this.switchFile(existingIdx);
             return;
@@ -3590,12 +3897,147 @@
       loadKeybindingsJson(jsonStr) {
         try {
           const parsed = JSON.parse(jsonStr);
-          if (parsed.preview) {
+          if (parsed && parsed.preview) {
             this.keybindings = parsed;
           }
         } catch (e) {
           console.error('Invalid keybindings JSON:', e);
+          this.keybindings = JSON.parse(JSON.stringify(this.defaultKeybindings));
         }
+      },
+
+      showTopError(message) {
+        const banner = document.getElementById('top-error-banner');
+        const textEl = document.getElementById('top-error-text');
+        if (banner && textEl) {
+          textEl.innerText = message;
+          banner.style.display = 'flex';
+        }
+        const corruptAlert = document.getElementById('kb-corrupt-alert');
+        const corruptMsg = document.getElementById('kb-corrupt-msg');
+        if (corruptAlert && corruptMsg) {
+          corruptMsg.innerText = message;
+          corruptAlert.style.display = 'flex';
+        }
+      },
+
+      hideTopError() {
+        const banner = document.getElementById('top-error-banner');
+        if (banner) banner.style.display = 'none';
+        const corruptAlert = document.getElementById('kb-corrupt-alert');
+        if (corruptAlert) corruptAlert.style.display = 'none';
+      },
+
+      openKeybindingsModal() {
+        this.populateKbFields();
+        this.switchKbTab('visual');
+        if (this.kbModalEl) this.kbModalEl.classList.add('show');
+      },
+
+      closeKeybindingsModal() {
+        if (this.kbModalEl) this.kbModalEl.classList.remove('show');
+      },
+
+      switchKbTab(mode) {
+        const btnVisual = document.getElementById('kb-tab-visual');
+        const btnJson = document.getElementById('kb-tab-json');
+        const viewVisual = document.getElementById('kb-view-visual');
+        const viewJson = document.getElementById('kb-view-json');
+
+        if (mode === 'visual') {
+          this.syncJsonToFields();
+          if (btnVisual) btnVisual.classList.add('active');
+          if (btnJson) btnJson.classList.remove('active');
+          if (viewVisual) viewVisual.style.display = 'flex';
+          if (viewJson) viewJson.style.display = 'none';
+        } else {
+          this.syncFieldsToJson();
+          if (btnVisual) btnVisual.classList.remove('active');
+          if (btnJson) btnJson.classList.add('active');
+          if (viewVisual) viewVisual.style.display = 'none';
+          if (viewJson) viewJson.style.display = 'flex';
+        }
+      },
+
+      populateKbFields() {
+        const kb = this.keybindings || this.defaultKeybindings;
+        const inputs = document.querySelectorAll('.kb-input-box');
+        inputs.forEach(input => {
+          const cat = input.getAttribute('data-cat');
+          const key = input.getAttribute('data-key');
+          if (kb[cat] && kb[cat][key] !== undefined) {
+            input.value = kb[cat][key];
+          }
+        });
+        if (this.kbTextareaEl) {
+          this.kbTextareaEl.value = JSON.stringify(kb, null, 2);
+        }
+      },
+
+      syncFieldsToJson() {
+        const kb = JSON.parse(JSON.stringify(this.keybindings || this.defaultKeybindings));
+        if (!kb.preview) kb.preview = {};
+        if (!kb.settings) kb.settings = {};
+
+        const inputs = document.querySelectorAll('.kb-input-box');
+        inputs.forEach(input => {
+          const cat = input.getAttribute('data-cat');
+          const key = input.getAttribute('data-key');
+          if (cat === 'settings') {
+            const num = parseInt(input.value, 10);
+            kb.settings[key] = isNaN(num) ? 60 : num;
+          } else {
+            kb[cat][key] = input.value.trim();
+          }
+        });
+
+        this.keybindings = kb;
+        if (this.kbTextareaEl) {
+          this.kbTextareaEl.value = JSON.stringify(kb, null, 2);
+        }
+        return kb;
+      },
+
+      syncJsonToFields() {
+        if (!this.kbTextareaEl) return;
+        try {
+          const parsed = JSON.parse(this.kbTextareaEl.value);
+          this.keybindings = parsed;
+          const inputs = document.querySelectorAll('.kb-input-box');
+          inputs.forEach(input => {
+            const cat = input.getAttribute('data-cat');
+            const key = input.getAttribute('data-key');
+            if (parsed[cat] && parsed[cat][key] !== undefined) {
+              input.value = parsed[cat][key];
+            }
+          });
+        } catch (_) {
+          // If raw json is currently invalid during switch, retain current values
+        }
+      },
+
+      saveKeybindingsFromModal() {
+        const viewJson = document.getElementById('kb-view-json');
+        const isJsonActive = viewJson && viewJson.style.display !== 'none';
+        let kbToSave = null;
+
+        if (isJsonActive) {
+          try {
+            kbToSave = JSON.parse(this.kbTextareaEl.value);
+          } catch (e) {
+            alert('Cannot save invalid JSON:\n' + e.message);
+            return;
+          }
+        } else {
+          kbToSave = this.syncFieldsToJson();
+        }
+
+        this.keybindings = kbToSave;
+        this.sendIpc('save_keybindings', { json: JSON.stringify(kbToSave, null, 2) });
+      },
+
+      applyDefaultKeybindings() {
+        this.sendIpc('reset_default_keybindings', {});
       },
 
       askToClose() {
@@ -3684,12 +4126,54 @@
         });
       },
 
+      isClassicDiagram(cardId) {
+        const card = document.getElementById(cardId);
+        if (!card) return false;
+        const btnClassic = card.querySelector('.btn-toggle-classic');
+        if (btnClassic && btnClassic.classList.contains('active')) return true;
+        const classicCanvas = document.getElementById('canvas-' + cardId);
+        return classicCanvas ? (classicCanvas.style.display !== 'none') : false;
+      },
+
       zoomDiagram(cardId, delta) {
-        DiagramPanZoom.zoom(cardId, delta);
+        if (this.isClassicDiagram(cardId)) {
+          DiagramPanZoom.zoom(cardId, delta);
+        } else {
+          DynamicGraphRenderer.zoomWorld(cardId, delta);
+        }
+      },
+
+      resetDiagramZoom(cardId) {
+        if (this.isClassicDiagram(cardId)) {
+          DiagramPanZoom.reset(cardId);
+        } else {
+          DynamicGraphRenderer.resetWorld(cardId);
+        }
       },
 
       resetZoomDiagram(cardId) {
-        DiagramPanZoom.reset(cardId);
+        this.resetDiagramZoom(cardId);
+      },
+
+      fitDiagram(cardId) {
+        if (this.isClassicDiagram(cardId)) {
+          DiagramPanZoom.fit(cardId);
+        } else {
+          DynamicGraphRenderer.fit(cardId);
+        }
+      },
+
+      resetDiagramLayout(cardId) {
+        if (this.isClassicDiagram(cardId)) {
+          const state = DiagramPanZoom.instances.get(cardId);
+          if (state) {
+            DiagramPanZoom.centerDiagram(state);
+          } else {
+            DiagramPanZoom.fit(cardId);
+          }
+        } else {
+          DynamicGraphRenderer.resetLayout(cardId);
+        }
       },
 
       fullscreenDiagram(cardId) {
@@ -3703,6 +4187,7 @@
         const classicCanvas = document.getElementById('canvas-' + blockId);
         const btnDyn = card.querySelector('.btn-toggle-dyn');
         const btnClassic = card.querySelector('.btn-toggle-classic');
+        const zoomValEl = document.getElementById('zoom-val-' + blockId);
 
         if (mode === 'dyn') {
           if (dynViewport) dynViewport.style.display = 'block';
@@ -3713,6 +4198,9 @@
           if (state) {
             DynamicGraphRenderer.measureBoxes(state);
             DynamicGraphRenderer.updateConnections(state);
+            if (zoomValEl) {
+              zoomValEl.innerText = Math.round(state.scale * 100) + '%';
+            }
           }
         } else {
           if (dynViewport) dynViewport.style.display = 'none';
@@ -3741,6 +4229,10 @@
             setTimeout(() => {
               DiagramPanZoom.init(blockId);
             }, 30);
+          }
+          const classicState = DiagramPanZoom.instances.get(blockId);
+          if (zoomValEl && classicState) {
+            zoomValEl.innerText = Math.round(classicState.scale * 100) + '%';
           }
         }
       },
@@ -3773,48 +4265,17 @@
         });
 
         // Keybindings Modal
-        document.getElementById('btn-keybindings').addEventListener('click', () => {
-          this.kbTextareaEl.value = JSON.stringify(this.keybindings, null, 2);
-          this.kbModalEl.classList.add('show');
-        });
-        document.getElementById('kb-modal-close').addEventListener('click', () => {
-          this.kbModalEl.classList.remove('show');
-        });
-        document.getElementById('kb-save-btn').addEventListener('click', () => {
-          try {
-            const parsed = JSON.parse(this.kbTextareaEl.value);
-            this.keybindings = parsed;
-            this.sendIpc('save_keybindings', { json: JSON.stringify(parsed, null, 2) });
-            this.kbModalEl.classList.remove('show');
-            alert('Keybindings saved successfully!');
-          } catch (e) {
-            alert('Invalid JSON: ' + e.message);
-          }
-        });
-        document.getElementById('kb-reset-btn').addEventListener('click', () => {
-          this.keybindings = {
-            preview: {
-              scroll_down: "j",
-              scroll_up: "k",
-              scroll_right: "l",
-              scroll_left: "h",
-              prev_file: "Alt+Shift+H",
-              next_file: "Alt+Shift+L",
-              close_app: "Ctrl+q",
-              save_file: "w"
-            },
-            settings: {
-              scroll_step_y: 60,
-              scroll_step_x: 60
-            }
-          };
-          this.kbTextareaEl.value = JSON.stringify(this.keybindings, null, 2);
-        });
+        const btnKb = document.getElementById('btn-keybindings');
+        if (btnKb) {
+          btnKb.addEventListener('click', () => {
+            this.openKeybindingsModal();
+          });
+        }
 
         window.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
             this.diagramModalEl.classList.remove('show');
-            this.kbModalEl.classList.remove('show');
+            this.closeKeybindingsModal();
           }
         });
       },
