@@ -23,15 +23,16 @@
       --success: #a6e3a1;
       --warning: #f9e2af;
       --info: #89dceb;
-      --toolbar-h: 46px;
-      --statusbar-h: 28px;
+      --titlebar-h: 36px;
+      --toolbar-h: 38px;
+      --statusbar-h: 26px;
       --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-mono: "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
     }
 
     [data-theme="light"] {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
       --bg-tertiary: #f1f5f9;
       --bg-card: #ffffff;
       --text-primary: #0f172a;
@@ -64,9 +65,157 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      border: 1px solid var(--border); /* Border for borderless window */
     }
 
-    /* Toolbar */
+    /* =========================================================================
+       ROW 1: BORDERLESS TITLEBAR & FILE TABS
+       ========================================================================= */
+    .titlebar {
+      height: var(--titlebar-h);
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0 0 10px;
+      -webkit-app-region: drag;
+      cursor: grab;
+      flex-shrink: 0;
+    }
+
+    .titlebar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      -webkit-app-region: drag;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      padding-right: 8px;
+      border-right: 1px solid var(--border-light);
+    }
+
+    /* Tabs Bar (Multiple File Manager) */
+    .tabs-container {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      flex: 1;
+      margin: 0 8px;
+      height: 100%;
+      -webkit-app-region: no-drag;
+      scrollbar-width: none;
+    }
+    .tabs-container::-webkit-scrollbar { display: none; }
+
+    .tab-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      max-width: 160px;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.12s;
+    }
+    .tab-item:hover {
+      background: var(--border-light);
+      color: var(--text-primary);
+    }
+    .tab-item.active {
+      background: var(--bg-primary);
+      color: var(--accent);
+      border-color: var(--border);
+      font-weight: 600;
+    }
+    .tab-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tab-dirty {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--warning);
+      display: none;
+    }
+    .tab-item.is-dirty .tab-dirty { display: inline-block; }
+    .tab-close {
+      font-size: 12px;
+      opacity: 0.6;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+    .tab-close:hover {
+      opacity: 1;
+      color: var(--danger);
+      background: rgba(243, 139, 168, 0.2);
+    }
+
+    .btn-add-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .btn-add-tab:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    /* Window Controls (Top Right: Min, Max, Close) */
+    .window-controls {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      -webkit-app-region: no-drag;
+    }
+
+    .win-btn {
+      width: 42px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .win-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    .win-btn.win-close:hover {
+      background: #e81123;
+      color: #ffffff;
+    }
+
+    /* =========================================================================
+       ROW 2: TOOLBAR (FLEXIBLE FOR HALF-SCREEN 700px - 960px)
+       ========================================================================= */
     .toolbar {
       height: var(--toolbar-h);
       background-color: var(--bg-secondary);
@@ -74,76 +223,40 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
-      gap: 8px;
-      z-index: 10;
+      padding: 0 10px;
+      gap: 6px;
       flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .toolbar::-webkit-scrollbar { display: none; }
 
     .tool-group {
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .app-title {
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding-right: 12px;
-      border-right: 1px solid var(--border);
-    }
-
-    .file-badge {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      background-color: var(--bg-tertiary);
-      padding: 4px 10px;
-      border-radius: 4px;
-      max-width: 320px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .dirty-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--warning);
-      display: none;
-    }
-    .dirty-dot.is-dirty {
-      display: inline-block;
+      gap: 4px;
+      flex-shrink: 0;
     }
 
     .btn {
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-primary);
-      font-size: 12px;
+      font-size: 11.5px;
       font-family: inherit;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 4px 8px;
+      border-radius: 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
+      gap: 4px;
+      transition: all 0.12s ease;
+      white-space: nowrap;
     }
-
     .btn:hover {
       background-color: var(--bg-tertiary);
       border-color: var(--border);
     }
-
     .btn:active {
       transform: scale(0.97);
     }
@@ -153,7 +266,6 @@
       color: #11111b;
       font-weight: 600;
     }
-
     .btn-primary:hover {
       background-color: var(--accent-hover);
       border-color: var(--accent);
@@ -163,17 +275,15 @@
       display: flex;
       background: var(--bg-tertiary);
       padding: 2px;
-      border-radius: 6px;
+      border-radius: 5px;
       border: 1px solid var(--border-light);
     }
-
     .btn-group .btn {
-      border-radius: 4px;
-      padding: 4px 10px;
-      font-size: 12px;
+      border-radius: 3px;
+      padding: 3px 8px;
+      font-size: 11px;
       font-weight: 500;
     }
-
     .btn-group .btn.active {
       background: var(--accent);
       color: #11111b;
@@ -184,14 +294,13 @@
       position: relative;
       display: inline-block;
     }
-
     .dropdown-content {
       display: none;
       position: absolute;
       top: 100%;
       left: 0;
       background-color: var(--bg-secondary);
-      min-width: 230px;
+      min-width: 220px;
       box-shadow: 0px 8px 20px rgba(0,0,0,0.45);
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -199,14 +308,10 @@
       z-index: 100;
       margin-top: 4px;
     }
-
-    .dropdown-content.show {
-      display: block;
-    }
-
+    .dropdown-content.show { display: block; }
     .dropdown-item {
-      padding: 7px 10px;
-      font-size: 12px;
+      padding: 6px 10px;
+      font-size: 11.5px;
       color: var(--text-primary);
       border-radius: 4px;
       cursor: pointer;
@@ -214,23 +319,23 @@
       align-items: center;
       gap: 8px;
     }
-
     .dropdown-item:hover {
       background-color: var(--bg-tertiary);
       color: var(--accent);
     }
-
     .dropdown-divider {
       height: 1px;
       background-color: var(--border);
       margin: 4px 0;
     }
 
-    /* Main Container */
+    /* =========================================================================
+       MAIN CONTAINER & PANES
+       ========================================================================= */
     .main-container {
       display: flex;
       flex: 1;
-      height: calc(100vh - var(--toolbar-h) - var(--statusbar-h));
+      height: calc(100vh - var(--titlebar-h) - var(--toolbar-h) - var(--statusbar-h));
       overflow: hidden;
       position: relative;
     }
@@ -240,13 +345,12 @@
       display: flex;
       flex-direction: column;
       flex: 1;
-      min-width: 200px;
+      min-width: 150px;
       height: 100%;
       background-color: var(--bg-secondary);
       border-right: 1px solid var(--border);
       position: relative;
     }
-
     .editor-container {
       display: flex;
       flex: 1;
@@ -254,21 +358,19 @@
       overflow: hidden;
       position: relative;
     }
-
     .line-numbers {
-      width: 48px;
-      padding: 16px 8px 16px 0;
+      width: 44px;
+      padding: 16px 6px 16px 0;
       background-color: var(--bg-secondary);
       color: var(--text-muted);
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: 12.5px;
       line-height: 1.6;
       text-align: right;
       overflow: hidden;
       user-select: none;
       border-right: 1px solid var(--border-light);
     }
-
     .editor-textarea {
       flex: 1;
       height: 100%;
@@ -289,13 +391,12 @@
 
     /* Splitter */
     .splitter {
-      width: 6px;
+      width: 5px;
       background-color: var(--border-light);
       cursor: col-resize;
       transition: background-color 0.15s;
       z-index: 5;
     }
-
     .splitter:hover, .splitter.dragging {
       background-color: var(--accent);
     }
@@ -303,27 +404,27 @@
     /* Preview Pane (Default View) */
     .preview-pane {
       flex: 1;
-      min-width: 200px;
+      min-width: 150px;
       height: 100%;
       overflow-y: auto;
-      padding: 32px 48px;
+      overflow-x: auto;
+      padding: 24px 32px;
       background-color: var(--bg-primary);
       user-select: text;
       scroll-behavior: smooth;
     }
 
-    /* Default View: Mode Preview */
+    /* Layout Modes */
     body.mode-preview .editor-pane,
     body.mode-preview .splitter {
       display: none !important;
     }
     body.mode-preview .preview-pane {
       flex: 1;
-      max-width: 1400px;
+      max-width: 980px;
       margin: 0 auto;
       width: 100%;
     }
-
     body.mode-edit .preview-pane,
     body.mode-edit .splitter {
       display: none !important;
@@ -332,112 +433,96 @@
       border-right: none;
     }
 
-    /* Markdown Rendered Content Styles */
+    /* =========================================================================
+       MARKDOWN BODY STYLES
+       ========================================================================= */
     .markdown-body {
-      font-size: 15.5px;
-      line-height: 1.7;
+      font-size: 14.5px;
+      line-height: 1.65;
       color: var(--text-primary);
       word-wrap: break-word;
     }
-
     .markdown-body h1, .markdown-body h2, .markdown-body h3,
     .markdown-body h4, .markdown-body h5, .markdown-body h6 {
-      margin-top: 26px;
-      margin-bottom: 12px;
+      margin-top: 22px;
+      margin-bottom: 10px;
       font-weight: 600;
       line-height: 1.25;
       color: var(--text-primary);
     }
-
     .markdown-body h1 {
-      font-size: 2.1rem;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 8px;
-    }
-    .markdown-body h2 {
-      font-size: 1.55rem;
-      border-bottom: 1px solid var(--border-light);
+      font-size: 1.85rem;
+      border-bottom: 1px solid var(--border);
       padding-bottom: 6px;
     }
-    .markdown-body h3 { font-size: 1.3rem; }
-
+    .markdown-body h2 {
+      font-size: 1.45rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 5px;
+    }
+    .markdown-body h3 { font-size: 1.2rem; }
     .markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body blockquote {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-
     .markdown-body ul, .markdown-body ol {
-      padding-left: 24px;
+      padding-left: 22px;
     }
+    .markdown-body li { margin-bottom: 3px; }
+    .markdown-body a { color: var(--accent); text-decoration: none; }
+    .markdown-body a:hover { text-decoration: underline; }
 
-    .markdown-body li {
-      margin-bottom: 5px;
-    }
-
-    .markdown-body a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .markdown-body a:hover {
-      text-decoration: underline;
-    }
-
-    /* Inline Code */
     .markdown-body code:not(.code-body *) {
       font-family: var(--font-mono);
       background-color: var(--code-bg);
       color: var(--accent-hover);
-      padding: 3px 7px;
-      border-radius: 5px;
+      padding: 2px 5px;
+      border-radius: 4px;
       font-size: 88%;
       border: 1px solid var(--border-light);
     }
 
     .markdown-body blockquote {
       border-left: 4px solid var(--accent);
-      padding: 10px 18px;
+      padding: 8px 16px;
       color: var(--text-secondary);
       background: var(--bg-tertiary);
-      border-radius: 0 6px 6px 0;
+      border-radius: 0 5px 5px 0;
     }
 
     .markdown-body table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
       border: 1px solid var(--border);
       border-radius: 6px;
       overflow: hidden;
     }
-
     .markdown-body th, .markdown-body td {
       border: 1px solid var(--border);
-      padding: 10px 16px;
+      padding: 8px 14px;
       text-align: left;
     }
-
     .markdown-body th {
       background-color: var(--bg-secondary);
       font-weight: 600;
     }
-
     .markdown-body tr:nth-child(even) {
       background-color: var(--bg-tertiary);
     }
-
     .markdown-body hr {
       border: 0;
       height: 1px;
       background: var(--border);
-      margin: 28px 0;
+      margin: 24px 0;
     }
 
-    /* Alerts / Callouts */
+    /* Alerts */
     .callout {
       border-left: 4px solid var(--accent);
       background: var(--bg-card);
       border-radius: 6px;
-      padding: 12px 18px;
-      margin-bottom: 18px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
       border: 1px solid var(--border-light);
       border-left-width: 4px;
     }
@@ -448,58 +533,49 @@
     .callout.caution { border-left-color: var(--danger); }
     .callout-title {
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11.5px;
       margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     /* =========================================================================
-       CODE VIEW BOX STYLING & THEME COLORING
+       CODE VIEW BOX STYLING
        ========================================================================= */
     .code-box {
       background: var(--code-bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      margin: 22px 0;
+      border-radius: 7px;
+      margin: 18px 0;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       font-family: var(--font-mono);
     }
-
     .code-box-header {
       background: #181825;
       border-bottom: 1px solid var(--border-light);
-      padding: 8px 14px;
+      padding: 6px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       font-size: 11px;
     }
-
     [data-theme="light"] .code-box-header {
       background: #f1f5f9;
-      border-bottom-color: #e2e8f0;
     }
-
     .code-box-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
-
     .code-box-mac-dots {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
-
     .mac-dot {
-      width: 11px;
-      height: 11px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       display: inline-block;
     }
@@ -511,86 +587,72 @@
       background: var(--bg-tertiary);
       color: var(--accent);
       border: 1px solid var(--border-light);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 10.5px;
       font-weight: 700;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
     }
-
     .code-copy-btn {
       background: var(--bg-tertiary);
       border: 1px solid var(--border);
       color: var(--text-secondary);
-      font-size: 11px;
-      font-family: inherit;
-      padding: 3px 9px;
-      border-radius: 4px;
+      font-size: 10.5px;
+      padding: 2px 8px;
+      border-radius: 3px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
+      gap: 4px;
     }
-    .code-copy-btn:hover {
-      background: var(--border);
-      color: var(--text-primary);
-    }
+    .code-copy-btn:hover { background: var(--border); color: var(--text-primary); }
 
     .code-content-wrapper {
       display: flex;
       overflow-x: auto;
-      padding: 14px 0;
+      padding: 12px 0;
       background: #11111b;
     }
-    [data-theme="light"] .code-content-wrapper {
-      background: #f8fafc;
-    }
+    [data-theme="light"] .code-content-wrapper { background: #f8fafc; }
 
     .code-line-numbers {
-      padding: 0 12px 0 16px;
+      padding: 0 10px 0 14px;
       text-align: right;
       color: #585b70;
       user-select: none;
-      font-size: 13px;
+      font-size: 12.5px;
       line-height: 1.65;
       border-right: 1px solid #313244;
-      min-width: 44px;
+      min-width: 38px;
     }
-    [data-theme="light"] .code-line-numbers {
-      color: #94a3b8;
-      border-right-color: #e2e8f0;
-    }
+    [data-theme="light"] .code-line-numbers { color: #94a3b8; border-right-color: #e2e8f0; }
 
     .code-body {
       flex: 1;
-      padding: 0 16px;
+      padding: 0 14px;
       margin: 0;
-      font-size: 13.5px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre;
       color: #cdd6f4;
       overflow-x: visible;
       user-select: text;
     }
-    [data-theme="light"] .code-body {
-      color: #1e293b;
-    }
+    [data-theme="light"] .code-body { color: #1e293b; }
 
-    /* VIBRANT SYNTAX TOKEN COLORS (Dark Theme - Catppuccin / OneDark Inspired) */
-    .tok-kw { color: #cba6f7; font-weight: 600; }     /* Purple: fn, let, mut, if, else, class, def */
-    .tok-type { color: #89dceb; font-weight: 600; }   /* Cyan: String, u32, bool, Vec, Option */
-    .tok-str { color: #a6e3a1; }                      /* Emerald Green: "string", 'char' */
-    .tok-num { color: #fab387; }                      /* Orange: 123, 0x4A, 3.14 */
-    .tok-comment { color: #6c7086; font-style: italic; } /* Muted Gray-Lavender: // comment */
-    .tok-fn { color: #89b4fa; font-weight: 600; }     /* Blue: functionName() */
-    .tok-macro { color: #f9e2af; font-weight: 600; }  /* Yellow Gold: println!, @decorator */
-    .tok-const { color: #f38ba8; font-weight: 600; }  /* Coral Red: true, false, null, None */
-    .tok-op { color: #94e2d5; }                       /* Teal: =>, ->, ::, ==, != */
-    .tok-prop { color: #f2cdcd; }                     /* Flamingo: object keys, struct fields */
+    /* Syntax Tokens */
+    .tok-kw { color: #cba6f7; font-weight: 600; }
+    .tok-type { color: #89dceb; font-weight: 600; }
+    .tok-str { color: #a6e3a1; }
+    .tok-num { color: #fab387; }
+    .tok-comment { color: #6c7086; font-style: italic; }
+    .tok-fn { color: #89b4fa; font-weight: 600; }
+    .tok-macro { color: #f9e2af; font-weight: 600; }
+    .tok-const { color: #f38ba8; font-weight: 600; }
+    .tok-op { color: #94e2d5; }
+    .tok-prop { color: #f2cdcd; }
 
-    /* VIBRANT SYNTAX TOKEN COLORS (Light Theme) */
     [data-theme="light"] .tok-kw { color: #8b5cf6; }
     [data-theme="light"] .tok-type { color: #0284c7; }
     [data-theme="light"] .tok-str { color: #15803d; }
@@ -603,34 +665,80 @@
     [data-theme="light"] .tok-prop { color: #be185d; }
 
     /* =========================================================================
-       DIAGRAM CARDS & ENHANCED BIG SIZING
+       RESIZABLE DIAGRAM CARDS & DRAGGABLE CANVAS (DIAGRAMS.NET STYLE)
        ========================================================================= */
     .diagram-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      margin: 24px 0;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      margin: 20px 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       width: 100%;
+      height: 380px;
+      min-width: 260px;
+      min-height: 140px;
+      max-width: 100%;
+      resize: both;
+      overflow: hidden; /* Clips panning canvas & enables browser corner resize */
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .diagram-card::-webkit-resizer {
+      background-color: var(--accent);
+      border-radius: 2px;
+    }
+
+    .diagram-resize-handle {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
+      border-bottom-right-radius: 4px;
+      opacity: 0.75;
+      z-index: 10;
     }
 
     .diagram-header {
       background: var(--bg-secondary);
-      padding: 8px 14px;
+      padding: 6px 12px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--text-secondary);
+      flex-shrink: 0;
+      user-select: none;
+      z-index: 5;
+    }
+
+    .diagram-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .diagram-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 400;
+      opacity: 0.85;
     }
 
     .diagram-controls {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      flex-shrink: 0;
     }
 
     .diagram-zoom-btn {
@@ -638,97 +746,476 @@
       border: 1px solid var(--border);
       color: var(--text-primary);
       padding: 2px 7px;
-      font-size: 11px;
-      font-family: inherit;
-      border-radius: 4px;
+      font-size: 10.5px;
+      border-radius: 3px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      font-family: var(--font-ui);
+      transition: all 0.12s;
     }
-    .diagram-zoom-btn:hover {
-      background: var(--border);
-      color: var(--accent);
-    }
+    .diagram-zoom-btn:hover { background: var(--border); color: var(--accent); }
+    .diagram-zoom-btn:active { transform: scale(0.95); }
 
     .diagram-zoom-val {
-      font-size: 11px;
+      font-size: 10.5px;
       font-family: var(--font-mono);
-      min-width: 42px;
+      min-width: 38px;
       text-align: center;
       color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 2px 4px;
     }
+    .diagram-zoom-val:hover { background: var(--bg-tertiary); color: var(--accent); }
 
     .diagram-badge {
       background: var(--accent-glow);
       color: var(--accent);
-      padding: 3px 9px;
-      border-radius: 12px;
-      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 10px;
       font-family: var(--font-mono);
       font-weight: 600;
     }
 
+    /* Draggable Viewport / Canvas (app.diagrams.net feel) */
     .diagram-body {
-      padding: 24px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 180px;
-      background: var(--bg-secondary);
-    }
-
-    .diagram-zoom-wrapper {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      transform-origin: center top;
-      transition: transform 0.15s ease-out;
+      flex: 1;
       width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--bg-secondary);
+      /* Dot grid pattern */
+      background-image: radial-gradient(rgba(205, 214, 244, 0.16) 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
     }
 
-    /* MERMAID BIG RENDERING FIX */
+    [data-theme="light"] .diagram-body {
+      background-image: radial-gradient(rgba(15, 23, 42, 0.13) 1.2px, transparent 1.2px);
+    }
+
+    .diagram-body.is-panning {
+      cursor: grabbing !important;
+    }
+
+    .diagram-canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+      user-select: none;
+      pointer-events: auto;
+    }
+
     .mermaid {
+      display: inline-block;
+      user-select: none;
+    }
+
+    .mermaid svg, .packet-diagram {
+      display: block;
+      user-select: none;
+      pointer-events: none; /* Let drag events fall through smoothly to diagram-body */
+    }
+
+    /* =========================================================================
+       DYNAMIC BOX GRAPH STYLING (NEXUS-GRAPH STYLE)
+       ========================================================================= */
+    .dyn-graph-viewport {
       width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--bg-secondary);
+      background-image: radial-gradient(rgba(205, 214, 244, 0.16) 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      cursor: grab;
+      user-select: none;
+    }
+    .dyn-graph-viewport.is-panning {
+      cursor: grabbing !important;
+    }
+    [data-theme="light"] .dyn-graph-viewport {
+      background-image: radial-gradient(rgba(15, 23, 42, 0.13) 1.2px, transparent 1.2px);
+    }
+
+    .dyn-graph-world {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    .dyn-svg-overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4000px;
+      height: 4000px;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .dyn-edge-path {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+      transition: stroke 0.12s;
+    }
+    .dyn-edge-path:hover {
+      stroke: var(--accent-hover);
+      stroke-width: 3.2;
+    }
+
+    .dyn-edge-label-wrap {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      pointer-events: none;
+    }
+    .dyn-edge-label {
+      background: var(--bg-card);
+      border: 1.2px solid var(--accent);
+      color: var(--accent);
+      font-size: 10.5px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      white-space: nowrap;
+    }
+
+    /* Dynamic Subgraph Container Box (nexus-graph movable box) */
+    .dyn-box {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1.8px solid var(--border);
+      border-radius: 9px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+      z-index: 2;
       display: flex;
+      flex-direction: column;
+      user-select: none;
+      transform-origin: top left;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .dyn-box:hover, .dyn-box.is-selected {
+      border-color: var(--accent);
+      box-shadow: 0 10px 32px var(--accent-glow), 0 4px 14px rgba(0,0,0,0.4);
+    }
+
+    .dyn-box.is-dragging {
+      opacity: 0.95;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      cursor: grabbing !important;
+      z-index: 10 !important;
+    }
+
+    .dyn-box-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: move;
+      gap: 8px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .dyn-box-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .dyn-box-icon {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .dyn-box-controls {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .dyn-scale-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      line-height: 1;
+      padding: 0;
+      transition: all 0.1s;
+    }
+    .dyn-scale-btn:hover {
+      background: var(--border);
+      color: var(--text-primary);
+      border-color: var(--accent);
+    }
+
+    .dyn-box-scale-val {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      min-width: 32px;
+      text-align: center;
+      cursor: pointer;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+    .dyn-box-scale-val:hover {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+    }
+
+    .dyn-box-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-primary);
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    /* Node items inside subgraph */
+    .dyn-node-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border-color 0.12s, background-color 0.12s, box-shadow 0.12s;
+    }
+    .dyn-node-item:hover {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .dyn-node-item.is-decision {
+      border-left: 3.5px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.04);
+    }
+    .dyn-node-item.is-decision:hover {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.09);
+    }
+
+    .dyn-node-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .dyn-node-title {
+      font-weight: 600;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .dyn-node-badges {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .dyn-badge-decision {
+      font-size: 9px;
+      font-weight: 700;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      white-space: nowrap;
+    }
+
+    .dyn-node-id-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .dyn-node-desc {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-left: 2.5px solid var(--accent);
+      padding: 4px 7px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.35;
+    }
+
+    /* Standalone Node Card */
+    .dyn-node-card {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1.8px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      transform-origin: top left;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .dyn-node-card:hover, .dyn-node-card.is-selected {
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+    .dyn-node-card.is-dragging {
+      opacity: 0.95;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      cursor: grabbing !important;
+      z-index: 10 !important;
+    }
+    .dyn-node-card-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: move;
+      gap: 6px;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+    }
+    .dyn-node-card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+    }
+    .dyn-node-card-title-group .dyn-node-title {
+      font-weight: 600;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dyn-node-card-body {
+      padding: 8px 10px;
+      background: var(--bg-primary);
+      border-bottom-left-radius: 7px;
+      border-bottom-right-radius: 7px;
+    }
+
+    /* Box Corner Resizer */
+    .dyn-box-resizer {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 14px;
+      height: 14px;
+      cursor: nwse-resize;
+      background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
+      border-bottom-right-radius: 6px;
+      opacity: 0.6;
+    }
+    .dyn-box-resizer:hover {
+      opacity: 1;
+    }
+
+    /* Drag & Drop Full Window Overlay */
+    .drop-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(137, 180, 250, 0.18);
+      backdrop-filter: blur(4px);
+      border: 3px dashed var(--accent);
+      display: none;
       justify-content: center;
       align-items: center;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .drop-overlay.active {
+      display: flex;
+    }
+    .drop-overlay-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--accent);
+      padding: 24px 36px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--accent);
+      font-size: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    .mermaid svg {
-      max-width: none !important;
-      height: auto !important;
-      font-family: var(--font-ui) !important;
-      font-size: 16px !important;
-    }
-
-    /* UDP & Packet Diagram SVG Styling */
-    .packet-diagram {
-      width: 100%;
-      max-width: 900px;
-    }
-
-    /* Fullscreen Modal Lightbox */
-    .diagram-modal {
+    /* Modal / Lightbox / Settings */
+    .modal-overlay {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(10, 10, 15, 0.88);
+      background: rgba(10, 10, 15, 0.85);
       backdrop-filter: blur(4px);
       z-index: 1000;
       flex-direction: column;
     }
-    .diagram-modal.show {
-      display: flex;
-    }
+    .modal-overlay.show { display: flex; }
     .modal-header {
-      height: 48px;
-      padding: 0 20px;
+      height: 44px;
+      padding: 0 16px;
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -736,131 +1223,171 @@
       align-items: center;
       color: var(--text-primary);
       font-weight: 600;
+      font-size: 13px;
     }
     .modal-body {
       flex: 1;
       overflow: auto;
-      padding: 40px;
+      padding: 24px;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
+    }
+    .modal-body svg {
+      max-width: 90vw;
+      max-height: 80vh;
+      height: auto;
+    }
+
+    /* Keybindings Editor Modal Card */
+    .keybindings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      width: 90%;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .keybindings-textarea {
+      width: 100%;
+      height: 260px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      padding: 12px;
+      border-radius: 6px;
+      outline: none;
+      resize: vertical;
     }
 
     /* Status Bar */
     .statusbar {
       height: var(--statusbar-h);
       background-color: var(--bg-secondary);
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border-light);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
+      padding: 0 12px;
       font-size: 11px;
       color: var(--text-muted);
       flex-shrink: 0;
     }
-
     .statusbar-left, .statusbar-right {
       display: flex;
       align-items: center;
-      gap: 16px;
-    }
-
-    .statusbar-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      gap: 14px;
     }
   </style>
 </head>
 <body class="mode-preview" data-theme="dark">
 
-  <!-- Toolbar -->
-  <header class="toolbar">
-    <div class="tool-group">
-      <div class="app-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- =========================================================================
+       ROW 1: BORDERLESS TITLEBAR & MULTIPLE FILE TABS
+       ========================================================================= -->
+  <div class="titlebar" id="titlebar">
+    <div class="titlebar-left">
+      <div class="app-brand">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
         <span>MDViewer</span>
       </div>
+    </div>
 
+    <!-- Scrollable Multiple File Tabs -->
+    <div class="tabs-container" id="tabs-container">
+      <!-- Injected by App.renderTabs() -->
+    </div>
+
+    <button class="btn-add-tab" id="btn-add-tab" title="Open New File Tab (Ctrl+N)">+</button>
+
+    <!-- Native Window Action Controls -->
+    <div class="window-controls">
+      <button class="win-btn" id="win-min" title="Minimize">🗕</button>
+      <button class="win-btn" id="win-max" title="Maximize / Restore">🗖</button>
+      <button class="win-btn win-close" id="win-close" title="Close (Ctrl+Q)">✕</button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       ROW 2: FLEXIBLE TOOLBAR (FOR HALF SCREEN)
+       ========================================================================= -->
+  <header class="toolbar">
+    <div class="tool-group">
       <button class="btn" id="btn-new" title="New Document (Ctrl+N)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         New
       </button>
       <button class="btn" id="btn-open" title="Open Markdown File (Ctrl+O)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Open
       </button>
-      <button class="btn btn-primary" id="btn-save" title="Save File (Ctrl+S)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <button class="btn btn-primary" id="btn-save" title="Save File (Ctrl+S / w)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save
       </button>
-      <button class="btn" id="btn-save-as" title="Save As (Ctrl+Shift+S)">Save As...</button>
 
       <div class="dropdown">
-        <button class="btn" id="btn-insert" title="Insert Diagrams & Templates">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-          Insert Diagram ▾
+        <button class="btn" id="btn-insert" title="Insert Diagrams">
+          <span>Insert ▾</span>
         </button>
         <div class="dropdown-content" id="dropdown-diagrams">
           <div class="dropdown-item" data-template="udp-rfc">⚡ UDP Header (RFC 768)</div>
-          <div class="dropdown-item" data-template="udp-dsl">⚡ UDP Header (Custom DSL)</div>
+          <div class="dropdown-item" data-template="udp-dsl">⚡ UDP Header (DSL)</div>
           <div class="dropdown-item" data-template="tcp-rfc">📦 TCP Header (RFC 793)</div>
-          <div class="dropdown-item" data-template="ip-rfc">🌐 IPv4 Header (RFC 791)</div>
           <div class="dropdown-divider"></div>
-          <div class="dropdown-item" data-template="mermaid-sequence">📊 Mermaid: Sequence (UDP Flow)</div>
+          <div class="dropdown-item" data-template="mermaid-sequence">📊 Mermaid: Sequence Flow</div>
           <div class="dropdown-item" data-template="mermaid-flowchart">📊 Mermaid: Flowchart</div>
           <div class="dropdown-item" data-template="mermaid-class">📊 Mermaid: Class Diagram</div>
         </div>
       </div>
     </div>
 
-    <!-- Active File Badge -->
-    <div class="file-badge" id="file-badge" title="No file opened">
-      <span class="dirty-dot" id="dirty-dot"></span>
-      <span id="file-name">Welcome.md</span>
-    </div>
-
     <div class="tool-group">
       <!-- Mode switcher (Preview is default) -->
       <div class="btn-group">
+        <button class="btn active" id="mode-preview" title="Preview Mode (NVim keys active)">Preview</button>
+        <button class="btn" id="mode-split" title="Side-by-Side Split">Split</button>
         <button class="btn" id="mode-edit" title="Editor Only">Edit</button>
-        <button class="btn" id="mode-split" title="Side-by-Side Split View">Split</button>
-        <button class="btn active" id="mode-preview" title="Rendered Preview Only">Preview</button>
       </div>
 
       <!-- Theme Switcher -->
-      <button class="btn" id="btn-theme" title="Toggle Dark/Light Mode">
+      <button class="btn" id="btn-theme" title="Toggle Theme">
         <span id="theme-icon">🌙</span>
       </button>
 
+      <!-- Keybindings Settings -->
+      <button class="btn" id="btn-keybindings" title="Configure NVim Keybindings">
+        ⌨ Keys
+      </button>
+
       <!-- Print / Export -->
-      <button class="btn" id="btn-print" title="Print or Export to PDF">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <button class="btn" id="btn-print" title="Print to PDF">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       </button>
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- =========================================================================
+       MAIN WORKSPACE CONTAINER
+       ========================================================================= -->
   <main class="main-container" id="main-container">
-    <!-- Editor Pane -->
     <section class="editor-pane" id="editor-pane">
       <div class="editor-container">
         <div class="line-numbers" id="line-numbers">1</div>
-        <textarea class="editor-textarea" id="editor" spellcheck="false" placeholder="Type markdown here or open a file..."></textarea>
+        <textarea class="editor-textarea" id="editor" spellcheck="false" placeholder="Type markdown here..."></textarea>
       </div>
     </section>
 
-    <!-- Resizable Splitter -->
     <div class="splitter" id="splitter"></div>
 
-    <!-- Preview Pane (Default Visible) -->
     <section class="preview-pane" id="preview-pane">
       <article class="markdown-body" id="preview"></article>
     </section>
@@ -869,32 +1396,65 @@
   <!-- Status Bar -->
   <footer class="statusbar">
     <div class="statusbar-left">
-      <span class="statusbar-item" id="status-file">📄 Welcome.md</span>
-      <span class="statusbar-item" id="status-cursor">Ln 1, Col 1</span>
+      <span id="status-mode">MODE: PREVIEW (NVIM: j/k/h/l)</span>
+      <span id="status-cursor">Ln 1, Col 1</span>
     </div>
     <div class="statusbar-right">
-      <span class="statusbar-item" id="status-words">0 words</span>
-      <span class="statusbar-item" id="status-lines">1 line</span>
-      <span class="statusbar-item" id="status-save">✓ Ready</span>
+      <span id="status-words">0 words</span>
+      <span id="status-lines">1 line</span>
+      <span id="status-save">✓ Ready</span>
     </div>
   </footer>
 
-  <!-- Diagram Lightbox Modal -->
-  <div class="diagram-modal" id="diagram-modal">
+  <!-- Drop File Overlay (Drag-to-Read) -->
+  <div class="drop-overlay" id="drop-overlay">
+    <div class="drop-overlay-box">
+      📄 Drop Markdown file here to instant open
+    </div>
+  </div>
+
+  <!-- Diagram Lightbox Modal (Fullscreen Canvas with Drag & Zoom) -->
+  <div class="modal-overlay" id="diagram-modal">
     <div class="modal-header">
-      <span id="modal-title">Diagram View</span>
-      <div class="tool-group">
-        <button class="btn" id="modal-zoom-out">- Zoom</button>
-        <span class="diagram-zoom-val" id="modal-zoom-val">100%</span>
-        <button class="btn" id="modal-zoom-in">+ Zoom</button>
+      <div class="diagram-title-group">
+        <span id="modal-title">Diagram View</span>
+        <span class="diagram-hint">🖱️ Drag to pan • Scroll to zoom • Double-click to fit</span>
+      </div>
+      <div class="diagram-controls">
+        <button class="diagram-zoom-btn" id="modal-zoom-out" title="Zoom Out">−</button>
+        <span class="diagram-zoom-val" id="modal-zoom-val" title="Click to reset">100%</span>
+        <button class="diagram-zoom-btn" id="modal-zoom-in" title="Zoom In">+</button>
+        <button class="diagram-zoom-btn" id="modal-fit" title="Fit to Screen">Fit</button>
+        <button class="diagram-zoom-btn" id="modal-reset" title="Reset View">Reset</button>
         <button class="btn btn-primary" id="modal-close">Close ✕</button>
       </div>
     </div>
-    <div class="modal-body" id="modal-body"></div>
+    <div class="diagram-body modal-diagram-body" id="modal-body" style="flex:1; width:100%; height:calc(100vh - 44px);">
+      <div class="diagram-canvas" id="modal-canvas"></div>
+    </div>
   </div>
 
-  <!-- Mermaid Library -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Keybindings JSON Config Modal -->
+  <div class="modal-overlay" id="keybindings-modal">
+    <div class="modal-header">
+      <span>Configure NVim Keybindings (JSON)</span>
+      <button class="btn btn-primary" id="kb-modal-close">Close ✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="keybindings-card">
+        <div style="font-size:12px; color:var(--text-secondary);">
+          Edit keybindings below. Changes apply instantly to <strong>Preview Mode</strong>.
+        </div>
+        <textarea class="keybindings-textarea" id="kb-textarea" spellcheck="false"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button class="btn" id="kb-reset-btn">Reset Defaults</button>
+          <button class="btn btn-primary" id="kb-save-btn">Save Keybindings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
 
   <script>
     /* =========================================================================
@@ -945,7 +1505,7 @@
             const label = cellLines.join(' ');
             const bitRatio = colWidth / totalWidth;
             const bits = Math.round(bitRatio * 32);
-            fields.push({ label, bits, widthPercent: (bits / 32) * 100 });
+            fields.push({ label, bits });
           }
           rows.push(fields);
         }
@@ -961,7 +1521,6 @@
         for (let line of lines) {
           line = line.trim();
           if (!line || line.startsWith('#')) continue;
-
           if (line.toLowerCase().startsWith('title:')) {
             title = line.substring(6).trim();
             continue;
@@ -970,14 +1529,12 @@
             width = parseInt(line.substring(6).trim(), 10) || 32;
             continue;
           }
-
           const match = line.match(/^(\d+)\s*[-:]\s*(\d+)\s*:\s*(.+)$/);
           if (match) {
             const start = parseInt(match[1], 10);
             const end = parseInt(match[2], 10);
             let rest = match[3].trim();
             let color = null;
-
             const colorMatch = rest.match(/\[(.*?)\]/);
             if (colorMatch) {
               const meta = colorMatch[1];
@@ -985,7 +1542,6 @@
               if (cMatch) color = cMatch[1];
               rest = rest.replace(/\[(.*?)\]/, '').trim();
             }
-
             const bits = (end - start) + 1;
             fields.push({ start, end, bits, label: rest, color });
           }
@@ -1009,27 +1565,24 @@
       },
 
       renderToSvg(parsed, customTitle) {
-        const rowHeight = 48;
-        const bitHeaderHeight = 28;
-        const titleHeight = 38;
-        const width = 840;
-        const marginX = 24;
+        const rowHeight = 44;
+        const bitHeaderHeight = 26;
+        const titleHeight = 36;
+        const width = 800;
+        const marginX = 20;
         const innerWidth = width - (marginX * 2);
 
         let rows = [];
         let diagramTitle = customTitle || "Packet Specification Diagram";
 
-        if (Array.isArray(parsed)) {
-          rows = parsed;
-        } else if (parsed && parsed.rows) {
+        if (Array.isArray(parsed)) rows = parsed;
+        else if (parsed && parsed.rows) {
           rows = parsed.rows;
           if (parsed.title) diagramTitle = parsed.title;
         }
-
         if (!rows || rows.length === 0) return null;
 
-        const totalHeight = titleHeight + bitHeaderHeight + (rows.length * rowHeight) + 20;
-
+        const totalHeight = titleHeight + bitHeaderHeight + (rows.length * rowHeight) + 16;
         const colors = [
           { fill: "#1e3a8a", border: "#3b82f6", text: "#93c5fd" },
           { fill: "#4c1d95", border: "#8b5cf6", text: "#c4b5fd" },
@@ -1042,25 +1595,24 @@
 
         let svg = `<svg class="packet-diagram" viewBox="0 0 ${width} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">
           <style>
-            .pkt-title { font-size: 15px; font-weight: 700; fill: #89b4fa; font-family: monospace; }
+            .pkt-title { font-size: 14px; font-weight: 700; fill: #89b4fa; font-family: monospace; }
             .pkt-bit { font-size: 10px; fill: #6c7086; font-family: monospace; text-anchor: middle; }
-            .pkt-byte { font-size: 11px; fill: #a6adc8; font-family: monospace; font-weight: bold; }
-            .pkt-label { font-size: 13px; font-family: -apple-system, sans-serif; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
-            .pkt-sub { font-size: 11px; font-family: monospace; opacity: 0.85; text-anchor: middle; dominant-baseline: middle; }
+            .pkt-byte { font-size: 10px; fill: #a6adc8; font-family: monospace; font-weight: bold; }
+            .pkt-label { font-size: 12px; font-family: -apple-system, sans-serif; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+            .pkt-sub { font-size: 10px; font-family: monospace; opacity: 0.85; text-anchor: middle; dominant-baseline: middle; }
             .pkt-grid { stroke: #313244; stroke-width: 1; stroke-dasharray: 2 2; }
           </style>
-          <rect width="100%" height="100%" rx="8" fill="#181825" stroke="#313244" stroke-width="1.5" />
-          <text x="${marginX}" y="26" class="pkt-title">⚡ ${diagramTitle}</text>
+          <rect width="100%" height="100%" rx="6" fill="#181825" stroke="#313244" stroke-width="1.2" />
+          <text x="${marginX}" y="24" class="pkt-title">⚡ ${diagramTitle}</text>
         `;
 
-        const headerY = titleHeight + 16;
+        const headerY = titleHeight + 14;
         const colW = innerWidth / 32;
 
         for (let b = 0; b < 4; b++) {
           const bx = marginX + (b * 8 * colW) + (4 * colW);
-          svg += `<text x="${bx}" y="${headerY - 14}" class="pkt-byte" text-anchor="middle">Octet ${b}</text>`;
+          svg += `<text x="${bx}" y="${headerY - 12}" class="pkt-byte" text-anchor="middle">Octet ${b}</text>`;
         }
-
         for (let i = 0; i < 32; i++) {
           const bx = marginX + (i * colW) + (colW / 2);
           svg += `<text x="${bx}" y="${headerY}" class="pkt-bit">${i % 10}</text>`;
@@ -1077,7 +1629,7 @@
           let curX = marginX;
           const byteOffset = rIdx * 4;
 
-          svg += `<text x="${marginX - 8}" y="${curY + (rowHeight / 2) + 4}" class="pkt-byte" text-anchor="end">+${byteOffset}</text>`;
+          svg += `<text x="${marginX - 6}" y="${curY + (rowHeight / 2) + 4}" class="pkt-byte" text-anchor="end">+${byteOffset}</text>`;
 
           row.forEach(field => {
             const bits = field.bits || 16;
@@ -1091,13 +1643,12 @@
 
             svg += `
               <g class="pkt-cell">
-                <rect x="${fieldX + 1}" y="${curY + 1}" width="${fieldW - 2}" height="${rowHeight - 2}" rx="5"
+                <rect x="${fieldX + 1}" y="${curY + 1}" width="${fieldW - 2}" height="${rowHeight - 2}" rx="4"
                       fill="${color.fill}" stroke="${color.border}" stroke-width="1.2" />
-                <text x="${textX}" y="${textY - 5}" class="pkt-label" fill="${color.text}">${field.label || 'Field'}</text>
-                <text x="${textX}" y="${textY + 12}" class="pkt-sub" fill="${color.text}">(${bits} bits)</text>
+                <text x="${textX}" y="${textY - 4}" class="pkt-label" fill="${color.text}">${field.label || 'Field'}</text>
+                <text x="${textX}" y="${textY + 11}" class="pkt-sub" fill="${color.text}">(${bits} bits)</text>
               </g>
             `;
-
             curX += fieldW;
           });
         });
@@ -1108,8 +1659,7 @@
     };
 
     /* =========================================================================
-       2. SYNTAX HIGHLIGHTER ENGINE (OFFLINE, MULTI-LANGUAGE)
-       Tokenizes and colors keywords, types, strings, numbers, functions, macros.
+       2. SYNTAX HIGHLIGHTER ENGINE
        ========================================================================= */
     const CodeHighlighter = {
       keywords: {
@@ -1123,7 +1673,6 @@
         sql: /\b(SELECT|FROM|WHERE|INSERT|INTO|UPDATE|DELETE|CREATE|TABLE|DROP|ALTER|JOIN|LEFT|RIGHT|INNER|OUTER|GROUP|BY|ORDER|HAVING|LIMIT|AND|OR|NOT|IN|AS|DISTINCT|SET|VALUES|INDEX|KEY|PRIMARY|FOREIGN|REFERENCES)\b/gi,
         bash: /\b(echo|if|then|else|elif|fi|for|in|do|done|while|until|case|esac|function|select|time|exit|return|source|alias|export|unset|read)\b/g
       },
-
       types: /\b(u8|u16|u32|u64|u128|i8|i16|i32|i64|i128|usize|isize|f32|f64|bool|char|str|String|Vec|Option|Result|Box|Rc|Arc|Mutex|Cell|RefCell|Path|PathBuf|File|SocketAddr|UdpSocket|TcpStream|TcpListener|int|float|str|dict|list|set|tuple|bytes|number|string|boolean|any|unknown|never|void|Promise|Array|Map|Set|Object)\b/g,
       constants: /\b(true|false|True|False|null|None|nil|undefined|NaN|Infinity|Ok|Err|Some|NULL)\b/g,
 
@@ -1135,13 +1684,11 @@
         if (safeLang === 'rs') safeLang = 'rust';
         if (safeLang === 'sh' || safeLang === 'zsh') safeLang = 'bash';
 
-        // Escape HTML
         let escaped = code
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;');
 
-        // Token extraction using placeholders to avoid nested replacements
         const tokens = [];
         const save = (html) => {
           const id = `___TOK${tokens.length}___`;
@@ -1149,53 +1696,1218 @@
           return id;
         };
 
-        // 1. Comments
         escaped = escaped.replace(/(\/\/[^\n]*|#[^\n]*)/g, m => save(`<span class="tok-comment">${m}</span>`));
         escaped = escaped.replace(/(\/\*[\s\S]*?\*\/)/g, m => save(`<span class="tok-comment">${m}</span>`));
-
-        // 2. Strings & template literals
         escaped = escaped.replace(/("(\\"|[^"])*")/g, m => save(`<span class="tok-str">${m}</span>`));
         escaped = escaped.replace(/('(\\'|[^'])*')/g, m => save(`<span class="tok-str">${m}</span>`));
         escaped = escaped.replace(/(`(\\`|[^`])*`)/g, m => save(`<span class="tok-str">${m}</span>`));
-
-        // 3. Numbers (Hex, Binary, Decimals)
         escaped = escaped.replace(/\b(0x[0-9a-fA-F]+|0b[01]+|\d+(\.\d+)?([eE][+-]?\d+)?)\b/g, m => save(`<span class="tok-num">${m}</span>`));
-
-        // 4. Rust Macros / Python Decorators
         escaped = escaped.replace(/\b([a-zA-Z_]\w*!)|(@[a-zA-Z_]\w*)/g, m => save(`<span class="tok-macro">${m}</span>`));
 
-        // 5. Language Keywords
         const kwRegex = this.keywords[safeLang] || this.keywords.rust;
         escaped = escaped.replace(kwRegex, m => save(`<span class="tok-kw">${m}</span>`));
-
-        // 6. Built-in Types
         escaped = escaped.replace(this.types, m => save(`<span class="tok-type">${m}</span>`));
-
-        // 7. Constants
         escaped = escaped.replace(this.constants, m => save(`<span class="tok-const">${m}</span>`));
-
-        // 8. Function invocations: foo(...)
         escaped = escaped.replace(/\b([a-zA-Z_]\w*)\s*(?=\()/g, m => save(`<span class="tok-fn">${m}</span>`));
-
-        // 9. Common Operators: =>, ->, ::, ==, !=
         escaped = escaped.replace(/(=&gt;|-&gt;|::|==|!=|&lt;=|&gt;=)/g, m => save(`<span class="tok-op">${m}</span>`));
 
-        // Restore token placeholders
         for (let i = tokens.length - 1; i >= 0; i--) {
           escaped = escaped.replace(`___TOK${i}___`, tokens[i]);
         }
-
         return escaped;
       }
     };
 
     /* =========================================================================
-       3. MARKDOWN PARSER WITH STYLED CODE BOX
+       3. INTERACTIVE DIAGRAM PAN, ZOOM & DRAG ENGINE (app.diagrams.net style)
+       ========================================================================= */
+    const DiagramPanZoom = {
+      instances: new Map(),
+      modalInstance: null,
+
+      normalizeSvg(svg) {
+        if (!svg) return { width: 400, height: 250 };
+
+        let w = 0, h = 0;
+        if (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width > 0) {
+          w = svg.viewBox.baseVal.width;
+          h = svg.viewBox.baseVal.height;
+        }
+
+        if (!w || !h) {
+          const vb = svg.getAttribute('viewBox');
+          if (vb) {
+            const parts = vb.trim().split(/[\s,]+/).map(parseFloat);
+            if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+              w = parts[2];
+              h = parts[3];
+            }
+          }
+        }
+
+        if (!w && svg.style && svg.style.maxWidth) {
+          w = parseFloat(svg.style.maxWidth);
+        }
+
+        if (!w || !h) {
+          try {
+            const bbox = svg.getBBox();
+            if (bbox && bbox.width > 0) {
+              w = bbox.width;
+              h = bbox.height;
+            }
+          } catch (_) {}
+        }
+
+        if (!w || !h) {
+          const rect = svg.getBoundingClientRect();
+          if (rect.width > 0) {
+            w = rect.width;
+            h = rect.height;
+          }
+        }
+
+        if (!w || isNaN(w)) w = 600;
+        if (!h || isNaN(h)) h = 360;
+
+        // Fix dimensions on SVG element
+        svg.style.width = w + 'px';
+        svg.style.height = h + 'px';
+        svg.style.maxWidth = 'none';
+        svg.style.maxHeight = 'none';
+        svg.style.display = 'block';
+
+        return { width: w, height: h };
+      },
+
+      init(cardId) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        const body = document.getElementById('body-' + cardId) || card.querySelector('.diagram-body');
+        const canvas = document.getElementById('canvas-' + cardId) || card.querySelector('.diagram-canvas');
+        if (!body || !canvas) return;
+
+        if (this.instances.has(cardId)) {
+          const prev = this.instances.get(cardId);
+          if (prev && prev.cleanup) prev.cleanup();
+          this.instances.delete(cardId);
+        }
+
+        const state = {
+          cardId,
+          card,
+          body,
+          canvas,
+          panX: 0,
+          panY: 0,
+          scale: 1.0,
+          isDragging: false,
+          startX: 0,
+          startY: 0,
+          svgWidth: 400,
+          svgHeight: 250,
+          cleanup: null
+        };
+
+        const onMouseDown = (e) => {
+          if (e.button !== 0 && e.button !== 1) return;
+          if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          state.isDragging = true;
+          state.startX = e.clientX - state.panX;
+          state.startY = e.clientY - state.panY;
+          body.classList.add('is-panning');
+        };
+
+        const onMouseMove = (e) => {
+          if (!state.isDragging) return;
+          e.preventDefault();
+          state.panX = Math.round(e.clientX - state.startX);
+          state.panY = Math.round(e.clientY - state.startY);
+          this.applyTransform(state);
+        };
+
+        const onMouseUp = () => {
+          if (!state.isDragging) return;
+          state.isDragging = false;
+          body.classList.remove('is-panning');
+        };
+
+        const onWheel = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const rect = body.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+
+          const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+          const newScale = Math.min(Math.max(Math.round(state.scale * zoomFactor * 100) / 100, 0.15), 5.0);
+
+          state.panX = Math.round(mouseX - (mouseX - state.panX) * (newScale / state.scale));
+          state.panY = Math.round(mouseY - (mouseY - state.panY) * (newScale / state.scale));
+          state.scale = newScale;
+
+          this.applyTransform(state);
+        };
+
+        const onDblClick = (e) => {
+          if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
+          e.preventDefault();
+          this.fit(cardId);
+        };
+
+        body.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        body.addEventListener('wheel', onWheel, { passive: false });
+        body.addEventListener('dblclick', onDblClick);
+
+        const ro = new ResizeObserver(() => {
+          const cur = this.instances.get(cardId);
+          if (cur && !cur.isDragging) {
+            this.applyTransform(cur);
+          }
+        });
+        ro.observe(card);
+
+        state.cleanup = () => {
+          body.removeEventListener('mousedown', onMouseDown);
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+          body.removeEventListener('wheel', onWheel);
+          body.removeEventListener('dblclick', onDblClick);
+          ro.disconnect();
+        };
+
+        this.instances.set(cardId, state);
+
+        setTimeout(() => {
+          this.centerDiagram(state);
+        }, 30);
+      },
+
+      centerDiagram(state) {
+        const svg = state.canvas.querySelector('svg');
+        if (!svg) return;
+        const dims = this.normalizeSvg(svg);
+        state.svgWidth = dims.width;
+        state.svgHeight = dims.height;
+
+        const bodyRect = state.body.getBoundingClientRect();
+        if (bodyRect.width === 0 || bodyRect.height === 0) return;
+
+        const padding = 36;
+        const availW = Math.max(bodyRect.width - padding, 80);
+        const availH = Math.max(bodyRect.height - padding, 80);
+
+        let initialScale = 1.0;
+        if (state.svgWidth > availW || state.svgHeight > availH) {
+          initialScale = Math.min(availW / state.svgWidth, availH / state.svgHeight);
+          initialScale = Math.max(Math.min(initialScale, 1.0), 0.25);
+        }
+
+        state.scale = Math.round(initialScale * 100) / 100;
+        state.panX = Math.round((bodyRect.width - state.svgWidth * state.scale) / 2);
+        state.panY = Math.round((bodyRect.height - state.svgHeight * state.scale) / 2);
+
+        this.applyTransform(state);
+      },
+
+      fit(cardId) {
+        const state = this.instances.get(cardId);
+        if (!state) return;
+        const svg = state.canvas.querySelector('svg');
+        if (!svg) return;
+
+        const dims = this.normalizeSvg(svg);
+        state.svgWidth = dims.width;
+        state.svgHeight = dims.height;
+
+        const bodyRect = state.body.getBoundingClientRect();
+        if (bodyRect.width === 0 || bodyRect.height === 0) return;
+
+        const padding = 36;
+        const availW = Math.max(bodyRect.width - padding, 60);
+        const availH = Math.max(bodyRect.height - padding, 60);
+
+        const fitScale = Math.min(availW / state.svgWidth, availH / state.svgHeight);
+        state.scale = Math.round(Math.min(Math.max(fitScale, 0.15), 4.0) * 100) / 100;
+        state.panX = Math.round((bodyRect.width - state.svgWidth * state.scale) / 2);
+        state.panY = Math.round((bodyRect.height - state.svgHeight * state.scale) / 2);
+
+        this.applyTransform(state);
+      },
+
+      reset(cardId) {
+        const state = this.instances.get(cardId);
+        if (!state) return;
+        const bodyRect = state.body.getBoundingClientRect();
+        state.scale = 1.0;
+        state.panX = Math.round((bodyRect.width - state.svgWidth) / 2);
+        state.panY = Math.round((bodyRect.height - state.svgHeight) / 2);
+        this.applyTransform(state);
+      },
+
+      zoom(cardId, delta) {
+        const state = this.instances.get(cardId);
+        if (!state) return;
+        const bodyRect = state.body.getBoundingClientRect();
+        const centerX = bodyRect.width / 2;
+        const centerY = bodyRect.height / 2;
+
+        const newScale = Math.min(Math.max(Math.round((state.scale + delta) * 100) / 100, 0.15), 5.0);
+
+        state.panX = Math.round(centerX - (centerX - state.panX) * (newScale / state.scale));
+        state.panY = Math.round(centerY - (centerY - state.panY) * (newScale / state.scale));
+        state.scale = newScale;
+
+        this.applyTransform(state);
+      },
+
+      applyTransform(state) {
+        state.canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        state.body.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
+
+        const zoomValEl = state.card.querySelector('.diagram-zoom-val');
+        if (zoomValEl) {
+          zoomValEl.innerText = Math.round(state.scale * 100) + '%';
+        }
+      },
+
+      openModal(cardId) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        const headerTitle = card.querySelector('.diagram-header span').innerText;
+        const svg = card.querySelector('.diagram-canvas svg');
+        if (!svg) return;
+
+        const modal = document.getElementById('diagram-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCanvas = document.getElementById('modal-canvas');
+        const modalBody = document.getElementById('modal-body');
+
+        modalTitle.innerText = headerTitle;
+        modalCanvas.innerHTML = svg.outerHTML;
+        modal.classList.add('show');
+
+        if (this.modalInstance && this.modalInstance.cleanup) {
+          this.modalInstance.cleanup();
+        }
+
+        const modalState = {
+          cardId: 'modal',
+          card: modal,
+          body: modalBody,
+          canvas: modalCanvas,
+          panX: 0,
+          panY: 0,
+          scale: 1.0,
+          isDragging: false,
+          startX: 0,
+          startY: 0,
+          svgWidth: 400,
+          svgHeight: 250,
+          cleanup: null
+        };
+
+        const onMouseDown = (e) => {
+          if (e.button !== 0 && e.button !== 1) return;
+          if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
+          e.preventDefault();
+          modalState.isDragging = true;
+          modalState.startX = e.clientX - modalState.panX;
+          modalState.startY = e.clientY - modalState.panY;
+          modalBody.classList.add('is-panning');
+        };
+
+        const onMouseMove = (e) => {
+          if (!modalState.isDragging) return;
+          e.preventDefault();
+          modalState.panX = Math.round(e.clientX - modalState.startX);
+          modalState.panY = Math.round(e.clientY - modalState.startY);
+          this.applyModalTransform(modalState);
+        };
+
+        const onMouseUp = () => {
+          if (!modalState.isDragging) return;
+          modalState.isDragging = false;
+          modalBody.classList.remove('is-panning');
+        };
+
+        const onWheel = (e) => {
+          e.preventDefault();
+          const rect = modalBody.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+          const newScale = Math.min(Math.max(Math.round(modalState.scale * zoomFactor * 100) / 100, 0.15), 6.0);
+
+          modalState.panX = Math.round(mouseX - (mouseX - modalState.panX) * (newScale / modalState.scale));
+          modalState.panY = Math.round(mouseY - (mouseY - modalState.panY) * (newScale / modalState.scale));
+          modalState.scale = newScale;
+          this.applyModalTransform(modalState);
+        };
+
+        const onDblClick = (e) => {
+          if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
+          this.fitModal();
+        };
+
+        modalBody.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        modalBody.addEventListener('wheel', onWheel, { passive: false });
+        modalBody.addEventListener('dblclick', onDblClick);
+
+        modalState.cleanup = () => {
+          modalBody.removeEventListener('mousedown', onMouseDown);
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+          modalBody.removeEventListener('wheel', onWheel);
+          modalBody.removeEventListener('dblclick', onDblClick);
+        };
+
+        this.modalInstance = modalState;
+
+        setTimeout(() => {
+          const modalSvg = modalCanvas.querySelector('svg');
+          if (modalSvg) {
+            const dims = this.normalizeSvg(modalSvg);
+            modalState.svgWidth = dims.width;
+            modalState.svgHeight = dims.height;
+            this.fitModal();
+          }
+        }, 50);
+      },
+
+      fitModal() {
+        if (!this.modalInstance) return;
+        const state = this.modalInstance;
+        const bodyRect = state.body.getBoundingClientRect();
+        if (bodyRect.width === 0 || bodyRect.height === 0) return;
+
+        const padding = 60;
+        const availW = Math.max(bodyRect.width - padding, 80);
+        const availH = Math.max(bodyRect.height - padding, 80);
+
+        const fitScale = Math.min(availW / state.svgWidth, availH / state.svgHeight);
+        state.scale = Math.round(Math.min(Math.max(fitScale, 0.2), 4.0) * 100) / 100;
+        state.panX = Math.round((bodyRect.width - state.svgWidth * state.scale) / 2);
+        state.panY = Math.round((bodyRect.height - state.svgHeight * state.scale) / 2);
+        this.applyModalTransform(state);
+      },
+
+      resetModal() {
+        if (!this.modalInstance) return;
+        const state = this.modalInstance;
+        const bodyRect = state.body.getBoundingClientRect();
+        state.scale = 1.0;
+        state.panX = Math.round((bodyRect.width - state.svgWidth) / 2);
+        state.panY = Math.round((bodyRect.height - state.svgHeight) / 2);
+        this.applyModalTransform(state);
+      },
+
+      zoomModal(delta) {
+        if (!this.modalInstance) return;
+        const state = this.modalInstance;
+        const bodyRect = state.body.getBoundingClientRect();
+        const centerX = bodyRect.width / 2;
+        const centerY = bodyRect.height / 2;
+        const newScale = Math.min(Math.max(Math.round((state.scale + delta) * 100) / 100, 0.15), 6.0);
+
+        state.panX = Math.round(centerX - (centerX - state.panX) * (newScale / state.scale));
+        state.panY = Math.round(centerY - (centerY - state.panY) * (newScale / state.scale));
+        state.scale = newScale;
+        this.applyModalTransform(state);
+      },
+
+      applyModalTransform(state) {
+        state.canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        state.body.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
+        const valEl = document.getElementById('modal-zoom-val');
+        if (valEl) valEl.innerText = Math.round(state.scale * 100) + '%';
+      },
+
+      initAll(container) {
+        const cards = (container || document).querySelectorAll('.diagram-card');
+        cards.forEach(card => {
+          this.init(card.id);
+        });
+      }
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* =========================================================================
+       4. DYNAMIC BOX GRAPH ENGINE (nexus-graph style movable & scalable boxes)
+       ========================================================================= */
+    const DynamicGraphRenderer = {
+      instances: new Map(),
+      parsedCache: new Map(),
+
+      canRender(code) {
+        if (!code) return false;
+        const trimmed = code.trim();
+        return /^(flowchart|graph)\b/i.test(trimmed);
+      },
+
+      cacheParsed(blockId, parsed) {
+        this.parsedCache.set(blockId, parsed);
+      },
+
+      parse(src) {
+        // Pre-process: protect newlines inside quotes, brackets, braces, and parentheses
+        let protectedSrc = src.replace(/(\[[^\]]*?\]|\([^\)]*?\)|(?:\{[^\}]*?\}))/gs, (match) => {
+          return match.replace(/\r?\n/g, '\\n');
+        });
+
+        const subgraphs = [];
+        const nodeMap = new Map();
+        const edges = [];
+        let currentSubgraph = null;
+
+        function extractNode(str) {
+          str = str.trim();
+          const m = str.match(/^([a-zA-Z0-9_\-]+)\s*(\{\{|\(\[\s*|\[\[|\(\(|\(\[\(|\{|\(|\[)\s*(["']?)([\s\S]*?)\3\s*(\}\}|\s*\]\)|\]\]|\)\)|\)\s*\]\)\}|\}|\)|\])$/);
+          if (m) {
+            const id = m[1];
+            const openSym = m[2];
+            let shape = 'rect';
+            if (openSym === '{' || openSym === '{{') shape = 'diamond';
+            else if (openSym === '(' || openSym === '((' || openSym.includes('(')) shape = 'round';
+            const label = m[4].trim().replace(/\\n/g, '\n');
+            return { id, label, shape };
+          }
+          const simple = str.match(/^([a-zA-Z0-9_\-]+)$/);
+          if (simple) {
+            return { id: simple[1], label: simple[1], shape: 'rect' };
+          }
+          return null;
+        }
+
+        const lines = protectedSrc.split(/\r?\n/);
+        for (let line of lines) {
+          line = line.trim();
+          if (!line || line.startsWith('%%')) continue;
+          if (/^(flowchart|graph)\b/i.test(line)) continue;
+          if (/^(classDef|style|click)\b/i.test(line)) continue;
+
+          // Subgraph start
+          const sgMatch = line.match(/^subgraph\s+([a-zA-Z0-9_\-]+)(?:\s*\[\s*(["']?)([\s\S]*?)\2\s*\])?/i);
+          if (sgMatch) {
+            const id = sgMatch[1];
+            const title = (sgMatch[3] !== undefined ? sgMatch[3] : id).replace(/\\n/g, '\n').trim();
+            currentSubgraph = { id, title, nodes: [] };
+            subgraphs.push(currentSubgraph);
+            continue;
+          }
+
+          // Subgraph end
+          if (/^end\b/i.test(line)) {
+            currentSubgraph = null;
+            continue;
+          }
+
+          // Edge connection: A --> B or A -->|Label| B
+          const edgeMatch = line.match(/^(.+?)\s*(-->|==>|-\.->|---)\s*(?:\|(["']?)([\s\S]*?)\3\|)?\s*(.+)$/);
+          if (edgeMatch) {
+            const leftRaw = edgeMatch[1].trim();
+            const edgeType = edgeMatch[2];
+            const edgeLabel = (edgeMatch[4] || '').trim();
+            const rightRaw = edgeMatch[5].trim();
+
+            const leftNode = extractNode(leftRaw);
+            const rightNode = extractNode(rightRaw);
+
+            const fromId = leftNode ? leftNode.id : leftRaw;
+            const toId = rightNode ? rightNode.id : rightRaw;
+
+            if (leftNode && !nodeMap.has(leftNode.id)) {
+              nodeMap.set(leftNode.id, leftNode);
+            }
+            if (rightNode && !nodeMap.has(rightNode.id)) {
+              nodeMap.set(rightNode.id, rightNode);
+            }
+
+            edges.push({ from: fromId, to: toId, label: edgeLabel, type: edgeType });
+            continue;
+          }
+
+          // Node inside subgraph
+          if (currentSubgraph) {
+            const n = extractNode(line);
+            if (n) {
+              currentSubgraph.nodes.push(n);
+              nodeMap.set(n.id, n);
+            }
+          } else {
+            const n = extractNode(line);
+            if (n && !nodeMap.has(n.id)) {
+              nodeMap.set(n.id, n);
+            }
+          }
+        }
+
+        // Detect standalone nodes (exclude subnodes and subgraphs themselves)
+        const subNodeIds = new Set();
+        subgraphs.forEach(sg => {
+          subNodeIds.add(sg.id);
+          sg.nodes.forEach(n => subNodeIds.add(n.id));
+        });
+        const standaloneNodes = [];
+        nodeMap.forEach((n, id) => {
+          if (!subNodeIds.has(id)) {
+            standaloneNodes.push(n);
+          }
+        });
+
+        return { subgraphs, standaloneNodes, edges };
+      },
+
+      renderHtml(blockId, parsed) {
+        let boxesHtml = '';
+        let overlayEdgesHtml = '';
+        let labelsHtml = '';
+
+        // Render Subgraph Boxes
+        parsed.subgraphs.forEach((sg, idx) => {
+          const nodesHtml = sg.nodes.map(n => {
+            const lines = (n.label || n.id).split('\n').map(l => l.trim()).filter(Boolean);
+            const titleText = lines.length > 0 ? lines[0] : n.id;
+            const descText = lines.length > 1 ? lines.slice(1).join('\n') : '';
+            const isDecision = n.shape === 'diamond';
+
+            return `
+              <div class="dyn-node-item ${isDecision ? 'is-decision' : ''}" id="node-${blockId}-${n.id}" data-node-id="${n.id}">
+                <div class="dyn-node-header-row">
+                  <span class="dyn-node-title">${escapeHtml(titleText)}</span>
+                  <div class="dyn-node-badges">
+                    ${isDecision ? '<span class="dyn-badge-decision">◆ Decision</span>' : ''}
+                    <span class="dyn-node-id-tag">${escapeHtml(n.id)}</span>
+                  </div>
+                </div>
+                ${descText ? `<div class="dyn-node-desc">${escapeHtml(descText)}</div>` : ''}
+              </div>
+            `;
+          }).join('');
+
+          boxesHtml += `
+            <div class="dyn-box" id="dyn-box-${blockId}-${sg.id}" data-box-id="${sg.id}" style="left: 40px; top: ${40 + idx * 240}px; width: 430px;">
+              <div class="dyn-box-header">
+                <div class="dyn-box-title" title="${escapeHtml(sg.title)}">
+                  <span class="dyn-box-icon">📦</span>
+                  <span class="dyn-box-label">${escapeHtml(sg.title)}</span>
+                </div>
+                <div class="dyn-box-controls">
+                  <span class="dyn-node-id-tag">${escapeHtml(sg.id)}</span>
+                  <button class="dyn-scale-btn" data-action="scale-down" data-target="${sg.id}" title="Scale Box Smaller">−</button>
+                  <span class="dyn-box-scale-val" id="scale-val-${blockId}-${sg.id}" data-target="${sg.id}" title="Click to reset box scale">100%</span>
+                  <button class="dyn-scale-btn" data-action="scale-up" data-target="${sg.id}" title="Scale Box Larger">+</button>
+                </div>
+              </div>
+              <div class="dyn-box-body">
+                ${nodesHtml}
+              </div>
+              <div class="dyn-box-resizer" data-target="${sg.id}" title="Drag corner to scale box"></div>
+            </div>
+          `;
+        });
+
+        // Render Standalone Nodes
+        parsed.standaloneNodes.forEach((n, idx) => {
+          const lines = (n.label || n.id).split('\n').map(l => l.trim()).filter(Boolean);
+          const titleText = lines.length > 0 ? lines[0] : n.id;
+          const descText = lines.length > 1 ? lines.slice(1).join('\n') : '';
+
+          boxesHtml += `
+            <div class="dyn-node-card" id="dyn-node-${blockId}-${n.id}" data-node-id="${n.id}" style="left: 540px; top: ${480 + idx * 130}px; width: 340px;">
+              <div class="dyn-node-card-header">
+                <div class="dyn-node-card-title-group" title="${escapeHtml(titleText)}">
+                  <span class="dyn-node-title-icon">🔹</span>
+                  <span class="dyn-node-title">${escapeHtml(titleText)}</span>
+                </div>
+                <div class="dyn-box-controls">
+                  <span class="dyn-node-id-tag">${escapeHtml(n.id)}</span>
+                  <button class="dyn-scale-btn" data-action="scale-down" data-target="${n.id}" title="Scale Smaller">−</button>
+                  <span class="dyn-box-scale-val" id="scale-val-${blockId}-${n.id}" data-target="${n.id}" title="Click to reset scale">100%</span>
+                  <button class="dyn-scale-btn" data-action="scale-up" data-target="${n.id}" title="Scale Larger">+</button>
+                </div>
+              </div>
+              ${descText ? `<div class="dyn-node-card-body"><div class="dyn-node-desc">${escapeHtml(descText)}</div></div>` : ''}
+              <div class="dyn-box-resizer" data-target="${n.id}" title="Drag corner to scale node"></div>
+            </div>
+          `;
+        });
+
+        // Pre-create SVG paths for edges
+        parsed.edges.forEach((e, idx) => {
+          const edgeId = `dyn-edge-${blockId}-${idx}`;
+          overlayEdgesHtml += `<path class="dyn-edge-path" id="${edgeId}" marker-end="url(#dyn-arrow-${blockId})" d="M 0 0 L 0 0" />`;
+          if (e.label) {
+            labelsHtml += `
+              <div class="dyn-edge-label-wrap" id="dyn-label-${blockId}-${idx}">
+                <span class="dyn-edge-label">${escapeHtml(e.label)}</span>
+              </div>
+            `;
+          }
+        });
+
+        return `
+          <div class="dyn-graph-viewport" id="viewport-${blockId}">
+            <div class="dyn-graph-world" id="world-${blockId}">
+              <svg class="dyn-svg-overlay" id="svg-overlay-${blockId}">
+                <defs>
+                  <marker id="dyn-arrow-${blockId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="var(--accent)"></path>
+                  </marker>
+                </defs>
+                ${overlayEdgesHtml}
+              </svg>
+              <div class="dyn-labels-layer" id="labels-${blockId}">
+                ${labelsHtml}
+              </div>
+              <div class="dyn-boxes-layer" id="boxes-${blockId}">
+                ${boxesHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      init(blockId, parsed) {
+        const viewport = document.getElementById('viewport-' + blockId);
+        const world = document.getElementById('world-' + blockId);
+        if (!viewport || !world) return;
+
+        if (this.instances.has(blockId)) {
+          const prev = this.instances.get(blockId);
+          if (prev && prev.cleanup) prev.cleanup();
+          this.instances.delete(blockId);
+        }
+
+        const state = {
+          blockId,
+          viewport,
+          world,
+          parsed,
+          panX: 40,
+          panY: 30,
+          scale: 0.95,
+          isPanningWorld: false,
+          startPanX: 0,
+          startPanY: 0,
+          draggingItem: null,
+          resizingItem: null,
+          boxes: new Map(),
+          cleanup: null
+        };
+
+        this.computeInitialLayout(state);
+
+        // Box scale button events
+        viewport.querySelectorAll('.dyn-scale-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const targetId = btn.getAttribute('data-target');
+            const action = btn.getAttribute('data-action');
+            this.adjustBoxScale(state, targetId, action === 'scale-up' ? 0.15 : -0.15);
+          });
+        });
+
+        // Box scale reset badge events
+        viewport.querySelectorAll('.dyn-box-scale-val').forEach(badge => {
+          badge.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const targetId = badge.getAttribute('data-target');
+            this.resetBoxScale(state, targetId);
+          });
+        });
+
+        // Mouse interactions
+        const onMouseDown = (e) => {
+          if (e.button !== 0 && e.button !== 1) return;
+
+          // 1. Resizing specific box handle
+          const resizer = e.target.closest('.dyn-box-resizer');
+          if (resizer) {
+            e.preventDefault();
+            e.stopPropagation();
+            const targetId = resizer.getAttribute('data-target');
+            const box = state.boxes.get(targetId);
+            if (box) {
+              state.resizingItem = {
+                id: targetId,
+                box,
+                startX: e.clientX,
+                startY: e.clientY,
+                origScale: box.scale
+              };
+            }
+            return;
+          }
+
+          // 2. Dragging specific box
+          const boxEl = e.target.closest('.dyn-box, .dyn-node-card');
+          if (boxEl && !e.target.closest('.dyn-box-controls') && !e.target.closest('button')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const boxId = boxEl.getAttribute('data-box-id') || boxEl.getAttribute('data-node-id');
+            const box = state.boxes.get(boxId);
+            if (box) {
+              boxEl.classList.add('is-dragging');
+              state.draggingItem = {
+                id: boxId,
+                box,
+                startX: e.clientX,
+                startY: e.clientY,
+                origBoxX: box.x,
+                origBoxY: box.y
+              };
+              boxEl.parentElement.appendChild(boxEl);
+            }
+            return;
+          }
+
+          // 3. Panning World
+          if (e.target === viewport || e.target.closest('.dyn-svg-overlay') || e.target === world) {
+            e.preventDefault();
+            state.isPanningWorld = true;
+            state.startPanX = e.clientX - state.panX;
+            state.startPanY = e.clientY - state.panY;
+            viewport.classList.add('is-panning');
+          }
+        };
+
+        const onMouseMove = (e) => {
+          // Dragging Box
+          if (state.draggingItem) {
+            e.preventDefault();
+            const dx = (e.clientX - state.draggingItem.startX) / state.scale;
+            const dy = (e.clientY - state.draggingItem.startY) / state.scale;
+            const box = state.draggingItem.box;
+            box.x = Math.round(state.draggingItem.origBoxX + dx);
+            box.y = Math.round(state.draggingItem.origBoxY + dy);
+            box.el.style.left = box.x + 'px';
+            box.el.style.top = box.y + 'px';
+            this.updateConnections(state);
+            return;
+          }
+
+          // Scaling Box
+          if (state.resizingItem) {
+            e.preventDefault();
+            const dx = (e.clientX - state.resizingItem.startX) / state.scale;
+            const box = state.resizingItem.box;
+            const deltaScale = dx / 280;
+            box.scale = Math.max(0.4, Math.min(2.5, Math.round((state.resizingItem.origScale + deltaScale) * 100) / 100));
+            box.el.style.transform = `scale(${box.scale})`;
+            const badge = document.getElementById(`scale-val-${blockId}-${box.id}`);
+            if (badge) badge.innerText = Math.round(box.scale * 100) + '%';
+            this.updateConnections(state);
+            return;
+          }
+
+          // Panning World
+          if (state.isPanningWorld) {
+            e.preventDefault();
+            state.panX = Math.round(e.clientX - state.startPanX);
+            state.panY = Math.round(e.clientY - state.startPanY);
+            this.applyWorldTransform(state);
+          }
+        };
+
+        const onMouseUp = () => {
+          if (state.draggingItem) {
+            state.draggingItem.box.el.classList.remove('is-dragging');
+            state.draggingItem = null;
+          }
+          state.resizingItem = null;
+          if (state.isPanningWorld) {
+            state.isPanningWorld = false;
+            viewport.classList.remove('is-panning');
+          }
+        };
+
+        const onWheel = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const rect = viewport.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+
+          const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+          const newScale = Math.min(Math.max(Math.round(state.scale * zoomFactor * 100) / 100, 0.2), 3.0);
+
+          state.panX = Math.round(mouseX - (mouseX - state.panX) * (newScale / state.scale));
+          state.panY = Math.round(mouseY - (mouseY - state.panY) * (newScale / state.scale));
+          state.scale = newScale;
+
+          this.applyWorldTransform(state);
+        };
+
+        const onDblClick = (e) => {
+          if (e.target.closest('.dyn-box') || e.target.closest('.dyn-node-card')) return;
+          this.fit(blockId);
+        };
+
+        viewport.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        viewport.addEventListener('wheel', onWheel, { passive: false });
+        viewport.addEventListener('dblclick', onDblClick);
+
+        state.cleanup = () => {
+          viewport.removeEventListener('mousedown', onMouseDown);
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+          viewport.removeEventListener('wheel', onWheel);
+          viewport.removeEventListener('dblclick', onDblClick);
+        };
+
+        this.instances.set(blockId, state);
+
+        setTimeout(() => {
+          this.applyWorldTransform(state);
+          this.measureBoxes(state);
+          this.updateConnections(state);
+          this.fit(blockId);
+        }, 40);
+      },
+
+      computeInitialLayout(state) {
+        let currentY = 40;
+        state.parsed.subgraphs.forEach((sg) => {
+          const el = document.getElementById(`dyn-box-${state.blockId}-${sg.id}`);
+          if (el) {
+            const h = el.offsetHeight || (120 + sg.nodes.length * 62);
+            const boxData = {
+              id: sg.id,
+              el,
+              x: 40,
+              y: currentY,
+              w: el.offsetWidth || 430,
+              h,
+              scale: 1.0,
+              origX: 40,
+              origY: currentY,
+              origScale: 1.0
+            };
+            el.style.left = boxData.x + 'px';
+            el.style.top = boxData.y + 'px';
+            state.boxes.set(sg.id, boxData);
+            currentY += h + 50;
+          }
+        });
+
+        let branchY = 500;
+        state.parsed.standaloneNodes.forEach((n, idx) => {
+          const el = document.getElementById(`dyn-node-${state.blockId}-${n.id}`);
+          if (el) {
+            const h = el.offsetHeight || 90;
+            const boxData = {
+              id: n.id,
+              el,
+              x: 540,
+              y: branchY + idx * 130,
+              w: el.offsetWidth || 340,
+              h,
+              scale: 1.0,
+              origX: 540,
+              origY: branchY + idx * 130,
+              origScale: 1.0
+            };
+            el.style.left = boxData.x + 'px';
+            el.style.top = boxData.y + 'px';
+            state.boxes.set(n.id, boxData);
+          }
+        });
+      },
+
+      measureBoxes(state) {
+        state.boxes.forEach(box => {
+          if (box.el) {
+            box.w = box.el.offsetWidth || box.w;
+            box.h = box.el.offsetHeight || box.h;
+          }
+        });
+      },
+
+      adjustBoxScale(state, boxId, delta) {
+        const box = state.boxes.get(boxId);
+        if (!box) return;
+        box.scale = Math.max(0.4, Math.min(2.5, Math.round((box.scale + delta) * 100) / 100));
+        box.el.style.transform = `scale(${box.scale})`;
+        const badge = document.getElementById(`scale-val-${state.blockId}-${box.id}`);
+        if (badge) badge.innerText = Math.round(box.scale * 100) + '%';
+        this.updateConnections(state);
+      },
+
+      resetBoxScale(state, boxId) {
+        const box = state.boxes.get(boxId);
+        if (!box) return;
+        box.scale = 1.0;
+        box.el.style.transform = 'scale(1.0)';
+        const badge = document.getElementById(`scale-val-${state.blockId}-${box.id}`);
+        if (badge) badge.innerText = '100%';
+        this.updateConnections(state);
+      },
+
+      resetLayout(blockId) {
+        const state = this.instances.get(blockId);
+        if (!state) return;
+        state.boxes.forEach(box => {
+          box.x = box.origX;
+          box.y = box.origY;
+          box.scale = 1.0;
+          box.el.style.left = box.x + 'px';
+          box.el.style.top = box.y + 'px';
+          box.el.style.transform = 'scale(1.0)';
+          const badge = document.getElementById(`scale-val-${blockId}-${box.id}`);
+          if (badge) badge.innerText = '100%';
+        });
+        this.updateConnections(state);
+        this.fit(blockId);
+      },
+
+      getEntityWorldRect(state, entityId) {
+        const box = state.boxes.get(entityId);
+        if (box && box.el) {
+          const w = (box.el.offsetWidth || box.w) * box.scale;
+          const h = (box.el.offsetHeight || box.h) * box.scale;
+          return {
+            isSubnode: false,
+            box,
+            x: box.x,
+            y: box.y,
+            w,
+            h,
+            cx: box.x + w / 2,
+            cy: box.y + h / 2,
+            parentId: null
+          };
+        }
+
+        const nodeEl = document.getElementById(`node-${state.blockId}-${entityId}`);
+        if (nodeEl) {
+          const parentBoxEl = nodeEl.closest('.dyn-box');
+          const parentId = parentBoxEl ? parentBoxEl.getAttribute('data-box-id') : null;
+          const parentBox = parentId ? state.boxes.get(parentId) : null;
+          if (parentBox) {
+            const itemX = parentBox.x + (nodeEl.offsetLeft || 0) * parentBox.scale;
+            const itemY = parentBox.y + (nodeEl.offsetTop || 0) * parentBox.scale;
+            const itemW = (nodeEl.offsetWidth || 200) * parentBox.scale;
+            const itemH = (nodeEl.offsetHeight || 38) * parentBox.scale;
+
+            return {
+              isSubnode: true,
+              parentBox,
+              parentId,
+              nodeEl,
+              x: itemX,
+              y: itemY,
+              w: itemW,
+              h: itemH,
+              cx: itemX + itemW / 2,
+              cy: itemY + itemH / 2
+            };
+          }
+        }
+
+        return null;
+      },
+
+      getPort(rect, side) {
+        if (!rect.isSubnode) {
+          switch (side) {
+            case 'left':   return { x: Math.round(rect.x), y: Math.round(rect.cy) };
+            case 'right':  return { x: Math.round(rect.x + rect.w), y: Math.round(rect.cy) };
+            case 'top':    return { x: Math.round(rect.cx), y: Math.round(rect.y) };
+            case 'bottom': return { x: Math.round(rect.cx), y: Math.round(rect.y + rect.h) };
+          }
+        } else {
+          const pb = rect.parentBox;
+          const pbW = (pb.el ? pb.el.offsetWidth : pb.w) * pb.scale;
+          const pbH = (pb.el ? pb.el.offsetHeight : pb.h) * pb.scale;
+          switch (side) {
+            case 'right':  return { x: Math.round(pb.x + pbW), y: Math.round(rect.cy) };
+            case 'left':   return { x: Math.round(pb.x), y: Math.round(rect.cy) };
+            case 'bottom': return { x: Math.round(rect.cx), y: Math.round(pb.y + pbH) };
+            case 'top':    return { x: Math.round(rect.cx), y: Math.round(pb.y) };
+          }
+        }
+        return { x: Math.round(rect.cx), y: Math.round(rect.cy) };
+      },
+
+      updateConnections(state) {
+        state.parsed.edges.forEach((edge, idx) => {
+          const pathEl = document.getElementById(`dyn-edge-${state.blockId}-${idx}`);
+          if (!pathEl) return;
+
+          const rFrom = this.getEntityWorldRect(state, edge.from);
+          const rTo = this.getEntityWorldRect(state, edge.to);
+
+          if (!rFrom || !rTo) return;
+
+          let p1, p2, d1, d2;
+
+          // SPECIAL CASE: Both nodes are subnodes in the EXACT SAME subgraph box (e.g. R4 --> R5)
+          if (rFrom.isSubnode && rTo.isSubnode && rFrom.parentId === rTo.parentId) {
+            const dy = rTo.cy - rFrom.cy;
+            if (dy >= 0) {
+              p1 = { x: Math.round(rFrom.cx), y: Math.round(rFrom.y + rFrom.h) };
+              d1 = [0, 1];
+              p2 = { x: Math.round(rTo.cx), y: Math.round(rTo.y) };
+              d2 = [0, -1];
+            } else {
+              p1 = { x: Math.round(rFrom.cx), y: Math.round(rFrom.y) };
+              d1 = [0, -1];
+              p2 = { x: Math.round(rTo.cx), y: Math.round(rTo.y + rTo.h) };
+              d2 = [0, 1];
+            }
+          } else {
+            const dx = rTo.cx - rFrom.cx;
+            const dy = rTo.cy - rFrom.cy;
+
+            const isHorizontal = Math.abs(dx) >= Math.abs(dy);
+
+            if (isHorizontal) {
+              if (dx >= 0) {
+                p1 = this.getPort(rFrom, 'right');
+                d1 = [1, 0];
+                p2 = this.getPort(rTo, 'left');
+                d2 = [-1, 0];
+              } else {
+                p1 = this.getPort(rFrom, 'left');
+                d1 = [-1, 0];
+                p2 = this.getPort(rTo, 'right');
+                d2 = [1, 0];
+              }
+            } else {
+              if (dy >= 0) {
+                p1 = this.getPort(rFrom, 'bottom');
+                d1 = [0, 1];
+                p2 = this.getPort(rTo, 'top');
+                d2 = [0, -1];
+              } else {
+                p1 = this.getPort(rFrom, 'top');
+                d1 = [0, -1];
+                p2 = this.getPort(rTo, 'bottom');
+                d2 = [0, 1];
+              }
+            }
+          }
+
+          const dist = Math.max(Math.min(Math.hypot(p2.x - p1.x, p2.y - p1.y) * 0.45, 140), 25);
+          const cp1 = {
+            x: Math.round(p1.x + d1[0] * dist),
+            y: Math.round(p1.y + d1[1] * dist)
+          };
+          const cp2 = {
+            x: Math.round(p2.x + d2[0] * dist),
+            y: Math.round(p2.y + d2[1] * dist)
+          };
+
+          const d = `M ${p1.x} ${p1.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${p2.x} ${p2.y}`;
+          pathEl.setAttribute('d', d);
+
+          const labelWrap = document.getElementById(`dyn-label-${state.blockId}-${idx}`);
+          if (labelWrap) {
+            const midX = Math.round(0.125 * p1.x + 0.375 * cp1.x + 0.375 * cp2.x + 0.125 * p2.x);
+            const midY = Math.round(0.125 * p1.y + 0.375 * cp1.y + 0.375 * cp2.y + 0.125 * p2.y);
+            labelWrap.style.left = midX + 'px';
+            labelWrap.style.top = midY + 'px';
+          }
+        });
+      },
+
+      applyWorldTransform(state) {
+        state.world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        state.viewport.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
+        const zoomValEl = document.getElementById(`zoom-val-${state.blockId}`);
+        if (zoomValEl) {
+          zoomValEl.innerText = Math.round(state.scale * 100) + '%';
+        }
+      },
+
+      fit(blockId) {
+        const state = this.instances.get(blockId);
+        if (!state) return;
+        const vRect = state.viewport.getBoundingClientRect();
+        if (vRect.width === 0) return;
+
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        state.boxes.forEach(b => {
+          minX = Math.min(minX, b.x);
+          minY = Math.min(minY, b.y);
+          maxX = Math.max(maxX, b.x + b.w * b.scale);
+          maxY = Math.max(maxY, b.y + b.h * b.scale);
+        });
+
+        if (minX === Infinity) return;
+
+        const totalW = maxX - minX;
+        const totalH = maxY - minY;
+        const padding = 50;
+
+        const scaleW = (vRect.width - padding) / totalW;
+        const scaleH = (vRect.height - padding) / totalH;
+        state.scale = Math.max(0.2, Math.min(1.1, Math.round(Math.min(scaleW, scaleH) * 100) / 100));
+
+        state.panX = Math.round((vRect.width - totalW * state.scale) / 2 - minX * state.scale);
+        state.panY = Math.round((vRect.height - totalH * state.scale) / 2 - minY * state.scale);
+
+        this.applyWorldTransform(state);
+      },
+
+      zoomWorld(blockId, delta) {
+        const state = this.instances.get(blockId);
+        if (!state) return;
+        const vRect = state.viewport.getBoundingClientRect();
+        const cx = vRect.width / 2;
+        const cy = vRect.height / 2;
+
+        const newScale = Math.max(0.2, Math.min(3.0, Math.round((state.scale + delta) * 100) / 100));
+        state.panX = Math.round(cx - (cx - state.panX) * (newScale / state.scale));
+        state.panY = Math.round(cy - (cy - state.panY) * (newScale / state.scale));
+        state.scale = newScale;
+
+        this.applyWorldTransform(state);
+      },
+
+      resetWorld(blockId) {
+        const state = this.instances.get(blockId);
+        if (!state) return;
+        state.scale = 1.0;
+        state.panX = 40;
+        state.panY = 30;
+        this.applyWorldTransform(state);
+      },
+
+      initAll(container) {
+        this.parsedCache.forEach((parsed, blockId) => {
+          this.init(blockId, parsed);
+        });
+      }
+    };
+
+    /* =========================================================================
+       5. MARKDOWN PARSER
        ========================================================================= */
     const SimpleMarkdown = {
       render(md) {
         if (!md) return '';
-
         let out = '';
         const lines = md.split(/\r?\n/);
         let inCode = false;
@@ -1212,7 +2924,6 @@
             inList = false;
           }
         }
-
         function flushTable() {
           if (inTable && tableRows.length > 0) {
             out += '<table>\n';
@@ -1228,7 +2939,6 @@
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
-
           if (line.trim().startsWith('```')) {
             flushList();
             flushTable();
@@ -1253,9 +2963,7 @@
           if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
             flushList();
             const cells = line.trim().slice(1, -1).split('|');
-            if (cells.every(c => /^[\s-:]+$/.test(c))) {
-              // delimiter
-            } else {
+            if (!cells.every(c => /^[\s-:]+$/.test(c))) {
               inTable = true;
               tableRows.push(cells);
             }
@@ -1364,7 +3072,6 @@
         s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
         s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
         s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius:6px;">');
-
         return s;
       },
 
@@ -1375,65 +3082,112 @@
         if (lang === 'udp' || lang === 'packet' || lang === 'bytefield' || lang === 'rfc') {
           let parsed = PacketRenderer.parseRfcAscii(code);
           let title = lang === 'udp' ? 'UDP Datagram Header (RFC 768)' : 'Protocol Packet Header';
-
           if (!parsed) {
             parsed = PacketRenderer.parseDsl(code);
             if (parsed && parsed.title) title = parsed.title;
           }
-
           if (parsed) {
             const svg = PacketRenderer.renderToSvg(parsed, title);
             return `
               <div class="diagram-card" id="${blockId}">
                 <div class="diagram-header">
-                  <span>${title}</span>
+                  <div class="diagram-title-group">
+                    <span>${title}</span>
+                    <span class="diagram-hint">🖱️ Drag to pan • Scroll to zoom</span>
+                  </div>
                   <div class="diagram-controls">
-                    <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', -0.2)">−</button>
-                    <span class="diagram-zoom-val">100%</span>
-                    <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', 0.2)">+</button>
-                    <button class="diagram-zoom-btn" onclick="App.resetZoomDiagram('${blockId}')">Reset</button>
-                    <button class="diagram-zoom-btn" onclick="App.fullscreenDiagram('${blockId}')" title="Expand Fullscreen">⛶</button>
+                    <button class="diagram-zoom-btn" onclick="DiagramPanZoom.zoom('${blockId}', -0.15)" title="Zoom Out">−</button>
+                    <span class="diagram-zoom-val" onclick="DiagramPanZoom.reset('${blockId}')" title="Click to reset 100%">100%</span>
+                    <button class="diagram-zoom-btn" onclick="DiagramPanZoom.zoom('${blockId}', 0.15)" title="Zoom In">+</button>
+                    <button class="diagram-zoom-btn" onclick="DiagramPanZoom.fit('${blockId}')" title="Fit to Box">Fit</button>
+                    <button class="diagram-zoom-btn" onclick="DiagramPanZoom.reset('${blockId}')" title="Reset View">Reset</button>
+                    <button class="diagram-zoom-btn" onclick="DiagramPanZoom.openModal('${blockId}')" title="Expand Fullscreen">⛶</button>
                     <span class="diagram-badge">PACKET</span>
                   </div>
                 </div>
-                <div class="diagram-body">
-                  <div class="diagram-zoom-wrapper">${svg}</div>
+                <div class="diagram-body" id="body-${blockId}">
+                  <div class="diagram-canvas" id="canvas-${blockId}">
+                    ${svg}
+                  </div>
                 </div>
+                <div class="diagram-resize-handle" title="Drag corner to resize box"></div>
               </div>
             `;
           }
         }
 
-        // 2. Mermaid diagram
+        // 2. Mermaid diagram: Flowcharts get DYNAMIC BOX GRAPH (nexus-graph style movable & scalable boxes)
         if (lang === 'mermaid') {
           const mermaidId = 'mermaid-' + Math.random().toString(36).substr(2, 9);
+          if (DynamicGraphRenderer.canRender(code)) {
+            const parsed = DynamicGraphRenderer.parse(code);
+            if (parsed.subgraphs.length > 0 || parsed.standaloneNodes.length > 0) {
+              DynamicGraphRenderer.cacheParsed(blockId, parsed);
+              const dynHtml = DynamicGraphRenderer.renderHtml(blockId, parsed);
+              return `
+                <div class="diagram-card" id="${blockId}" style="height: 520px;">
+                  <div class="diagram-header">
+                    <div class="diagram-title-group">
+                      <span>Dynamic Flowchart</span>
+                      <span class="diagram-hint">🗔 Drag boxes • Corner scale • Pan world</span>
+                    </div>
+                    <div class="diagram-controls">
+                      <div class="btn-group" style="margin-right: 4px;">
+                        <button class="btn btn-sm active btn-toggle-dyn" onclick="App.toggleDiagramMode('${blockId}', 'dyn')" title="Dynamic Draggable Boxes">🗔 Dynamic Boxes</button>
+                        <button class="btn btn-sm btn-toggle-classic" onclick="App.toggleDiagramMode('${blockId}', 'classic')" title="Classic Mermaid SVG">📊 Classic SVG</button>
+                      </div>
+                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.resetLayout('${blockId}')" title="Reset All Boxes to Default Layout">↺ Layout</button>
+                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.zoomWorld('${blockId}', -0.15)" title="Zoom Out">−</button>
+                      <span class="diagram-zoom-val" id="zoom-val-${blockId}" onclick="DynamicGraphRenderer.resetWorld('${blockId}')" title="Click to reset 100%">100%</span>
+                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.zoomWorld('${blockId}', 0.15)" title="Zoom In">+</button>
+                      <button class="diagram-zoom-btn" onclick="DynamicGraphRenderer.fit('${blockId}')" title="Fit All Boxes">Fit</button>
+                      <button class="diagram-zoom-btn" onclick="DiagramPanZoom.openModal('${blockId}')" title="Expand Fullscreen">⛶</button>
+                      <span class="diagram-badge">FLOWCHART</span>
+                    </div>
+                  </div>
+                  <div class="diagram-body" id="body-${blockId}" style="padding:0; overflow:hidden; position:relative;">
+                    ${dynHtml}
+                    <div class="diagram-canvas" id="canvas-${blockId}" style="display:none;">
+                      <pre class="mermaid-raw-code" style="display:none;">${escapeHtml(code)}</pre>
+                      <div class="classic-svg-container" id="classic-svg-${blockId}"></div>
+                    </div>
+                  </div>
+                  <div class="diagram-resize-handle" title="Drag corner to resize diagram container"></div>
+                </div>
+              `;
+            }
+          }
+
           return `
             <div class="diagram-card" id="${blockId}">
               <div class="diagram-header">
-                <span>Mermaid Diagram</span>
+                <div class="diagram-title-group">
+                  <span>Mermaid Diagram</span>
+                  <span class="diagram-hint">🖱️ Drag to pan • Scroll to zoom</span>
+                </div>
                 <div class="diagram-controls">
-                  <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', -0.25)">−</button>
-                  <span class="diagram-zoom-val">100%</span>
-                  <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', 0.25)">+</button>
-                  <button class="diagram-zoom-btn" onclick="App.resetZoomDiagram('${blockId}')">Reset</button>
-                  <button class="diagram-zoom-btn" onclick="App.fullscreenDiagram('${blockId}')" title="Expand Fullscreen">⛶</button>
+                  <button class="diagram-zoom-btn" onclick="DiagramPanZoom.zoom('${blockId}', -0.15)" title="Zoom Out">−</button>
+                  <span class="diagram-zoom-val" onclick="DiagramPanZoom.reset('${blockId}')" title="Click to reset 100%">100%</span>
+                  <button class="diagram-zoom-btn" onclick="DiagramPanZoom.zoom('${blockId}', 0.15)" title="Zoom In">+</button>
+                  <button class="diagram-zoom-btn" onclick="DiagramPanZoom.fit('${blockId}')" title="Fit to Box">Fit</button>
+                  <button class="diagram-zoom-btn" onclick="DiagramPanZoom.reset('${blockId}')" title="Reset View">Reset</button>
+                  <button class="diagram-zoom-btn" onclick="DiagramPanZoom.openModal('${blockId}')" title="Expand Fullscreen">⛶</button>
                   <span class="diagram-badge">MERMAID</span>
                 </div>
               </div>
-              <div class="diagram-body">
-                <div class="diagram-zoom-wrapper">
+              <div class="diagram-body" id="body-${blockId}">
+                <div class="diagram-canvas" id="canvas-${blockId}">
                   <div class="mermaid" id="${mermaidId}">${code}</div>
                 </div>
               </div>
+              <div class="diagram-resize-handle" title="Drag corner to resize box"></div>
             </div>
           `;
         }
 
-        // 3. STYLED CODE VIEW BOX WITH SYNTAX HIGHLIGHTING & COPY BUTTON
+        // 3. Styled Code View Box
         const displayLang = (lang || 'TEXT').toUpperCase();
         const highlighted = CodeHighlighter.highlight(code, lang);
-
-        // Generate line numbers
         const lineCount = code.split('\n').length;
         const lineNumbersHtml = Array.from({ length: lineCount }, (_, i) => i + 1).join('<br>');
 
@@ -1449,7 +3203,7 @@
                 <span class="code-box-lang">${displayLang}</span>
               </div>
               <button class="code-copy-btn" onclick="App.copyCode(this)">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
@@ -1466,96 +3220,94 @@
     };
 
     /* =========================================================================
-       4. APP STATE & CONTROLLER
+       4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
-      filePath: null,
-      fileName: 'Welcome.md',
-      isDirty: false,
+      // Multiple file manager state
+      files: [],
+      activeFileIndex: 0,
+      mode: 'preview', // Default view mode is Preview
+
+      // Keybindings
+      keybindings: {
+        preview: {
+          scroll_down: "j",
+          scroll_up: "k",
+          scroll_right: "l",
+          scroll_left: "h",
+          prev_file: "Alt+Shift+H",
+          next_file: "Alt+Shift+L",
+          close_app: "Ctrl+q",
+          save_file: "w"
+        },
+        settings: {
+          scroll_step_y: 60,
+          scroll_step_x: 60
+        }
+      },
+
+      // Elements
       editorEl: document.getElementById('editor'),
       previewEl: document.getElementById('preview'),
+      previewPaneEl: document.getElementById('preview-pane'),
       lineNumbersEl: document.getElementById('line-numbers'),
-      fileNameEl: document.getElementById('file-name'),
-      dirtyDotEl: document.getElementById('dirty-dot'),
-      statusFileEl: document.getElementById('status-file'),
+      tabsContainerEl: document.getElementById('tabs-container'),
+      statusModeEl: document.getElementById('status-mode'),
       statusCursorEl: document.getElementById('status-cursor'),
       statusWordsEl: document.getElementById('status-words'),
       statusLinesEl: document.getElementById('status-lines'),
       statusSaveEl: document.getElementById('status-save'),
 
-      // Modal
-      modalEl: document.getElementById('diagram-modal'),
-      modalBodyEl: document.getElementById('modal-body'),
-      modalTitleEl: document.getElementById('modal-title'),
-      modalZoomValEl: document.getElementById('modal-zoom-val'),
+      // Modals
+      diagramModalEl: document.getElementById('diagram-modal'),
+      diagramModalBodyEl: document.getElementById('modal-body'),
+      diagramModalTitleEl: document.getElementById('modal-title'),
+      diagramModalZoomValEl: document.getElementById('modal-zoom-val'),
+      kbModalEl: document.getElementById('keybindings-modal'),
+      kbTextareaEl: document.getElementById('kb-textarea'),
       modalScale: 1.0,
 
       init() {
         this.setupEditorEvents();
         this.setupToolbarEvents();
+        this.setupTitlebarWindowControls();
+        this.setupDragAndDrop();
         this.setupSplitter();
-        this.setupKeyboardShortcuts();
-        this.setupModalEvents();
+        this.setupNVimKeybindings();
+        this.setupModals();
 
-        // MERMAID CONFIGURATION: BIGGER FONTS AND NO CONSTRAINTS
+        const initMermaid = () => {
+          if (window.mermaid && !window._mermaidInitialized) {
+            window._mermaidInitialized = true;
+            mermaid.initialize({
+              startOnLoad: false,
+              theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'dark'
+            });
+            const mermaidNodes = this.previewEl ? this.previewEl.querySelectorAll('.mermaid') : [];
+            if (mermaidNodes.length > 0) {
+              mermaid.run({ nodes: mermaidNodes }).then(() => {
+                DiagramPanZoom.initAll(this.previewEl);
+              }).catch(e => console.error(e));
+            }
+          }
+        };
+
         if (window.mermaid) {
-          mermaid.initialize({
-            startOnLoad: false,
-            theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'dark',
-            securityLevel: 'loose',
-            fontSize: 18,
-            flowchart: {
-              useMaxWidth: false,
-              htmlLabels: true,
-              curve: 'basis',
-              nodeSpacing: 50,
-              rankSpacing: 50
-            },
-            sequence: {
-              useMaxWidth: false,
-              actorFontSize: 18,
-              messageFontSize: 16,
-              noteFontSize: 15,
-              actorMargin: 80,
-              width: 180
-            },
-            class: { useMaxWidth: false },
-            state: { useMaxWidth: false }
-          });
+          initMermaid();
+        } else {
+          const scriptTag = document.querySelector('script[src*="mermaid"]');
+          if (scriptTag) scriptTag.addEventListener('load', initMermaid);
         }
 
-        // Set default mode to Preview
         this.setMode('preview');
-
-        // Request initial file from Rust backend
         this.sendIpc('get_init_data', {});
-      },
-
-      copyCode(btn) {
-        const codeBox = btn.closest('.code-box');
-        if (!codeBox) return;
-        const codeEl = codeBox.querySelector('.code-body code');
-        if (!codeEl) return;
-
-        navigator.clipboard.writeText(codeEl.innerText).then(() => {
-          const span = btn.querySelector('span');
-          const original = span.innerText;
-          span.innerText = 'Copied! ✓';
-          btn.style.color = 'var(--success)';
-          btn.style.borderColor = 'var(--success)';
-          setTimeout(() => {
-            span.innerText = original;
-            btn.style.color = '';
-            btn.style.borderColor = '';
-          }, 1600);
-        });
       },
 
       sendIpc(cmd, payload) {
         if (window.ipc) {
           window.ipc.postMessage(JSON.stringify({ cmd, ...payload }));
         } else {
-          console.log('[IPC Dev Mode]', cmd, payload);
+          console.log('[IPC Standalone]', cmd, payload);
         }
       },
 
@@ -1564,8 +3316,11 @@
           const data = typeof message === 'string' ? JSON.parse(message) : message;
           switch (data.type) {
             case 'init':
+              if (data.json) this.loadKeybindingsJson(data.json);
+              this.openNewFile(data.path, data.name, data.content);
+              break;
             case 'file_opened':
-              this.loadFile(data.path, data.name, data.content);
+              this.openNewFile(data.path, data.name, data.content);
               break;
             case 'file_saved':
               this.onFileSaved(data.path, data.name);
@@ -1579,181 +3334,489 @@
         }
       },
 
-      loadFile(path, name, content) {
-        this.filePath = path;
-        this.fileName = name || 'Welcome.md';
-        this.editorEl.value = content || '';
-        this.isDirty = false;
-        this.updateFileDisplay();
-        this.updateEditor();
-        this.renderMarkdown();
-        
-        // ALWAYS default to PREVIEW mode when opening files!
+      /* MULTI-FILE MANAGER */
+      openNewFile(path, name, content) {
+        // If file already opened, switch to it
+        if (path) {
+          const existingIdx = this.files.findIndex(f => f.path === path);
+          if (existingIdx !== -1) {
+            this.switchFile(existingIdx);
+            return;
+          }
+        }
+
+        const newFile = {
+          id: 'file_' + Math.random().toString(36).substr(2, 9),
+          path: path || null,
+          name: name || 'Untitled.md',
+          content: content || '',
+          isDirty: false
+        };
+
+        this.files.push(newFile);
+        this.activeFileIndex = this.files.length - 1;
+        this.renderTabs();
+        this.loadActiveFileIntoEditor();
         this.setMode('preview');
       },
 
-      onFileSaved(path, name) {
-        this.filePath = path;
-        this.fileName = name;
-        this.isDirty = false;
-        this.statusSaveEl.innerText = '✓ Saved';
-        this.updateFileDisplay();
+      switchFile(index) {
+        if (index < 0 || index >= this.files.length) return;
+        // Save current editor content to active file before switching
+        if (this.files[this.activeFileIndex]) {
+          this.files[this.activeFileIndex].content = this.editorEl.value;
+        }
+        this.activeFileIndex = index;
+        this.renderTabs();
+        this.loadActiveFileIntoEditor();
       },
 
-      updateFileDisplay() {
-        this.fileNameEl.innerText = this.fileName;
-        this.dirtyDotEl.classList.toggle('is-dirty', this.isDirty);
-        this.statusFileEl.innerText = `📄 ${this.fileName}`;
-        const fullTitle = `${this.isDirty ? '● ' : ''}${this.fileName} - MDViewer`;
-        document.title = fullTitle;
-        this.sendIpc('set_title', { title: fullTitle });
+      switchFileRelative(delta) {
+        if (this.files.length <= 1) return;
+        let nextIdx = (this.activeFileIndex + delta) % this.files.length;
+        if (nextIdx < 0) nextIdx = this.files.length - 1;
+        this.switchFile(nextIdx);
+      },
+
+      closeFile(index, event) {
+        if (event) event.stopPropagation();
+        const file = this.files[index];
+        if (file && file.isDirty && !confirm(`Discard unsaved changes to "${file.name}"?`)) {
+          return;
+        }
+
+        this.files.splice(index, 1);
+        if (this.files.length === 0) {
+          this.openNewFile(null, 'Untitled.md', '# New Document\n\n');
+        } else {
+          if (this.activeFileIndex >= this.files.length) {
+            this.activeFileIndex = this.files.length - 1;
+          }
+          this.renderTabs();
+          this.loadActiveFileIntoEditor();
+        }
+      },
+
+      renderTabs() {
+        this.tabsContainerEl.innerHTML = this.files.map((file, idx) => `
+          <div class="tab-item ${idx === this.activeFileIndex ? 'active' : ''} ${file.isDirty ? 'is-dirty' : ''}"
+               onclick="App.switchFile(${idx})" title="${file.path || file.name}">
+            <span class="tab-dirty"></span>
+            <span class="tab-name">${file.name}</span>
+            <span class="tab-close" onclick="App.closeFile(${idx}, event)" title="Close Tab">✕</span>
+          </div>
+        `).join('');
+
+        // Ensure active tab is visible in scroll
+        const activeTab = this.tabsContainerEl.querySelector('.tab-item.active');
+        if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      },
+
+      loadActiveFileIntoEditor() {
+        const file = this.files[this.activeFileIndex];
+        if (!file) return;
+
+        this.editorEl.value = file.content;
+        this.statusSaveEl.innerText = file.isDirty ? '● Unsaved' : '✓ Saved';
+        const title = `${file.isDirty ? '● ' : ''}${file.name} - MDViewer`;
+        document.title = title;
+        this.sendIpc('set_title', { title });
+
+        this.updateEditor();
+        this.renderMarkdown();
+      },
+
+      onFileSaved(path, name) {
+        const file = this.files[this.activeFileIndex];
+        if (file) {
+          file.path = path;
+          file.name = name;
+          file.isDirty = false;
+        }
+        this.renderTabs();
+        this.loadActiveFileIntoEditor();
       },
 
       markDirty() {
-        if (!this.isDirty) {
-          this.isDirty = true;
+        const file = this.files[this.activeFileIndex];
+        if (file && !file.isDirty) {
+          file.isDirty = true;
+          this.renderTabs();
           this.statusSaveEl.innerText = '● Unsaved';
-          this.updateFileDisplay();
+          const title = `● ${file.name} - MDViewer`;
+          document.title = title;
+          this.sendIpc('set_title', { title });
         }
       },
 
       renderMarkdown() {
         const text = this.editorEl.value;
+        DynamicGraphRenderer.parsedCache.clear();
         this.previewEl.innerHTML = SimpleMarkdown.render(text);
 
-        // Run Mermaid if loaded
+        // Initialize Dynamic Box Flowcharts (nexus-graph style)
+        DynamicGraphRenderer.initAll(this.previewEl);
+
         if (window.mermaid) {
           try {
             const mermaidNodes = this.previewEl.querySelectorAll('.mermaid');
             if (mermaidNodes.length > 0) {
-              mermaid.run({
-                nodes: mermaidNodes
-              }).then(() => {
-                this.enlargeMermaidDiagrams();
+              mermaid.run({ nodes: mermaidNodes }).then(() => {
+                DiagramPanZoom.initAll(this.previewEl);
               }).catch(e => {
                 console.error('Mermaid render error:', e);
-                this.enlargeMermaidDiagrams();
+                DiagramPanZoom.initAll(this.previewEl);
               });
+            } else {
+              DiagramPanZoom.initAll(this.previewEl);
             }
           } catch (e) {
-            console.error('Mermaid sync error:', e);
+            console.error('Mermaid render error:', e);
+            DiagramPanZoom.initAll(this.previewEl);
           }
+        } else {
+          DiagramPanZoom.initAll(this.previewEl);
         }
       },
 
-      enlargeMermaidDiagrams() {
-        const svgs = this.previewEl.querySelectorAll('.mermaid svg');
-        svgs.forEach(svg => {
-          svg.style.maxWidth = 'none';
+      /* DRAG-TO-READ ACTION */
+      setupDragAndDrop() {
+        const overlay = document.getElementById('drop-overlay');
 
-          const viewBox = svg.viewBox && svg.viewBox.baseVal;
-          if (viewBox && viewBox.width > 0) {
-            const vbWidth = viewBox.width;
-            if (vbWidth > 700) {
-              const targetWidth = Math.max(vbWidth * 1.3, 1100);
-              svg.style.minWidth = targetWidth + 'px';
-              svg.style.width = targetWidth + 'px';
-            } else {
-              svg.style.minWidth = Math.min(vbWidth * 1.35, 900) + 'px';
-              svg.style.transform = 'scale(1.25)';
-              svg.style.transformOrigin = 'center top';
-            }
-          } else {
-            svg.style.minWidth = '100%';
-            svg.style.transform = 'scale(1.2)';
-            svg.style.transformOrigin = 'center top';
+        window.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          overlay.classList.add('active');
+        });
+
+        window.addEventListener('dragleave', (e) => {
+          if (e.relatedTarget === null) {
+            overlay.classList.remove('active');
           }
+        });
+
+        window.addEventListener('drop', (e) => {
+          e.preventDefault();
+          overlay.classList.remove('active');
+
+          if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+            for (let i = 0; i < e.dataTransfer.files.length; i++) {
+              const file = e.dataTransfer.files[i];
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                // If webview provides path, use it, else file.name
+                const filePath = file.path || file.name;
+                App.openNewFile(filePath, file.name, event.target.result);
+              };
+              reader.readAsText(file);
+            }
+          }
+        });
+      },
+
+      /* NVIM KEYBINDINGS (ACTIVE ONLY IN PREVIEW MODE) */
+      setupNVimKeybindings() {
+        window.addEventListener('keydown', (e) => {
+          // If in an active input or textarea, or NOT in preview mode: PURGE keybinds!
+          const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+          const isTyping = activeTag === 'textarea' || activeTag === 'input';
+
+          // General shortcuts (Ctrl+S, Ctrl+O, Ctrl+N)
+          if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+            if (e.key === 's') {
+              e.preventDefault();
+              if (e.shiftKey) App.saveAs();
+              else App.save();
+              return;
+            } else if (e.key === 'o') {
+              e.preventDefault();
+              App.sendIpc('open_file', {});
+              return;
+            } else if (e.key === 'n') {
+              e.preventDefault();
+              App.openNewFile(null, 'Untitled.md', '# New Document\n\n');
+              return;
+            } else if (e.key === 'q') {
+              e.preventDefault();
+              App.askToClose();
+              return;
+            }
+          }
+
+          // PURGE all NVim navigation if not in preview mode or if typing
+          if (this.mode !== 'preview' || isTyping) {
+            return;
+          }
+
+          const kb = this.keybindings.preview || {};
+          const stepY = (this.keybindings.settings && this.keybindings.settings.scroll_step_y) || 60;
+          const stepX = (this.keybindings.settings && this.keybindings.settings.scroll_step_x) || 60;
+
+          // Alt + Shift + H (Previous file)
+          if (e.altKey && e.shiftKey && e.key.toUpperCase() === 'H') {
+            e.preventDefault();
+            this.switchFileRelative(-1);
+            return;
+          }
+
+          // Alt + Shift + L (Next file)
+          if (e.altKey && e.shiftKey && e.key.toUpperCase() === 'L') {
+            e.preventDefault();
+            this.switchFileRelative(1);
+            return;
+          }
+
+          // NVim single-key navigation (j, k, l, h, w)
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (e.key === (kb.scroll_down || 'j')) {
+              e.preventDefault();
+              this.previewPaneEl.scrollBy({ top: stepY, behavior: 'smooth' });
+            } else if (e.key === (kb.scroll_up || 'k')) {
+              e.preventDefault();
+              this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'smooth' });
+            } else if (e.key === (kb.scroll_right || 'l')) {
+              e.preventDefault();
+              this.previewPaneEl.scrollBy({ left: stepX, behavior: 'smooth' });
+            } else if (e.key === (kb.scroll_left || 'h')) {
+              e.preventDefault();
+              this.previewPaneEl.scrollBy({ left: -stepX, behavior: 'smooth' });
+            } else if (e.key === (kb.save_file || 'w')) {
+              e.preventDefault();
+              this.save();
+            }
+          }
+        });
+      },
+
+      loadKeybindingsJson(jsonStr) {
+        try {
+          const parsed = JSON.parse(jsonStr);
+          if (parsed.preview) {
+            this.keybindings = parsed;
+          }
+        } catch (e) {
+          console.error('Invalid keybindings JSON:', e);
+        }
+      },
+
+      askToClose() {
+        const dirtyFile = this.files.find(f => f.isDirty);
+        if (dirtyFile) {
+          if (!confirm(`You have unsaved changes in "${dirtyFile.name}". Do you really want to exit?`)) {
+            return;
+          }
+        }
+        this.sendIpc('close_window', {});
+      },
+
+      /* BORDERLESS WINDOW TITLEBAR CONTROLS */
+      setupTitlebarWindowControls() {
+        document.getElementById('win-min').addEventListener('click', () => {
+          this.sendIpc('minimize_window', {});
+        });
+        document.getElementById('win-max').addEventListener('click', () => {
+          this.sendIpc('maximize_window', {});
+        });
+        document.getElementById('win-close').addEventListener('click', () => {
+          this.askToClose();
+        });
+
+        // Window drag fallback on mousedown on empty titlebar space
+        const titlebar = document.getElementById('titlebar');
+        titlebar.addEventListener('mousedown', (e) => {
+          if (e.target === titlebar || e.target.closest('.titlebar-left') || e.target.classList.contains('tabs-container')) {
+            this.sendIpc('drag_window', {});
+          }
+        });
+        titlebar.addEventListener('dblclick', (e) => {
+          if (e.target === titlebar || e.target.closest('.titlebar-left')) {
+            this.sendIpc('maximize_window', {});
+          }
+        });
+      },
+
+      setMode(mode) {
+        this.mode = mode;
+        document.body.className = `mode-${mode}`;
+        document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById(`mode-${mode}`);
+        if (btn) btn.classList.add('active');
+
+        if (mode === 'preview') {
+          this.statusModeEl.innerText = 'MODE: PREVIEW (NVIM: j/k/h/l)';
+          this.renderMarkdown();
+        } else if (mode === 'split') {
+          this.statusModeEl.innerText = 'MODE: SPLIT (NVIM PURGED)';
+        } else {
+          this.statusModeEl.innerText = 'MODE: EDIT (NVIM PURGED)';
+        }
+      },
+
+      save() {
+        const file = this.files[this.activeFileIndex];
+        if (!file) return;
+        if (file.path) {
+          this.sendIpc('save_file', { path: file.path, content: this.editorEl.value });
+        } else {
+          this.saveAs();
+        }
+      },
+
+      saveAs() {
+        const file = this.files[this.activeFileIndex];
+        const defaultName = file ? file.name : 'document.md';
+        this.sendIpc('save_file_as', { content: this.editorEl.value, defaultName });
+      },
+
+      copyCode(btn) {
+        const codeBox = btn.closest('.code-box');
+        if (!codeBox) return;
+        const codeEl = codeBox.querySelector('.code-body code');
+        if (!codeEl) return;
+        navigator.clipboard.writeText(codeEl.innerText).then(() => {
+          const span = btn.querySelector('span');
+          const orig = span.innerText;
+          span.innerText = 'Copied! ✓';
+          btn.style.color = 'var(--success)';
+          setTimeout(() => {
+            span.innerText = orig;
+            btn.style.color = '';
+          }, 1500);
         });
       },
 
       zoomDiagram(cardId, delta) {
-        const card = document.getElementById(cardId);
-        if (!card) return;
-        const wrapper = card.querySelector('.diagram-zoom-wrapper');
-        const valLabel = card.querySelector('.diagram-zoom-val');
-        if (!wrapper) return;
-
-        let currentScale = parseFloat(wrapper.getAttribute('data-scale') || '1.0');
-        currentScale = Math.max(0.4, Math.min(3.5, currentScale + delta));
-        wrapper.setAttribute('data-scale', currentScale);
-        wrapper.style.transform = `scale(${currentScale})`;
-        if (valLabel) valLabel.innerText = Math.round(currentScale * 100) + '%';
+        DiagramPanZoom.zoom(cardId, delta);
       },
 
       resetZoomDiagram(cardId) {
-        const card = document.getElementById(cardId);
-        if (!card) return;
-        const wrapper = card.querySelector('.diagram-zoom-wrapper');
-        const valLabel = card.querySelector('.diagram-zoom-val');
-        if (!wrapper) return;
-
-        wrapper.setAttribute('data-scale', '1.0');
-        wrapper.style.transform = 'scale(1.0)';
-        if (valLabel) valLabel.innerText = '100%';
+        DiagramPanZoom.reset(cardId);
       },
 
       fullscreenDiagram(cardId) {
-        const card = document.getElementById(cardId);
+        DiagramPanZoom.openModal(cardId);
+      },
+
+      toggleDiagramMode(blockId, mode) {
+        const card = document.getElementById(blockId);
         if (!card) return;
-        const headerTitle = card.querySelector('.diagram-header span').innerText;
-        const content = card.querySelector('.diagram-body').innerHTML;
+        const dynViewport = document.getElementById('viewport-' + blockId);
+        const classicCanvas = document.getElementById('canvas-' + blockId);
+        const btnDyn = card.querySelector('.btn-toggle-dyn');
+        const btnClassic = card.querySelector('.btn-toggle-classic');
 
-        this.modalTitleEl.innerText = headerTitle;
-        this.modalBodyEl.innerHTML = content;
-        this.modalScale = 1.3;
-        this.updateModalZoom();
-        this.modalEl.classList.add('show');
-      },
+        if (mode === 'dyn') {
+          if (dynViewport) dynViewport.style.display = 'block';
+          if (classicCanvas) classicCanvas.style.display = 'none';
+          if (btnDyn) btnDyn.classList.add('active');
+          if (btnClassic) btnClassic.classList.remove('active');
+          const state = DynamicGraphRenderer.instances.get(blockId);
+          if (state) {
+            DynamicGraphRenderer.measureBoxes(state);
+            DynamicGraphRenderer.updateConnections(state);
+          }
+        } else {
+          if (dynViewport) dynViewport.style.display = 'none';
+          if (classicCanvas) classicCanvas.style.display = 'block';
+          if (btnDyn) btnDyn.classList.remove('active');
+          if (btnClassic) btnClassic.classList.add('active');
 
-      updateModalZoom() {
-        const wrapper = this.modalBodyEl.querySelector('.diagram-zoom-wrapper') || this.modalBodyEl.firstElementChild;
-        if (wrapper) {
-          wrapper.style.transform = `scale(${this.modalScale})`;
-          wrapper.style.transformOrigin = 'center top';
+          const svgContainer = document.getElementById('classic-svg-' + blockId);
+          if (svgContainer && !svgContainer.getAttribute('data-rendered')) {
+            const rawEl = classicCanvas.querySelector('.mermaid-raw-code');
+            const rawCode = rawEl ? rawEl.textContent : '';
+            if (window.mermaid && rawCode) {
+              const renderId = 'classic-svg-render-' + Math.random().toString(36).substr(2, 9);
+              window.mermaid.render(renderId, rawCode).then(res => {
+                svgContainer.innerHTML = res.svg;
+                svgContainer.setAttribute('data-rendered', 'true');
+                setTimeout(() => {
+                  DiagramPanZoom.init(blockId);
+                }, 30);
+              }).catch(err => {
+                console.error('Mermaid classic render error:', err);
+                svgContainer.innerHTML = `<div style="color:var(--danger); padding:16px; font-size:12px;">Failed to render classic SVG: ${escapeHtml(err.message || String(err))}</div>`;
+              });
+            }
+          } else {
+            setTimeout(() => {
+              DiagramPanZoom.init(blockId);
+            }, 30);
+          }
         }
-        this.modalZoomValEl.innerText = Math.round(this.modalScale * 100) + '%';
       },
 
-      setupModalEvents() {
+      setupModals() {
+        // Diagram Fullscreen Modal
         document.getElementById('modal-close').addEventListener('click', () => {
-          this.modalEl.classList.remove('show');
-          this.modalBodyEl.innerHTML = '';
+          this.diagramModalEl.classList.remove('show');
+          if (DiagramPanZoom.modalInstance && DiagramPanZoom.modalInstance.cleanup) {
+            DiagramPanZoom.modalInstance.cleanup();
+            DiagramPanZoom.modalInstance = null;
+          }
+          const canvas = document.getElementById('modal-canvas');
+          if (canvas) canvas.innerHTML = '';
         });
-
         document.getElementById('modal-zoom-in').addEventListener('click', () => {
-          this.modalScale = Math.min(4.0, this.modalScale + 0.25);
-          this.updateModalZoom();
+          DiagramPanZoom.zoomModal(0.18);
+        });
+        document.getElementById('modal-zoom-out').addEventListener('click', () => {
+          DiagramPanZoom.zoomModal(-0.18);
+        });
+        document.getElementById('modal-fit').addEventListener('click', () => {
+          DiagramPanZoom.fitModal();
+        });
+        document.getElementById('modal-reset').addEventListener('click', () => {
+          DiagramPanZoom.resetModal();
+        });
+        document.getElementById('modal-zoom-val').addEventListener('click', () => {
+          DiagramPanZoom.resetModal();
         });
 
-        document.getElementById('modal-zoom-out').addEventListener('click', () => {
-          this.modalScale = Math.max(0.4, this.modalScale - 0.25);
-          this.updateModalZoom();
+        // Keybindings Modal
+        document.getElementById('btn-keybindings').addEventListener('click', () => {
+          this.kbTextareaEl.value = JSON.stringify(this.keybindings, null, 2);
+          this.kbModalEl.classList.add('show');
+        });
+        document.getElementById('kb-modal-close').addEventListener('click', () => {
+          this.kbModalEl.classList.remove('show');
+        });
+        document.getElementById('kb-save-btn').addEventListener('click', () => {
+          try {
+            const parsed = JSON.parse(this.kbTextareaEl.value);
+            this.keybindings = parsed;
+            this.sendIpc('save_keybindings', { json: JSON.stringify(parsed, null, 2) });
+            this.kbModalEl.classList.remove('show');
+            alert('Keybindings saved successfully!');
+          } catch (e) {
+            alert('Invalid JSON: ' + e.message);
+          }
+        });
+        document.getElementById('kb-reset-btn').addEventListener('click', () => {
+          this.keybindings = {
+            preview: {
+              scroll_down: "j",
+              scroll_up: "k",
+              scroll_right: "l",
+              scroll_left: "h",
+              prev_file: "Alt+Shift+H",
+              next_file: "Alt+Shift+L",
+              close_app: "Ctrl+q",
+              save_file: "w"
+            },
+            settings: {
+              scroll_step_y: 60,
+              scroll_step_x: 60
+            }
+          };
+          this.kbTextareaEl.value = JSON.stringify(this.keybindings, null, 2);
         });
 
         window.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && this.modalEl.classList.contains('show')) {
-            this.modalEl.classList.remove('show');
+          if (e.key === 'Escape') {
+            this.diagramModalEl.classList.remove('show');
+            this.kbModalEl.classList.remove('show');
           }
         });
-      },
-
-      updateEditor() {
-        const lines = this.editorEl.value.split('\n');
-        const count = lines.length;
-        this.lineNumbersEl.innerHTML = Array.from({ length: count }, (_, i) => i + 1).join('<br>');
-
-        const words = (this.editorEl.value.match(/\b\S+\b/g) || []).length;
-        this.statusWordsEl.innerText = `${words} words`;
-        this.statusLinesEl.innerText = `${count} lines`;
-      },
-
-      updateCursor() {
-        const text = this.editorEl.value;
-        const pos = this.editorEl.selectionStart;
-        const lines = text.substring(0, pos).split('\n');
-        const line = lines.length;
-        const col = lines[lines.length - 1].length + 1;
-        this.statusCursorEl.innerText = `Ln ${line}, Col ${col}`;
       },
 
       setupEditorEvents() {
@@ -1764,16 +3827,14 @@
           clearTimeout(timer);
           timer = setTimeout(() => this.renderMarkdown(), 150);
         });
-
         this.editorEl.addEventListener('click', () => this.updateCursor());
         this.editorEl.addEventListener('keyup', () => this.updateCursor());
 
         this.editorEl.addEventListener('scroll', () => {
           this.lineNumbersEl.scrollTop = this.editorEl.scrollTop;
-          
-          if (document.body.classList.contains('mode-split')) {
+          if (this.mode === 'split') {
             const ratio = this.editorEl.scrollTop / (this.editorEl.scrollHeight - this.editorEl.clientHeight);
-            this.previewEl.scrollTop = ratio * (this.previewEl.scrollHeight - this.previewEl.clientHeight);
+            this.previewPaneEl.scrollTop = ratio * (this.previewPaneEl.scrollHeight - this.previewPaneEl.clientHeight);
           }
         });
 
@@ -1792,26 +3853,21 @@
 
       setupToolbarEvents() {
         document.getElementById('btn-new').addEventListener('click', () => {
-          if (this.isDirty && !confirm('Discard unsaved changes?')) return;
-          this.loadFile(null, 'Untitled.md', '# New Document\n\nWrite your markdown here.\n');
-          this.setMode('split');
+          this.openNewFile(null, 'Untitled.md', '# New Document\n\n');
         });
-
+        document.getElementById('btn-add-tab').addEventListener('click', () => {
+          this.openNewFile(null, 'Untitled.md', '# New Document\n\n');
+        });
         document.getElementById('btn-open').addEventListener('click', () => {
           this.sendIpc('open_file', {});
         });
-
         document.getElementById('btn-save').addEventListener('click', () => {
           this.save();
         });
 
-        document.getElementById('btn-save-as').addEventListener('click', () => {
-          this.saveAs();
-        });
-
-        document.getElementById('mode-edit').addEventListener('click', () => this.setMode('edit'));
-        document.getElementById('mode-split').addEventListener('click', () => this.setMode('split'));
         document.getElementById('mode-preview').addEventListener('click', () => this.setMode('preview'));
+        document.getElementById('mode-split').addEventListener('click', () => this.setMode('split'));
+        document.getElementById('mode-edit').addEventListener('click', () => this.setMode('edit'));
 
         document.getElementById('btn-theme').addEventListener('click', () => {
           const current = document.body.getAttribute('data-theme');
@@ -1824,21 +3880,15 @@
           }
         });
 
-        document.getElementById('btn-print').addEventListener('click', () => {
-          window.print();
-        });
+        document.getElementById('btn-print').addEventListener('click', () => window.print());
 
         const dropdownBtn = document.getElementById('btn-insert');
         const dropdownContent = document.getElementById('dropdown-diagrams');
-
         dropdownBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           dropdownContent.classList.toggle('show');
         });
-
-        window.addEventListener('click', () => {
-          dropdownContent.classList.remove('show');
-        });
+        window.addEventListener('click', () => dropdownContent.classList.remove('show'));
 
         document.querySelectorAll('.dropdown-item').forEach(item => {
           item.addEventListener('click', () => {
@@ -1848,21 +3898,10 @@
         });
       },
 
-      setMode(mode) {
-        document.body.className = `mode-${mode}`;
-        document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
-        const btn = document.getElementById(`mode-${mode}`);
-        if (btn) btn.classList.add('active');
-        if (mode !== 'edit') {
-          this.renderMarkdown();
-        }
-      },
-
       setupSplitter() {
         const splitter = document.getElementById('splitter');
         const editorPane = document.getElementById('editor-pane');
         const container = document.getElementById('main-container');
-
         let isDragging = false;
 
         splitter.addEventListener('mousedown', () => {
@@ -1891,42 +3930,22 @@
         });
       },
 
-      setupKeyboardShortcuts() {
-        window.addEventListener('keydown', (e) => {
-          if (e.ctrlKey || e.metaKey) {
-            if (e.key === 's') {
-              e.preventDefault();
-              if (e.shiftKey) this.saveAs();
-              else this.save();
-            } else if (e.key === 'o') {
-              e.preventDefault();
-              this.sendIpc('open_file', {});
-            } else if (e.key === 'n') {
-              e.preventDefault();
-              document.getElementById('btn-new').click();
-            } else if (e.key === 'p') {
-              e.preventDefault();
-              const curMode = document.body.className;
-              this.setMode(curMode === 'mode-preview' ? 'mode-split' : 'mode-preview');
-            } else if (e.key === 'e') {
-              e.preventDefault();
-              const curMode = document.body.className;
-              this.setMode(curMode === 'mode-edit' ? 'mode-split' : 'mode-edit');
-            }
-          }
-        });
+      updateEditor() {
+        const lines = this.editorEl.value.split('\n');
+        const count = lines.length;
+        this.lineNumbersEl.innerHTML = Array.from({ length: count }, (_, i) => i + 1).join('<br>');
+        const words = (this.editorEl.value.match(/\b\S+\b/g) || []).length;
+        this.statusWordsEl.innerText = `${words} words`;
+        this.statusLinesEl.innerText = `${count} lines`;
       },
 
-      save() {
-        if (this.filePath) {
-          this.sendIpc('save_file', { path: this.filePath, content: this.editorEl.value });
-        } else {
-          this.saveAs();
-        }
-      },
-
-      saveAs() {
-        this.sendIpc('save_file_as', { content: this.editorEl.value, defaultName: this.fileName });
+      updateCursor() {
+        const text = this.editorEl.value;
+        const pos = this.editorEl.selectionStart;
+        const lines = text.substring(0, pos).split('\n');
+        const line = lines.length;
+        const col = lines[lines.length - 1].length + 1;
+        this.statusCursorEl.innerText = `Ln ${line}, Col ${col}`;
       },
 
       insertTemplate(type) {
@@ -1945,7 +3964,6 @@
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 \`\`\`\n`;
             break;
-
           case 'udp-dsl':
             snippet = `\n\`\`\`packet
 title: User Datagram Protocol Header (RFC 768)
@@ -1957,7 +3975,6 @@ width: 32
 64-95: Application Payload Data
 \`\`\`\n`;
             break;
-
           case 'tcp-rfc':
             snippet = `\n\`\`\`packet
 title: Transmission Control Protocol Header (RFC 793)
@@ -1978,26 +3995,6 @@ title: Transmission Control Protocol Header (RFC 793)
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 \`\`\`\n`;
             break;
-
-          case 'ip-rfc':
-            snippet = `\n\`\`\`packet
-title: Internet Protocol v4 Header (RFC 791)
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|Version|  IHL  |Type of Service|          Total Length         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|         Identification        |Flags|      Fragment Offset    |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Time to Live |    Protocol   |        Header Checksum        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Source Address                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Destination Address                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-\`\`\`\n`;
-            break;
-
           case 'mermaid-sequence':
             snippet = `\n\`\`\`mermaid
 sequenceDiagram
@@ -2005,29 +4002,21 @@ sequenceDiagram
     actor Client
     participant DNS as DNS Server (UDP:53)
     participant Web as Web Server (TCP:443)
-
-    Note over Client,DNS: UDP Query - Fast, Connectionless
-    Client->>DNS: UDP Datagram: Query "example.com"
-    DNS-->>Client: UDP Datagram: Response "93.184.216.34"
-
-    Note over Client,Web: TCP Handshake & TLS
+    Client->>DNS: UDP: Query example.com
+    DNS-->>Client: UDP: 93.184.216.34
     Client->>Web: TCP SYN
     Web-->>Client: TCP SYN-ACK
-    Client->>Web: TCP ACK (Established)
+    Client->>Web: TCP ACK
 \`\`\`\n`;
             break;
-
           case 'mermaid-flowchart':
             snippet = `\n\`\`\`mermaid
 flowchart TD
-    A[Incoming UDP Packet] --> B{Valid Checksum?}
-    B -- Yes --> C{Port 53?}
-    B -- No --> D[Drop Packet silently]
-    C -- Yes --> E[Dispatch to DNS Handler]
-    C -- No --> F[Dispatch to General UDP Handler]
+    A[Incoming Packet] --> B{Valid?}
+    B -- Yes --> C[Process Request]
+    B -- No --> D[Drop Packet]
 \`\`\`\n`;
             break;
-
           case 'mermaid-class':
             snippet = `\n\`\`\`mermaid
 classDiagram
@@ -2036,14 +4025,7 @@ classDiagram
         +uint16 dest_port
         +uint16 length
         +uint16 checksum
-        +validate() bool
     }
-    class UdpPacket {
-        +UdpHeader header
-        +bytes payload
-        +serialize() bytes
-    }
-    UdpPacket *-- UdpHeader
 \`\`\`\n`;
             break;
         }

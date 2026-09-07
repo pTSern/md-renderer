@@ -14,6 +14,7 @@ use wry::{WebView, WebViewBuilder};
 
 const APP_HTML: &str = include_str!("../assets/app.html");
 const SAMPLE_MD: &str = include_str!("../assets/sample.md");
+const DEFAULT_KEYBINDINGS: &str = include_str!("../keybindings.json");
 
 #[derive(Debug, Deserialize)]
 struct IpcRequest {
@@ -23,6 +24,7 @@ struct IpcRequest {
     #[serde(rename = "defaultName")]
     default_name: Option<String>,
     title: Option<String>,
+    json: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,24 +35,36 @@ struct IpcResponse<'a> {
     name: Option<String>,
     content: Option<String>,
     message: Option<String>,
+    json: Option<String>,
 }
 
 fn send_to_webview(webview: &WebView, response: &IpcResponse) {
-    if let Ok(json) = serde_json::to_string(response) {
-        let script = format!("window.receiveFromRust({});", json);
+    if let Ok(json_str) = serde_json::to_string(response) {
+        let script = format!("window.receiveFromRust({});", json_str);
         let _ = webview.evaluate_script(&script);
     }
 }
 
+fn get_keybindings_content() -> String {
+    let keybindings_path = Path::new("keybindings.json");
+    if keybindings_path.exists() {
+        if let Ok(content) = fs::read_to_string(keybindings_path) {
+            return content;
+        }
+    }
+    DEFAULT_KEYBINDINGS.to_string()
+}
+
 fn main() {
-    // Get command line argument (e.g. mdviewer.exe "path\to\file.md")
     let initial_path_arg = std::env::args().nth(1).map(PathBuf::from);
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_title("MDViewer - Markdown & UDP Diagram Editor")
-        .with_inner_size(LogicalSize::new(1280.0, 820.0))
-        .with_min_inner_size(LogicalSize::new(600.0, 400.0))
+        .with_title("MDViewer")
+        .with_decorations(false) // Borderless window (custom title bar controls)
+        .with_resizable(true)
+        .with_inner_size(LogicalSize::new(960.0, 840.0)) // Half-screen target size
+        .with_min_inner_size(LogicalSize::new(460.0, 360.0))
         .build(&event_loop)
         .expect("Failed to create application window");
 
@@ -60,7 +74,6 @@ fn main() {
     let webview_holder: Arc<Mutex<Option<WebView>>> = Arc::new(Mutex::new(None));
     let webview_for_ipc = webview_holder.clone();
 
-    // Initial file state
     let initial_path_for_ipc = initial_path_arg.clone();
 
     let webview = WebViewBuilder::new()
@@ -71,31 +84,44 @@ fn main() {
                 let holder = webview_for_ipc.lock().unwrap();
                 if let Some(wv) = holder.as_ref() {
                     match request.cmd.as_str() {
+                        "drag_window" => {
+                            let _ = window_clone_ipc.drag_window();
+                        }
+
+                        "minimize_window" => {
+                            window_clone_ipc.set_minimized(true);
+                        }
+
+                        "maximize_window" => {
+                            window_clone_ipc.set_maximized(!window_clone_ipc.is_maximized());
+                        }
+
+                        "close_window" => {
+                            std::process::exit(0);
+                        }
+
                         "get_init_data" => {
+                            let kb_json = get_keybindings_content();
                             if let Some(ref path_buf) = initial_path_for_ipc {
                                 if path_buf.exists() {
-                                    match fs::read_to_string(path_buf) {
-                                        Ok(content) => {
-                                            let name = path_buf
-                                                .file_name()
-                                                .and_then(|n| n.to_str())
-                                                .unwrap_or("Untitled.md")
-                                                .to_string();
-                                            send_to_webview(
-                                                wv,
-                                                &IpcResponse {
-                                                    response_type: "init",
-                                                    path: Some(path_buf.to_string_lossy().to_string()),
-                                                    name: Some(name),
-                                                    content: Some(content),
-                                                    message: None,
-                                                },
-                                            );
-                                            return;
-                                        }
-                                        Err(e) => {
-                                            eprintln!("Failed to read file: {:?}", e);
-                                        }
+                                    if let Ok(content) = fs::read_to_string(path_buf) {
+                                        let name = path_buf
+                                            .file_name()
+                                            .and_then(|n| n.to_str())
+                                            .unwrap_or("Untitled.md")
+                                            .to_string();
+                                        send_to_webview(
+                                            wv,
+                                            &IpcResponse {
+                                                response_type: "init",
+                                                path: Some(path_buf.to_string_lossy().to_string()),
+                                                name: Some(name),
+                                                content: Some(content),
+                                                message: None,
+                                                json: Some(kb_json),
+                                            },
+                                        );
+                                        return;
                                     }
                                 }
                             }
@@ -109,8 +135,36 @@ fn main() {
                                     name: Some("Welcome.md".to_string()),
                                     content: Some(SAMPLE_MD.to_string()),
                                     message: None,
+                                    json: Some(kb_json),
                                 },
                             );
+                        }
+
+                        "read_file" => {
+                            if let Some(path_str) = request.path {
+                                let path = PathBuf::from(&path_str);
+                                if path.exists() {
+                                    if let Ok(content) = fs::read_to_string(&path) {
+                                        let name = path
+                                            .file_name()
+                                            .and_then(|n| n.to_str())
+                                            .unwrap_or("Untitled.md")
+                                            .to_string();
+                                        send_to_webview(
+                                            wv,
+                                            &IpcResponse {
+                                                response_type: "file_opened",
+                                                path: Some(path.to_string_lossy().to_string()),
+                                                name: Some(name),
+                                                content: Some(content),
+                                                message: None,
+                                                json: None,
+                                            },
+                                        );
+                                        return;
+                                    }
+                                }
+                            }
                         }
 
                         "open_file" => {
@@ -135,6 +189,7 @@ fn main() {
                                                 name: Some(name),
                                                 content: Some(content),
                                                 message: None,
+                                                json: None,
                                             },
                                         );
                                     }
@@ -147,6 +202,7 @@ fn main() {
                                                 name: None,
                                                 content: None,
                                                 message: Some(format!("Failed to open file: {}", e)),
+                                                json: None,
                                             },
                                         );
                                     }
@@ -172,6 +228,7 @@ fn main() {
                                                 name: Some(name),
                                                 content: None,
                                                 message: None,
+                                                json: None,
                                             },
                                         );
                                     }
@@ -184,6 +241,7 @@ fn main() {
                                                 name: None,
                                                 content: None,
                                                 message: Some(format!("Failed to save file: {}", e)),
+                                                json: None,
                                             },
                                         );
                                     }
@@ -215,6 +273,7 @@ fn main() {
                                                     name: Some(name),
                                                     content: None,
                                                     message: None,
+                                                    json: None,
                                                 },
                                             );
                                         }
@@ -227,11 +286,18 @@ fn main() {
                                                     name: None,
                                                     content: None,
                                                     message: Some(format!("Failed to save file: {}", e)),
+                                                    json: None,
                                                 },
                                             );
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        "save_keybindings" => {
+                            if let Some(json_content) = request.json {
+                                let _ = fs::write("keybindings.json", json_content);
                             }
                         }
 
@@ -285,6 +351,7 @@ fn main() {
                                     name: Some(name),
                                     content: Some(content),
                                     message: None,
+                                    json: None,
                                 },
                             );
                         }

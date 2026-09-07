@@ -40,6 +40,46 @@ sequenceDiagram
 
 ---
 
+## 2.1. System Architecture (Cocos Creator Extension Flowchart)
+
+```mermaid
+flowchart TD
+    subgraph Host_Project["Host Project (Any Cocos Creator Project)"]
+        H1["assets/ (Arbitrary user bundles: B1, B2, ...)"]
+        H2[".pts Assets, Scenes, Prefabs across project"]
+    end
+
+    subgraph Scanner["lazy-registry.ts (Build-Time / Editor-Time Introspection)"]
+        S1["Dynamic Bundle Discovery\nScan all folder .meta with isBundle: true"]
+        S2["Dynamic Priority Engine\nsecretPriority = max(projectPriorities) + 5"]
+        S3["Dynamic Dependency Crawler\nTrace live roots -> needed assets"]
+        S4["Dynamic Bundle Mapper\nMap candidate UUID -> owning bundle"]
+    end
+
+    subgraph Artifacts["Generated Extension Artifacts (extensions/pts-asset/assets/_$secret/)"]
+        A1["_$secret.meta (Dynamic priority)"]
+        A2["_lazy.prefab (Contains only unreferenced assets)"]
+        A3["pts-bundle-map.json (uuid -> bundleName)"]
+    end
+
+    subgraph Runtime["Json.Register.ts (Generic Runtime Engine)"]
+        R1["Resolve UUID on hydration"]
+        R2{"Is Asset Loaded in Memory?"}
+        R3{"Is Asset in a Loaded Bundle?"}
+        R4{"Is Asset in an Unloaded Bundle?"}
+        R5["Reactive Deferral + Dynamic Getter\nResolve when bundle loads via pipeline hook"]
+    end
+
+    Host_Project --> Scanner
+    Scanner --> Artifacts
+    Artifacts --> Runtime
+    R2 -->|"Yes"| ReturnAsset["Return from assetManager.assets / cache"]
+    R3 -->|"Yes"| LoadAny["assetManager.loadAny({ uuid, bundle })"]
+    R4 -->|"Yes"| R5
+```
+
+---
+
 ## 3. High-Performance UDP Socket in Rust
 
 Here is a non-blocking asynchronous UDP server implementation in Rust:
