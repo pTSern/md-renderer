@@ -387,6 +387,118 @@
       white-space: pre;
       tab-size: 2;
       user-select: text;
+      scroll-behavior: auto;
+    }
+    body.vim-mode-normal .editor-textarea,
+    body.vim-mode-visual .editor-textarea {
+      caret-color: transparent !important;
+    }
+    body.vim-mode-insert .editor-textarea {
+      caret-color: var(--accent) !important;
+    }
+
+    /* Neovide Smooth Animated Floating Cursor */
+    .vim-cursor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10;
+      box-sizing: border-box;
+      display: none;
+      transition: transform 0.06s cubic-bezier(0.18, 0.89, 0.32, 1.15), width 0.06s ease, height 0.06s ease;
+    }
+    .vim-cursor.normal {
+      display: block !important;
+      background: rgba(88, 166, 255, 0.48);
+      border: 1.5px solid var(--accent);
+      box-shadow: 0 0 8px rgba(88, 166, 255, 0.55);
+      border-radius: 2px;
+    }
+    .vim-cursor.insert {
+      display: block !important;
+      width: 2.5px !important;
+      background: var(--accent);
+      box-shadow: 0 0 6px rgba(88, 166, 255, 0.85);
+      animation: vim-cursor-blink 1s infinite;
+    }
+    .vim-cursor.visual {
+      display: block !important;
+      background: rgba(210, 153, 34, 0.48);
+      border: 1.5px solid var(--warning);
+      box-shadow: 0 0 8px rgba(210, 153, 34, 0.55);
+      border-radius: 2px;
+    }
+    @keyframes vim-cursor-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    /* Vim Command Bar (Floating at bottom of editor) */
+    .vim-command-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      z-index: 20;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+    .vim-cmd-prompt {
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 6px;
+      user-select: none;
+    }
+    .vim-cmd-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    /* Vim Mode Badge in Statusbar */
+    .vim-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      margin-right: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .vim-badge.normal {
+      background: rgba(88, 166, 255, 0.18);
+      color: var(--accent);
+      border: 1px solid rgba(88, 166, 255, 0.4);
+    }
+    .vim-badge.insert {
+      background: rgba(63, 185, 80, 0.18);
+      color: var(--success);
+      border: 1px solid rgba(63, 185, 80, 0.4);
+    }
+    .vim-badge.visual {
+      background: rgba(210, 153, 34, 0.18);
+      color: var(--warning);
+      border: 1px solid rgba(210, 153, 34, 0.4);
+    }
+    .vim-badge.command {
+      background: rgba(188, 140, 255, 0.18);
+      color: #bc8cff;
+      border: 1px solid rgba(188, 140, 255, 0.4);
     }
 
     /* Splitter */
@@ -411,7 +523,7 @@
       padding: 24px 32px;
       background-color: var(--bg-primary);
       user-select: text;
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
     }
 
     /* Layout Modes */
@@ -1482,6 +1594,11 @@
         <button class="btn" id="mode-edit" title="Editor Only">Edit</button>
       </div>
 
+      <!-- Vim Mode Toggle -->
+      <button class="btn active" id="btn-vim-toggle" title="Toggle Vim Mode for Editor (Ctrl+Alt+V)" style="font-weight:700; color:var(--accent); font-size:11.5px; padding:4px 9px;">
+        VIM
+      </button>
+
       <!-- Theme Switcher -->
       <button class="btn" id="btn-theme" title="Toggle Theme">
         <span id="theme-icon">🌙</span>
@@ -1504,9 +1621,16 @@
        ========================================================================= -->
   <main class="main-container" id="main-container">
     <section class="editor-pane" id="editor-pane">
-      <div class="editor-container">
+      <div class="editor-container" id="editor-container">
         <div class="line-numbers" id="line-numbers">1</div>
         <textarea class="editor-textarea" id="editor" spellcheck="false" placeholder="Type markdown here..."></textarea>
+        <!-- Neovide Floating Animated Cursor -->
+        <div class="vim-cursor" id="vim-cursor"></div>
+        <!-- Vim Command Bar -->
+        <div class="vim-command-bar" id="vim-command-bar" style="display:none;">
+          <span class="vim-cmd-prompt">:</span>
+          <input type="text" class="vim-cmd-input" id="vim-cmd-input" spellcheck="false" autocomplete="off">
+        </div>
       </div>
     </section>
 
@@ -1520,6 +1644,7 @@
   <!-- Status Bar -->
   <footer class="statusbar">
     <div class="statusbar-left">
+      <span id="status-vim-badge" class="vim-badge normal" style="display:none;">-- NORMAL --</span>
       <span id="status-mode">MODE: PREVIEW (NVIM: j/k/h/l)</span>
       <span id="status-cursor">Ln 1, Col 1</span>
     </div>
@@ -1662,6 +1787,13 @@
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
+                <span class="kb-row-label">Cycle View Mode</span>
+                <span class="kb-row-desc">Switch between Preview, Split, and Edit modes</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="cycle_mode" spellcheck="false" placeholder="Shift+Tab">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
                 <span class="kb-row-label">Close App</span>
                 <span class="kb-row-desc">Exit application</span>
               </div>
@@ -1687,6 +1819,20 @@
                 <span class="kb-row-desc">Pixels per keypress for left/right navigation</span>
               </div>
               <input type="number" min="10" max="500" step="10" class="kb-input-box" data-cat="settings" data-key="scroll_step_x">
+            </div>
+          </div>
+
+          <!-- Performance & Display Settings -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>🖥️ Performance &amp; Display</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Max FPS Limit</span>
+                <span class="kb-row-desc">Cap animation frame rate (e.g. 60, 120, 144, 240, or 0 for unlimited)</span>
+              </div>
+              <input type="number" min="0" max="360" step="15" class="kb-input-box" data-cat="settings" data-key="max_fps" placeholder="60">
             </div>
           </div>
         </div>
@@ -3495,6 +3641,1232 @@
     };
 
     /* =========================================================================
+       3.5. NEOVIDE SMOOTH SCROLLER & VIM EDITOR ENGINE
+       ========================================================================= */
+    const SmoothScroller = {
+      instances: new Map(),
+
+      attach(element, options = {}) {
+        if (!element) return null;
+        if (this.instances.has(element)) return this.instances.get(element);
+
+        const state = {
+          el: element,
+          friction: options.friction || 0.16, // Neovide spring lerp factor
+          targetY: element.scrollTop,
+          targetX: element.scrollLeft,
+          currentY: element.scrollTop,
+          currentX: element.scrollLeft,
+          animating: false,
+          rafId: null,
+          lastFrameTime: 0,
+          onStep: options.onStep || null
+        };
+
+        const clamp = () => {
+          const maxY = Math.max(0, element.scrollHeight - element.clientHeight);
+          const maxX = Math.max(0, element.scrollWidth - element.clientWidth);
+          state.targetY = Math.max(0, Math.min(state.targetY, maxY));
+          state.targetX = Math.max(0, Math.min(state.targetX, maxX));
+        };
+
+        const step = (timestamp) => {
+          const maxFps = (window.App && typeof App.getMaxFps === 'function') ? App.getMaxFps() : 60;
+          if (maxFps > 0 && state.lastFrameTime && timestamp) {
+            const minInterval = 1000 / maxFps;
+            const elapsed = timestamp - state.lastFrameTime;
+            if (elapsed < minInterval - 1) {
+              state.rafId = requestAnimationFrame(step);
+              return;
+            }
+          }
+          state.lastFrameTime = timestamp || performance.now();
+
+          const dy = state.targetY - state.currentY;
+          const dx = state.targetX - state.currentX;
+
+          if (Math.abs(dy) < 0.4 && Math.abs(dx) < 0.4) {
+            state.currentY = state.targetY;
+            state.currentX = state.targetX;
+            state.el.scrollTop = Math.round(state.currentY);
+            state.el.scrollLeft = Math.round(state.currentX);
+            state.animating = false;
+            state.lastFrameTime = 0;
+            if (state.onStep) state.onStep(state);
+            return;
+          }
+
+          state.currentY += dy * state.friction;
+          state.currentX += dx * state.friction;
+          state.el.scrollTop = Math.round(state.currentY);
+          state.el.scrollLeft = Math.round(state.currentX);
+          if (state.onStep) state.onStep(state);
+
+          state.rafId = requestAnimationFrame(step);
+        };
+
+        const onWheel = (e) => {
+          if (e.ctrlKey || e.metaKey) return;
+          if (e.target.closest('.diagram-card') || e.target.closest('.modal-overlay')) return;
+
+          e.preventDefault();
+          clamp();
+
+          const mult = e.deltaMode === 1 ? 24 : (e.deltaMode === 2 ? 400 : 1.15);
+          state.targetY += e.deltaY * mult;
+          state.targetX += e.deltaX * mult;
+          clamp();
+
+          if (!state.animating) {
+            state.animating = true;
+            state.currentY = state.el.scrollTop;
+            state.currentX = state.el.scrollLeft;
+            state.rafId = requestAnimationFrame(step);
+          }
+        };
+
+        element.addEventListener('scroll', () => {
+          if (!state.animating) {
+            state.currentY = state.targetY = element.scrollTop;
+            state.currentX = state.targetX = element.scrollLeft;
+            if (state.onStep) state.onStep(state);
+          }
+        }, { passive: true });
+
+        element.addEventListener('wheel', onWheel, { passive: false });
+
+        const controller = {
+          state,
+          scrollBy(deltaY, deltaX = 0) {
+            clamp();
+            state.targetY += deltaY;
+            state.targetX += deltaX;
+            clamp();
+            if (!state.animating) {
+              state.animating = true;
+              state.currentY = state.el.scrollTop;
+              state.currentX = state.el.scrollLeft;
+              state.rafId = requestAnimationFrame(step);
+            }
+          },
+          scrollTo(targetY, targetX = null) {
+            state.targetY = targetY;
+            if (targetX !== null) state.targetX = targetX;
+            clamp();
+            if (!state.animating) {
+              state.animating = true;
+              state.currentY = state.el.scrollTop;
+              state.currentX = state.el.scrollLeft;
+              state.rafId = requestAnimationFrame(step);
+            }
+          },
+          sync() {
+            state.currentY = state.targetY = element.scrollTop;
+            state.currentX = state.targetX = element.scrollLeft;
+          }
+        };
+
+        this.instances.set(element, controller);
+        return controller;
+      },
+
+      get(element) {
+        return this.instances.get(element);
+      }
+    };
+
+    /* Vim Modal Editing Engine for Edit / Split Mode */
+    const VimMode = {
+      enabled: true,
+      mode: 'NORMAL', // 'NORMAL', 'INSERT', 'VISUAL', 'VISUAL_LINE', 'COMMAND'
+      pendingCount: '',
+      pendingOperator: '',
+      pendingKey: '',
+      visualAnchor: 0,
+      register: { text: '', isLine: false },
+      lastAction: null,
+      lastFind: { char: '', isForward: true },
+      undoStack: [],
+      redoStack: [],
+      maxUndo: 60,
+      preferredCol: null,
+      _charMetrics: null,
+
+      app: null,
+      editorEl: null,
+      cursorEl: null,
+      badgeEl: null,
+      cmdBarEl: null,
+      cmdInputEl: null,
+      editorScroller: null,
+
+      init(app) {
+        this.app = app;
+        this.editorEl = app.editorEl;
+        this.cursorEl = document.getElementById('vim-cursor');
+        this.badgeEl = document.getElementById('status-vim-badge');
+        this.cmdBarEl = document.getElementById('vim-command-bar');
+        this.cmdInputEl = document.getElementById('vim-cmd-input');
+
+        this.editorScroller = SmoothScroller.attach(this.editorEl, {
+          onStep: () => {
+            this.app.lineNumbersEl.scrollTop = this.editorEl.scrollTop;
+            if (this.app.mode === 'split') {
+              const maxEditor = Math.max(1, this.editorEl.scrollHeight - this.editorEl.clientHeight);
+              const ratio = this.editorEl.scrollTop / maxEditor;
+              const previewScroller = SmoothScroller.get(this.app.previewPaneEl);
+              if (previewScroller) {
+                previewScroller.scrollTo(ratio * (this.app.previewPaneEl.scrollHeight - this.app.previewPaneEl.clientHeight));
+              } else {
+                this.app.previewPaneEl.scrollTop = ratio * (this.app.previewPaneEl.scrollHeight - this.app.previewPaneEl.clientHeight);
+              }
+            }
+            this.updateCursorPosition();
+          }
+        });
+
+        this.setupEvents();
+      },
+
+      setupEvents() {
+        this.editorEl.addEventListener('keydown', (e) => this.onKeyDown(e));
+        this.editorEl.addEventListener('click', () => {
+          setTimeout(() => this.updateCursorFromEditor(), 10);
+        });
+        this.editorEl.addEventListener('input', () => {
+          this.updateCursorPosition();
+        });
+
+        window.addEventListener('resize', () => {
+          this._charMetrics = null;
+          this.updateCursorPosition();
+        });
+
+        if (this.cmdInputEl) {
+          this.cmdInputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.stopPropagation();
+              const val = this.cmdInputEl.value;
+              this.setMode('NORMAL');
+              this.executeCommand(val);
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              e.stopPropagation();
+              this.setMode('NORMAL');
+            }
+          });
+        }
+      },
+
+      getCharMetrics() {
+        if (this._charMetrics) return this._charMetrics;
+        const span = document.createElement('span');
+        const style = getComputedStyle(this.editorEl);
+        span.style.fontFamily = style.fontFamily || 'Consolas, monospace';
+        span.style.fontSize = style.fontSize || '13px';
+        span.style.lineHeight = style.lineHeight || '1.6';
+        span.style.position = 'absolute';
+        span.style.visibility = 'hidden';
+        span.style.whiteSpace = 'pre';
+        span.textContent = 'M'.repeat(50);
+        document.body.appendChild(span);
+        const rect = span.getBoundingClientRect();
+        const w = rect.width / 50;
+        const h = rect.height || 20.8;
+        document.body.removeChild(span);
+        this._charMetrics = { width: w > 0 ? w : 7.8, height: h > 0 ? h : 20.8 };
+        return this._charMetrics;
+      },
+
+      getLineInfo(pos = this.editorEl.selectionStart) {
+        const text = this.editorEl.value;
+        const lineStart = text.lastIndexOf('\n', pos - 1) + 1;
+        let lineEnd = text.indexOf('\n', pos);
+        if (lineEnd === -1) lineEnd = text.length;
+        const lineIndex = text.substring(0, lineStart).split('\n').length - 1;
+        const lineText = text.substring(lineStart, lineEnd);
+        const col = pos - lineStart;
+
+        // First non-blank position
+        let firstNonBlank = lineStart;
+        for (let i = lineStart; i < lineEnd; i++) {
+          if (text[i] !== ' ' && text[i] !== '\t') {
+            firstNonBlank = i;
+            break;
+          }
+        }
+
+        return { text, pos, lineStart, lineEnd, lineIndex, lineText, col, firstNonBlank };
+      },
+
+      setCursor(pos, keepCol = false) {
+        const total = this.editorEl.value.length;
+        pos = Math.max(0, Math.min(total, pos));
+
+        if (this.mode === 'NORMAL' && total > 0) {
+          const info = this.getLineInfo(pos);
+          if (info.lineText.length > 0 && pos === info.lineEnd) {
+            pos = Math.max(info.lineStart, info.lineEnd - 1);
+          }
+        }
+
+        if (!keepCol) {
+          const info = this.getLineInfo(pos);
+          this.preferredCol = info.col;
+        }
+
+        if (this.mode === 'VISUAL' || this.mode === 'VISUAL_LINE') {
+          const start = Math.min(this.visualAnchor, pos);
+          const end = Math.max(this.visualAnchor, pos);
+          if (this.mode === 'VISUAL_LINE') {
+            const startInfo = this.getLineInfo(start);
+            const endInfo = this.getLineInfo(end);
+            this.editorEl.selectionStart = startInfo.lineStart;
+            this.editorEl.selectionEnd = Math.min(this.editorEl.value.length, endInfo.lineEnd + 1);
+          } else {
+            this.editorEl.selectionStart = start;
+            this.editorEl.selectionEnd = Math.min(this.editorEl.value.length, end + 1);
+          }
+        } else {
+          this.editorEl.selectionStart = pos;
+          this.editorEl.selectionEnd = pos;
+        }
+
+        this.scrollCursorIntoView();
+        this.updateCursorPosition();
+        this.app.updateCursor();
+      },
+
+      updateCursorFromEditor() {
+        if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split')) return;
+        const pos = this.editorEl.selectionStart;
+        if (this.mode === 'NORMAL') {
+          const info = this.getLineInfo(pos);
+          if (info.lineText.length > 0 && pos >= info.lineEnd) {
+            this.setCursor(Math.max(info.lineStart, info.lineEnd - 1));
+          } else {
+            this.preferredCol = info.col;
+            this.updateCursorPosition();
+          }
+        } else {
+          this.updateCursorPosition();
+        }
+      },
+
+      scrollCursorIntoView() {
+        const info = this.getLineInfo();
+        const metrics = this.getCharMetrics();
+        const lineY = info.lineIndex * metrics.height;
+        const viewHeight = this.editorEl.clientHeight;
+        const padding = metrics.height * 2.5;
+
+        const curScroll = this.editorScroller ? this.editorScroller.state.targetY : this.editorEl.scrollTop;
+        if (lineY < curScroll + padding) {
+          const newY = Math.max(0, lineY - padding);
+          if (this.editorScroller) this.editorScroller.scrollTo(newY);
+          else this.editorEl.scrollTop = newY;
+        } else if (lineY > curScroll + viewHeight - padding - metrics.height) {
+          const newY = lineY - viewHeight + padding + metrics.height;
+          if (this.editorScroller) this.editorScroller.scrollTo(newY);
+          else this.editorEl.scrollTop = newY;
+        }
+      },
+
+      updateCursorPosition() {
+        if (!this.cursorEl) return;
+        if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split')) {
+          this.cursorEl.style.display = 'none';
+          return;
+        }
+
+        this.cursorEl.style.display = 'block';
+
+        const pos = this.editorEl.selectionStart;
+        const info = this.getLineInfo(pos);
+        const metrics = this.getCharMetrics();
+
+        let colWidth = 0;
+        for (let i = 0; i < info.col; i++) {
+          if (info.lineText[i] === '\t') colWidth += (2 - (colWidth % 2));
+          else colWidth += 1;
+        }
+
+        const editorStyle = getComputedStyle(this.editorEl);
+        const paddingLeft = parseFloat(editorStyle.paddingLeft) || 16;
+        const paddingTop = parseFloat(editorStyle.paddingTop) || 16;
+        const offsetLeft = this.editorEl.offsetLeft || 0;
+        const offsetTop = this.editorEl.offsetTop || 0;
+
+        const x = offsetLeft + paddingLeft + (colWidth * metrics.width) - this.editorEl.scrollLeft;
+        const y = offsetTop + paddingTop + (info.lineIndex * metrics.height) - this.editorEl.scrollTop;
+
+        this.cursorEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+        this.cursorEl.style.width = Math.max(8, Math.round(metrics.width)) + 'px';
+        this.cursorEl.style.height = Math.round(metrics.height) + 'px';
+
+        if (this.mode === 'INSERT') {
+          this.cursorEl.className = 'vim-cursor insert';
+        } else if (this.mode === 'VISUAL' || this.mode === 'VISUAL_LINE') {
+          this.cursorEl.className = 'vim-cursor visual';
+        } else {
+          this.cursorEl.className = 'vim-cursor normal';
+        }
+      },
+
+      setMode(newMode) {
+        const prevMode = this.mode;
+        this.mode = newMode;
+        this.pendingCount = '';
+        this.pendingOperator = '';
+        this.pendingKey = '';
+
+        document.body.classList.remove('vim-mode-normal', 'vim-mode-insert', 'vim-mode-visual');
+
+        if (newMode === 'NORMAL') {
+          document.body.classList.add('vim-mode-normal');
+          if (this.badgeEl) {
+            this.badgeEl.className = 'vim-badge normal';
+            this.badgeEl.innerText = '-- NORMAL --';
+            this.badgeEl.style.display = 'inline-flex';
+          }
+          if (this.cmdBarEl) this.cmdBarEl.style.display = 'none';
+          if (prevMode === 'INSERT') {
+            const info = this.getLineInfo();
+            if (info.col > 0) {
+              this.setCursor(this.editorEl.selectionStart - 1);
+            }
+          } else {
+            this.setCursor(this.editorEl.selectionStart);
+          }
+          this.editorEl.focus();
+        } else if (newMode === 'INSERT') {
+          this.saveSnapshot();
+          document.body.classList.add('vim-mode-insert');
+          if (this.badgeEl) {
+            this.badgeEl.className = 'vim-badge insert';
+            this.badgeEl.innerText = '-- INSERT --';
+            this.badgeEl.style.display = 'inline-flex';
+          }
+          if (this.cmdBarEl) this.cmdBarEl.style.display = 'none';
+          this.editorEl.focus();
+        } else if (newMode === 'VISUAL' || newMode === 'VISUAL_LINE') {
+          document.body.classList.add('vim-mode-visual');
+          this.visualAnchor = this.editorEl.selectionStart;
+          if (this.badgeEl) {
+            this.badgeEl.className = 'vim-badge visual';
+            this.badgeEl.innerText = newMode === 'VISUAL_LINE' ? '-- VISUAL LINE --' : '-- VISUAL --';
+            this.badgeEl.style.display = 'inline-flex';
+          }
+          if (this.cmdBarEl) this.cmdBarEl.style.display = 'none';
+          this.setCursor(this.editorEl.selectionStart);
+          this.editorEl.focus();
+        } else if (newMode === 'COMMAND') {
+          if (this.badgeEl) {
+            this.badgeEl.className = 'vim-badge command';
+            this.badgeEl.innerText = '-- COMMAND --';
+            this.badgeEl.style.display = 'inline-flex';
+          }
+          if (this.cmdBarEl) {
+            this.cmdBarEl.style.display = 'flex';
+            this.cmdInputEl.value = '';
+            this.cmdInputEl.focus();
+          }
+        }
+
+        this.updateCursorPosition();
+      },
+
+      toggle() {
+        this.enabled = !this.enabled;
+        const btn = document.getElementById('btn-vim-toggle');
+        if (btn) {
+          if (this.enabled) {
+            btn.classList.add('active');
+            btn.style.color = 'var(--accent)';
+          } else {
+            btn.classList.remove('active');
+            btn.style.color = 'var(--text-muted)';
+          }
+        }
+
+        if (this.enabled) {
+          this.setMode('NORMAL');
+          if (this.app) {
+            this.app.statusModeEl.innerText = this.app.mode === 'split' ? 'MODE: SPLIT (VIM MODE)' : 'MODE: EDIT (VIM MODE)';
+          }
+        } else {
+          document.body.classList.remove('vim-mode-normal', 'vim-mode-insert', 'vim-mode-visual');
+          if (this.cursorEl) this.cursorEl.style.display = 'none';
+          if (this.badgeEl) this.badgeEl.style.display = 'none';
+          if (this.app) this.app.statusModeEl.innerText = `MODE: ${this.app.mode.toUpperCase()} (VIM OFF)`;
+        }
+      },
+
+      activate() {
+        if (this.enabled) {
+          if (this.cursorEl) this.cursorEl.style.display = 'block';
+          this.setMode('NORMAL');
+        } else {
+          if (this.badgeEl) this.badgeEl.style.display = 'none';
+          if (this.cursorEl) this.cursorEl.style.display = 'none';
+        }
+      },
+
+      deactivate() {
+        if (this.cursorEl) this.cursorEl.style.display = 'none';
+        if (this.badgeEl) this.badgeEl.style.display = 'none';
+        if (this.cmdBarEl) this.cmdBarEl.style.display = 'none';
+        document.body.classList.remove('vim-mode-normal', 'vim-mode-insert', 'vim-mode-visual');
+      },
+
+      saveSnapshot() {
+        this.undoStack.push({
+          value: this.editorEl.value,
+          start: this.editorEl.selectionStart,
+          end: this.editorEl.selectionEnd
+        });
+        if (this.undoStack.length > this.maxUndo) this.undoStack.shift();
+        this.redoStack = [];
+      },
+
+      undo() {
+        if (this.undoStack.length === 0) return;
+        this.redoStack.push({
+          value: this.editorEl.value,
+          start: this.editorEl.selectionStart,
+          end: this.editorEl.selectionEnd
+        });
+        const snap = this.undoStack.pop();
+        this.editorEl.value = snap.value;
+        this.editorEl.selectionStart = snap.start;
+        this.editorEl.selectionEnd = snap.end;
+        this.app.markDirty();
+        this.app.updateEditor();
+        this.app.renderMarkdown();
+        this.setCursor(snap.start);
+      },
+
+      redo() {
+        if (this.redoStack.length === 0) return;
+        this.undoStack.push({
+          value: this.editorEl.value,
+          start: this.editorEl.selectionStart,
+          end: this.editorEl.selectionEnd
+        });
+        const snap = this.redoStack.pop();
+        this.editorEl.value = snap.value;
+        this.editorEl.selectionStart = snap.start;
+        this.editorEl.selectionEnd = snap.end;
+        this.app.markDirty();
+        this.app.updateEditor();
+        this.app.renderMarkdown();
+        this.setCursor(snap.start);
+      },
+
+      spliceText(start, deleteCount, insertText) {
+        const val = this.editorEl.value;
+        this.editorEl.value = val.substring(0, start) + insertText + val.substring(start + deleteCount);
+        this.app.markDirty();
+        this.app.updateEditor();
+        this.app.renderMarkdown();
+      },
+
+      moveVertical(lines) {
+        const info = this.getLineInfo();
+        const textLines = info.text.split('\n');
+        const targetLineIdx = Math.max(0, Math.min(textLines.length - 1, info.lineIndex + lines));
+        if (targetLineIdx === info.lineIndex) return;
+
+        let targetStart = 0;
+        for (let i = 0; i < targetLineIdx; i++) {
+          targetStart += textLines[i].length + 1;
+        }
+        const targetLineText = textLines[targetLineIdx];
+        const col = Math.max(0, Math.min(Math.max(0, targetLineText.length - 1), this.preferredCol !== null ? this.preferredCol : info.col));
+        this.setCursor(targetStart + col, true);
+      },
+
+      moveHorizontal(chars) {
+        const info = this.getLineInfo();
+        const maxCol = Math.max(0, info.lineText.length - 1);
+        const newCol = Math.max(0, Math.min(maxCol, info.col + chars));
+        this.setCursor(info.lineStart + newCol);
+      },
+
+      moveWordForward(isEnd = false) {
+        const text = this.editorEl.value;
+        let pos = this.editorEl.selectionStart;
+        if (pos >= text.length - 1) return;
+
+        if (isEnd) {
+          pos++;
+          while (pos < text.length && /\s/.test(text[pos])) pos++;
+          const isWord = /\w/.test(text[pos]);
+          while (pos < text.length - 1 && (isWord ? /\w/ : /[^\w\s]/).test(text[pos + 1])) pos++;
+        } else {
+          const isWord = /\w/.test(text[pos]);
+          while (pos < text.length && (isWord ? /\w/ : /[^\w\s]/).test(text[pos])) pos++;
+          while (pos < text.length && /\s/.test(text[pos])) pos++;
+        }
+
+        this.setCursor(Math.min(text.length - 1, pos));
+      },
+
+      moveWordBackward() {
+        const text = this.editorEl.value;
+        let pos = this.editorEl.selectionStart;
+        if (pos <= 0) return;
+
+        pos--;
+        while (pos > 0 && /\s/.test(text[pos])) pos--;
+        const isWord = /\w/.test(text[pos]);
+        while (pos > 0 && (isWord ? /\w/ : /[^\w\s]/).test(text[pos - 1])) pos--;
+
+        this.setCursor(Math.max(0, pos));
+      },
+
+      findMatchingBracket(pos) {
+        const text = this.editorEl.value;
+        const char = text[pos];
+        const pairs = { '(': ')', '[': ']', '{': '}', ')': '(', ']': '[', '}': '{' };
+        const match = pairs[char];
+        if (!match) return pos;
+
+        const forward = ['(', '[', '{'].includes(char);
+        let depth = 1;
+        let idx = pos;
+
+        while (forward ? idx < text.length - 1 : idx > 0) {
+          idx += forward ? 1 : -1;
+          if (text[idx] === char) depth++;
+          else if (text[idx] === match) {
+            depth--;
+            if (depth === 0) return idx;
+          }
+        }
+        return pos;
+      },
+
+      deleteRange(start, end) {
+        this.saveSnapshot();
+        const minPos = Math.min(start, end);
+        const maxPos = Math.max(start, end);
+        this.register = {
+          text: this.editorEl.value.substring(minPos, maxPos),
+          isLine: false
+        };
+        this.spliceText(minPos, maxPos - minPos, '');
+        this.setCursor(minPos);
+      },
+
+      deleteLines(count = 1) {
+        this.saveSnapshot();
+        const info = this.getLineInfo();
+        const text = this.editorEl.value;
+        let endPos = info.lineEnd;
+        let linesCounted = 1;
+
+        while (linesCounted < count && endPos < text.length) {
+          const nextEnd = text.indexOf('\n', endPos + 1);
+          endPos = nextEnd === -1 ? text.length : nextEnd;
+          linesCounted++;
+        }
+
+        const deleteEnd = endPos < text.length ? endPos + 1 : endPos;
+        const deleteStart = (deleteEnd === text.length && info.lineStart > 0) ? info.lineStart - 1 : info.lineStart;
+
+        this.register = {
+          text: text.substring(info.lineStart, deleteEnd),
+          isLine: true
+        };
+
+        this.spliceText(deleteStart, deleteEnd - deleteStart, '');
+        this.setCursor(deleteStart);
+      },
+
+      changeLines(count = 1) {
+        this.saveSnapshot();
+        const info = this.getLineInfo();
+        const indent = (info.lineText.match(/^\s*/) || [''])[0];
+        this.deleteLines(count);
+        this.spliceText(info.lineStart, 0, indent);
+        this.setCursor(info.lineStart + indent.length);
+        this.setMode('INSERT');
+      },
+
+      yankLines(count = 1) {
+        const info = this.getLineInfo();
+        const text = this.editorEl.value;
+        let endPos = info.lineEnd;
+        let linesCounted = 1;
+
+        while (linesCounted < count && endPos < text.length) {
+          const nextEnd = text.indexOf('\n', endPos + 1);
+          endPos = nextEnd === -1 ? text.length : nextEnd;
+          linesCounted++;
+        }
+
+        const yankText = text.substring(info.lineStart, Math.min(text.length, endPos + 1));
+        this.register = { text: yankText, isLine: true };
+        navigator.clipboard.writeText(yankText).catch(() => {});
+      },
+
+      paste(before = false) {
+        if (!this.register.text) {
+          navigator.clipboard.readText().then(text => {
+            if (text) {
+              this.saveSnapshot();
+              const pos = this.editorEl.selectionStart;
+              this.spliceText(pos, 0, text);
+              this.setCursor(pos + text.length);
+            }
+          }).catch(() => {});
+          return;
+        }
+
+        this.saveSnapshot();
+        const info = this.getLineInfo();
+        if (this.register.isLine) {
+          if (before) {
+            this.spliceText(info.lineStart, 0, this.register.text);
+            this.setCursor(info.lineStart);
+          } else {
+            const insertPos = info.lineEnd + (info.text.length > info.lineEnd ? 1 : 0);
+            const textToInsert = (info.lineEnd === info.text.length ? '\n' : '') + this.register.text;
+            this.spliceText(insertPos, 0, textToInsert);
+            this.setCursor(insertPos);
+          }
+        } else {
+          const pos = before ? this.editorEl.selectionStart : Math.min(this.editorEl.value.length, this.editorEl.selectionStart + 1);
+          this.spliceText(pos, 0, this.register.text);
+          this.setCursor(pos + this.register.text.length - 1);
+        }
+      },
+
+      toggleCase() {
+        const pos = this.editorEl.selectionStart;
+        const text = this.editorEl.value;
+        if (pos >= text.length) return;
+        const ch = text[pos];
+        const toggled = ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase();
+        this.saveSnapshot();
+        this.spliceText(pos, 1, toggled);
+        this.moveHorizontal(1);
+      },
+
+      joinLine() {
+        const info = this.getLineInfo();
+        if (info.lineEnd >= info.text.length) return;
+        const nextStart = info.lineEnd + 1;
+        const nextInfo = this.getLineInfo(nextStart);
+        const nextTrimmed = nextInfo.lineText.trim();
+        this.saveSnapshot();
+        const replaceLength = nextInfo.lineEnd - info.lineEnd;
+        const insertText = ' ' + nextTrimmed;
+        this.spliceText(info.lineEnd, replaceLength, insertText);
+        this.setCursor(info.lineEnd);
+      },
+
+      onKeyDown(e) {
+        if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split')) return;
+
+        // Shift+Tab cycles mode between Preview -> Split -> Edit
+        if (e.key === 'Tab' && e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.app.cycleMode();
+          return;
+        }
+
+        // Toggle Vim Mode shortcut: Ctrl+Alt+V
+        if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'v') {
+          e.preventDefault();
+          this.toggle();
+          return;
+        }
+
+        if (this.mode === 'INSERT') {
+          if (e.key === 'Escape' || (e.ctrlKey && e.key === '[')) {
+            e.preventDefault();
+            this.setMode('NORMAL');
+            return;
+          }
+          return;
+        }
+
+        if (this.mode === 'COMMAND') return;
+
+        // In NORMAL or VISUAL mode, intercept keys
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (this.mode === 'VISUAL' || this.mode === 'VISUAL_LINE') {
+          this.handleVisualKey(e);
+        } else {
+          this.handleNormalKey(e);
+        }
+      },
+
+      handleNormalKey(e) {
+        const key = e.key;
+
+        // Digits for count (1-9, or 0 if count already started)
+        if (/^[0-9]$/.test(key) && (this.pendingCount.length > 0 || key !== '0')) {
+          this.pendingCount += key;
+          return;
+        }
+
+        const count = parseInt(this.pendingCount, 10) || 1;
+
+        // Pending operator handling (e.g. dd, dw, cw, yy, r, f, etc.)
+        if (this.pendingOperator) {
+          const op = this.pendingOperator;
+
+          if (op === 'r') {
+            if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+              this.saveSnapshot();
+              const pos = this.editorEl.selectionStart;
+              this.spliceText(pos, 1, key);
+              this.setCursor(pos);
+            }
+            this.pendingOperator = '';
+            this.pendingCount = '';
+            return;
+          }
+
+          if (op === 'f' || op === 'F') {
+            if (key.length === 1) {
+              this.lastFind = { char: key, isForward: op === 'f' };
+              const info = this.getLineInfo();
+              const text = info.text;
+              if (op === 'f') {
+                const target = text.indexOf(key, info.pos + 1);
+                if (target !== -1 && target <= info.lineEnd) this.setCursor(target);
+              } else {
+                const target = text.lastIndexOf(key, info.pos - 1);
+                if (target !== -1 && target >= info.lineStart) this.setCursor(target);
+              }
+            }
+            this.pendingOperator = '';
+            this.pendingCount = '';
+            return;
+          }
+
+          if (op === 'g') {
+            if (key === 'g') {
+              // gg motion
+              let targetPos = 0;
+              if (this.pendingCount) {
+                const targetLine = count - 1;
+                const lines = this.editorEl.value.split('\n');
+                let cur = 0;
+                for (let i = 0; i < Math.min(targetLine, lines.length - 1); i++) {
+                  cur += lines[i].length + 1;
+                }
+                targetPos = cur;
+              }
+              this.setCursor(targetPos);
+            }
+            this.pendingOperator = '';
+            this.pendingCount = '';
+            return;
+          }
+
+          // Same key repeats line operator: dd, cc, yy, >>, <<
+          if (key === op) {
+            if (op === 'd') this.deleteLines(count);
+            else if (op === 'c') this.changeLines(count);
+            else if (op === 'y') this.yankLines(count);
+            else if (op === '>') {
+              const info = this.getLineInfo();
+              this.saveSnapshot();
+              this.spliceText(info.lineStart, 0, '  ');
+              this.setCursor(info.pos + 2);
+            } else if (op === '<') {
+              const info = this.getLineInfo();
+              if (info.lineText.startsWith('  ')) {
+                this.saveSnapshot();
+                this.spliceText(info.lineStart, 2, '');
+                this.setCursor(Math.max(info.lineStart, info.pos - 2));
+              }
+            }
+            this.pendingOperator = '';
+            this.pendingCount = '';
+            return;
+          }
+
+          // Inner / Around text object handling: diw, ciw, yiw, etc.
+          if (key === 'i' || key === 'a') {
+            this.pendingKey = key;
+            return;
+          }
+
+          if (this.pendingKey === 'i' || this.pendingKey === 'a') {
+            const isInner = this.pendingKey === 'i';
+            const text = this.editorEl.value;
+            const pos = this.editorEl.selectionStart;
+
+            if (key === 'w') {
+              let start = pos;
+              while (start > 0 && /\w/.test(text[start - 1])) start--;
+              let end = pos;
+              while (end < text.length && /\w/.test(text[end])) end++;
+              if (!isInner) {
+                while (end < text.length && /\s/.test(text[end])) end++;
+              }
+              if (op === 'd') this.deleteRange(start, end);
+              else if (op === 'c') { this.deleteRange(start, end); this.setMode('INSERT'); }
+              else if (op === 'y') {
+                this.register = { text: text.substring(start, end), isLine: false };
+                navigator.clipboard.writeText(this.register.text).catch(() => {});
+              }
+            }
+
+            this.pendingOperator = '';
+            this.pendingKey = '';
+            this.pendingCount = '';
+            return;
+          }
+
+          // Operator with motion (e.g. dw, de, d$, d0, cw, etc.)
+          const startPos = this.editorEl.selectionStart;
+          let targetPos = startPos;
+
+          if (key === 'w') {
+            this.moveWordForward(false);
+            targetPos = this.editorEl.selectionStart;
+          } else if (key === 'e') {
+            this.moveWordForward(true);
+            targetPos = this.editorEl.selectionStart + 1;
+          } else if (key === 'b') {
+            this.moveWordBackward();
+            targetPos = this.editorEl.selectionStart;
+          } else if (key === '$') {
+            targetPos = this.getLineInfo().lineEnd;
+          } else if (key === '0') {
+            targetPos = this.getLineInfo().lineStart;
+          } else if (key === 'G') {
+            targetPos = this.editorEl.value.length;
+          }
+
+          if (op === 'd') this.deleteRange(startPos, targetPos);
+          else if (op === 'c') { this.deleteRange(startPos, targetPos); this.setMode('INSERT'); }
+          else if (op === 'y') {
+            const min = Math.min(startPos, targetPos);
+            const max = Math.max(startPos, targetPos);
+            this.register = { text: this.editorEl.value.substring(min, max), isLine: false };
+            navigator.clipboard.writeText(this.register.text).catch(() => {});
+            this.setCursor(min);
+          }
+
+          this.pendingOperator = '';
+          this.pendingCount = '';
+          return;
+        }
+
+        // Direct motions
+        if (key === 'h' || key === 'ArrowLeft') this.moveHorizontal(-count);
+        else if (key === 'l' || key === 'ArrowRight') this.moveHorizontal(count);
+        else if (key === 'j' || key === 'ArrowDown') this.moveVertical(count);
+        else if (key === 'k' || key === 'ArrowUp') this.moveVertical(-count);
+        else if (key === 'w') { for (let i = 0; i < count; i++) this.moveWordForward(false); }
+        else if (key === 'b') { for (let i = 0; i < count; i++) this.moveWordBackward(); }
+        else if (key === 'e') { for (let i = 0; i < count; i++) this.moveWordForward(true); }
+        else if (key === '0' || key === 'Home') this.setCursor(this.getLineInfo().lineStart);
+        else if (key === '^') this.setCursor(this.getLineInfo().firstNonBlank);
+        else if (key === '$' || key === 'End') {
+          const info = this.getLineInfo();
+          this.preferredCol = Infinity;
+          this.setCursor(Math.max(info.lineStart, info.lineEnd - 1), true);
+        }
+        else if (key === 'G') {
+          const lines = this.editorEl.value.split('\n');
+          const targetLine = this.pendingCount ? Math.max(0, Math.min(lines.length - 1, count - 1)) : lines.length - 1;
+          let cur = 0;
+          for (let i = 0; i < targetLine; i++) cur += lines[i].length + 1;
+          this.setCursor(cur);
+        }
+        else if (e.ctrlKey && key === 'd') {
+          this.moveVertical(15);
+          if (this.editorScroller) this.editorScroller.scrollBy(15 * 20);
+        }
+        else if (e.ctrlKey && key === 'u') {
+          this.moveVertical(-15);
+          if (this.editorScroller) this.editorScroller.scrollBy(-15 * 20);
+        }
+        else if (e.ctrlKey && key === 'f') {
+          this.moveVertical(30);
+          if (this.editorScroller) this.editorScroller.scrollBy(30 * 20);
+        }
+        else if (e.ctrlKey && key === 'b') {
+          this.moveVertical(-30);
+          if (this.editorScroller) this.editorScroller.scrollBy(-30 * 20);
+        }
+        else if (key === '%') {
+          const matchPos = this.findMatchingBracket(this.editorEl.selectionStart);
+          this.setCursor(matchPos);
+        }
+        else if (key === ';') {
+          if (this.lastFind.char) {
+            const info = this.getLineInfo();
+            const text = info.text;
+            if (this.lastFind.isForward) {
+              const target = text.indexOf(this.lastFind.char, info.pos + 1);
+              if (target !== -1 && target <= info.lineEnd) this.setCursor(target);
+            } else {
+              const target = text.lastIndexOf(this.lastFind.char, info.pos - 1);
+              if (target !== -1 && target >= info.lineStart) this.setCursor(target);
+            }
+          }
+        }
+
+        // Entering Insert mode
+        else if (key === 'i') this.setMode('INSERT');
+        else if (key === 'I') { this.setCursor(this.getLineInfo().firstNonBlank); this.setMode('INSERT'); }
+        else if (key === 'a') {
+          const info = this.getLineInfo();
+          const target = info.lineText.length > 0 ? Math.min(info.lineEnd, info.pos + 1) : info.pos;
+          this.setCursor(target);
+          this.setMode('INSERT');
+        }
+        else if (key === 'A') { this.setCursor(this.getLineInfo().lineEnd); this.setMode('INSERT'); }
+        else if (key === 'o') {
+          const info = this.getLineInfo();
+          const indent = (info.lineText.match(/^\s*/) || [''])[0];
+          this.saveSnapshot();
+          const insertText = '\n' + indent;
+          this.spliceText(info.lineEnd, 0, insertText);
+          this.setCursor(info.lineEnd + insertText.length);
+          this.setMode('INSERT');
+        }
+        else if (key === 'O') {
+          const info = this.getLineInfo();
+          const indent = (info.lineText.match(/^\s*/) || [''])[0];
+          this.saveSnapshot();
+          const insertText = indent + '\n';
+          this.spliceText(info.lineStart, 0, insertText);
+          this.setCursor(info.lineStart + indent.length);
+          this.setMode('INSERT');
+        }
+
+        // Editing commands
+        else if (key === 'x') {
+          const info = this.getLineInfo();
+          if (info.lineText.length > 0) {
+            this.saveSnapshot();
+            this.register = { text: info.text.substring(info.pos, info.pos + 1), isLine: false };
+            this.spliceText(info.pos, 1, '');
+            this.setCursor(info.pos);
+          }
+        }
+        else if (key === 'X') {
+          const info = this.getLineInfo();
+          if (info.col > 0) {
+            this.saveSnapshot();
+            this.spliceText(info.pos - 1, 1, '');
+            this.setCursor(info.pos - 1);
+          }
+        }
+        else if (key === 's') {
+          this.saveSnapshot();
+          this.spliceText(this.editorEl.selectionStart, 1, '');
+          this.setMode('INSERT');
+        }
+        else if (key === 'C') {
+          const info = this.getLineInfo();
+          this.deleteRange(info.pos, info.lineEnd);
+          this.setMode('INSERT');
+        }
+        else if (key === 'D') {
+          const info = this.getLineInfo();
+          this.deleteRange(info.pos, info.lineEnd);
+        }
+        else if (key === 'p') this.paste(false);
+        else if (key === 'P') this.paste(true);
+        else if (key === 'u') this.undo();
+        else if (e.ctrlKey && key === 'r') this.redo();
+        else if (key === '~') this.toggleCase();
+        else if (key === 'J') this.joinLine();
+
+        // Mode switches
+        else if (key === 'v') this.setMode('VISUAL');
+        else if (key === 'V') this.setMode('VISUAL_LINE');
+        else if (key === ':') this.setMode('COMMAND');
+
+        // Operators
+        else if (['d', 'c', 'y', 'r', 'f', 'F', 'g', '>', '<'].includes(key)) {
+          this.pendingOperator = key;
+        }
+
+        this.pendingCount = '';
+      },
+
+      handleVisualKey(e) {
+        const key = e.key;
+
+        if (key === 'Escape' || (e.ctrlKey && key === '[')) {
+          this.setMode('NORMAL');
+          return;
+        }
+
+        // Visual motions
+        if (key === 'h' || key === 'ArrowLeft') this.moveHorizontal(-1);
+        else if (key === 'l' || key === 'ArrowRight') this.moveHorizontal(1);
+        else if (key === 'j' || key === 'ArrowDown') this.moveVertical(1);
+        else if (key === 'k' || key === 'ArrowUp') this.moveVertical(-1);
+        else if (key === 'w') this.moveWordForward(false);
+        else if (key === 'b') this.moveWordBackward();
+        else if (key === 'e') this.moveWordForward(true);
+        else if (key === '0') this.setCursor(this.getLineInfo().lineStart);
+        else if (key === '$') this.setCursor(this.getLineInfo().lineEnd);
+        else if (key === 'G') this.setCursor(this.editorEl.value.length);
+        else if (key === 'g' && this.pendingKey === 'g') { this.setCursor(0); this.pendingKey = ''; }
+        else if (key === 'g') { this.pendingKey = 'g'; return; }
+
+        // Visual operators
+        else if (key === 'y') {
+          const sel = this.editorEl.value.substring(this.editorEl.selectionStart, this.editorEl.selectionEnd);
+          this.register = { text: sel, isLine: this.mode === 'VISUAL_LINE' };
+          navigator.clipboard.writeText(sel).catch(() => {});
+          this.setMode('NORMAL');
+        }
+        else if (key === 'd' || key === 'x') {
+          this.saveSnapshot();
+          const start = this.editorEl.selectionStart;
+          const end = this.editorEl.selectionEnd;
+          this.register = { text: this.editorEl.value.substring(start, end), isLine: this.mode === 'VISUAL_LINE' };
+          this.spliceText(start, end - start, '');
+          this.setMode('NORMAL');
+          this.setCursor(start);
+        }
+        else if (key === 'c') {
+          this.saveSnapshot();
+          const start = this.editorEl.selectionStart;
+          const end = this.editorEl.selectionEnd;
+          this.spliceText(start, end - start, '');
+          this.setMode('INSERT');
+          this.setCursor(start);
+        }
+        else if (key === '~') {
+          const start = this.editorEl.selectionStart;
+          const end = this.editorEl.selectionEnd;
+          const sel = this.editorEl.value.substring(start, end);
+          let toggled = '';
+          for (let i = 0; i < sel.length; i++) {
+            toggled += sel[i] === sel[i].toUpperCase() ? sel[i].toLowerCase() : sel[i].toUpperCase();
+          }
+          this.saveSnapshot();
+          this.spliceText(start, end - start, toggled);
+          this.setMode('NORMAL');
+          this.setCursor(start);
+        }
+        else if (key === 'u' || key === 'U') {
+          const start = this.editorEl.selectionStart;
+          const end = this.editorEl.selectionEnd;
+          const sel = this.editorEl.value.substring(start, end);
+          const replaced = key === 'u' ? sel.toLowerCase() : sel.toUpperCase();
+          this.saveSnapshot();
+          this.spliceText(start, end - start, replaced);
+          this.setMode('NORMAL');
+          this.setCursor(start);
+        }
+      },
+
+      executeCommand(rawCmd) {
+        const cmd = rawCmd.trim();
+        if (!cmd) return;
+
+        // :w (Save)
+        if (cmd === 'w') {
+          this.app.save();
+          this.flashStatus('[File written]');
+          return;
+        }
+
+        // :w <path> (Save As)
+        if (cmd.startsWith('w ')) {
+          const path = cmd.substring(2).trim();
+          this.app.sendIpc('save_file', { path, content: this.editorEl.value });
+          this.flashStatus(`[Written: ${path}]`);
+          return;
+        }
+
+        // :q (Close)
+        if (cmd === 'q') {
+          this.app.closeFile(this.app.activeFileIndex);
+          return;
+        }
+
+        // :wq or :x (Save and Close)
+        if (cmd === 'wq' || cmd === 'x') {
+          this.app.save();
+          setTimeout(() => this.app.closeFile(this.app.activeFileIndex), 100);
+          return;
+        }
+
+        // :<number> (Jump to line)
+        if (/^[0-9]+$/.test(cmd)) {
+          const lineNum = parseInt(cmd, 10);
+          const lines = this.editorEl.value.split('\n');
+          const target = Math.max(0, Math.min(lines.length - 1, lineNum - 1));
+          let pos = 0;
+          for (let i = 0; i < target; i++) pos += lines[i].length + 1;
+          this.setCursor(pos);
+          this.flashStatus(`Line ${lineNum}`);
+          return;
+        }
+
+        // Search and replace: :%s/find/replace/g or :s/find/replace/g
+        const sMatch = cmd.match(/^%?s\/(.*?)\/(.*?)\/([gi]*)$/);
+        if (sMatch) {
+          const [, findStr, replaceStr, flags] = sMatch;
+          try {
+            this.saveSnapshot();
+            const regex = new RegExp(findStr, flags || 'g');
+            this.editorEl.value = this.editorEl.value.replace(regex, replaceStr);
+            this.app.markDirty();
+            this.app.updateEditor();
+            this.app.renderMarkdown();
+            this.flashStatus(`Replaced occurrences of "${findStr}"`);
+          } catch (e) {
+            this.flashStatus(`Regex error: ${e.message}`);
+          }
+          return;
+        }
+
+        // :set nu / :set nonu
+        if (cmd === 'set nu') {
+          this.app.lineNumbersEl.style.display = 'block';
+          return;
+        }
+        if (cmd === 'set nonu') {
+          this.app.lineNumbersEl.style.display = 'none';
+          return;
+        }
+
+        // :help
+        if (cmd === 'help') {
+          this.app.openKeybindingsModal();
+          return;
+        }
+
+        this.flashStatus(`Unknown command: :${cmd}`);
+      },
+
+      flashStatus(msg) {
+        if (!this.app.statusSaveEl) return;
+        const orig = this.app.statusSaveEl.innerText;
+        this.app.statusSaveEl.innerText = msg;
+        this.app.statusSaveEl.style.color = 'var(--accent)';
+        setTimeout(() => {
+          this.app.statusSaveEl.innerText = orig;
+          this.app.statusSaveEl.style.color = '';
+        }, 2200);
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -3513,11 +4885,13 @@
           prev_file: "Alt+Shift+H",
           next_file: "Alt+Shift+L",
           close_app: "Ctrl+q",
-          save_file: "w"
+          save_file: "w",
+          cycle_mode: "Shift+Tab"
         },
         settings: {
           scroll_step_y: 60,
-          scroll_step_x: 60
+          scroll_step_x: 60,
+          max_fps: 60
         }
       },
       keybindings: {
@@ -3529,11 +4903,35 @@
           prev_file: "Alt+Shift+H",
           next_file: "Alt+Shift+L",
           close_app: "Ctrl+q",
-          save_file: "w"
+          save_file: "w",
+          cycle_mode: "Shift+Tab"
         },
         settings: {
           scroll_step_y: 60,
-          scroll_step_x: 60
+          scroll_step_x: 60,
+          max_fps: 60
+        }
+      },
+
+      getMaxFps() {
+        const fps = (this.keybindings && this.keybindings.settings && this.keybindings.settings.max_fps !== undefined)
+          ? parseInt(this.keybindings.settings.max_fps, 10)
+          : 60;
+        return isNaN(fps) ? 60 : fps;
+      },
+
+      cycleMode() {
+        const modes = ['preview', 'split', 'edit'];
+        const curIdx = modes.indexOf(this.mode);
+        const nextMode = modes[(curIdx + 1) % modes.length];
+        this.setMode(nextMode);
+        if (nextMode === 'edit' || nextMode === 'split') {
+          setTimeout(() => {
+            this.editorEl.focus();
+            if (VimMode.enabled) {
+              VimMode.updateCursorPosition();
+            }
+          }, 20);
         }
       },
 
@@ -3559,6 +4957,9 @@
       modalScale: 1.0,
 
       init() {
+        SmoothScroller.attach(this.previewPaneEl);
+        VimMode.init(this);
+
         this.setupEditorEvents();
         this.setupToolbarEvents();
         this.setupTitlebarWindowControls();
@@ -3731,6 +5132,13 @@
 
         this.updateEditor();
         this.renderMarkdown();
+
+        if (this.mode === 'edit' || this.mode === 'split') {
+          if (VimMode.enabled) {
+            VimMode.setMode('NORMAL');
+            VimMode.setCursor(0);
+          }
+        }
       },
 
       onFileSaved(path, name) {
@@ -3823,6 +5231,20 @@
       /* NVIM KEYBINDINGS (ACTIVE ONLY IN PREVIEW MODE) */
       setupNVimKeybindings() {
         window.addEventListener('keydown', (e) => {
+          // Global shortcut: Shift+Tab cycles mode between Preview -> Split -> Edit
+          if (e.key === 'Tab' && e.shiftKey) {
+            e.preventDefault();
+            this.cycleMode();
+            return;
+          }
+
+          // Global shortcut: Ctrl+Alt+V toggles Vim mode for editor
+          if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'v' || e.key === 'V')) {
+            e.preventDefault();
+            VimMode.toggle();
+            return;
+          }
+
           // If in an active input or textarea, or NOT in preview mode: PURGE keybinds!
           const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
           const isTyping = activeTag === 'textarea' || activeTag === 'input';
@@ -3857,6 +5279,7 @@
           const kb = this.keybindings.preview || {};
           const stepY = (this.keybindings.settings && this.keybindings.settings.scroll_step_y) || 60;
           const stepX = (this.keybindings.settings && this.keybindings.settings.scroll_step_x) || 60;
+          const scroller = SmoothScroller.get(this.previewPaneEl);
 
           // Alt + Shift + H (Previous file)
           if (e.altKey && e.shiftKey && e.key.toUpperCase() === 'H') {
@@ -3872,23 +5295,58 @@
             return;
           }
 
-          // NVim single-key navigation (j, k, l, h, w)
+          // Ctrl+d / Ctrl+u in preview (Neovide fluid half-page jump)
+          if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey) {
+            const halfView = (this.previewPaneEl.clientHeight || 400) * 0.5;
+            if (e.key === 'd') {
+              e.preventDefault();
+              if (scroller) scroller.scrollBy(halfView, 0);
+              else this.previewPaneEl.scrollBy({ top: halfView, behavior: 'auto' });
+              return;
+            } else if (e.key === 'u') {
+              e.preventDefault();
+              if (scroller) scroller.scrollBy(-halfView, 0);
+              else this.previewPaneEl.scrollBy({ top: -halfView, behavior: 'auto' });
+              return;
+            }
+          }
+
+          // NVim single-key navigation (j, k, l, h, w, gg, G)
           if (!e.ctrlKey && !e.metaKey && !e.altKey) {
             if (e.key === (kb.scroll_down || 'j')) {
               e.preventDefault();
-              this.previewPaneEl.scrollBy({ top: stepY, behavior: 'smooth' });
+              if (scroller) scroller.scrollBy(stepY, 0);
+              else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
             } else if (e.key === (kb.scroll_up || 'k')) {
               e.preventDefault();
-              this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'smooth' });
+              if (scroller) scroller.scrollBy(-stepY, 0);
+              else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
             } else if (e.key === (kb.scroll_right || 'l')) {
               e.preventDefault();
-              this.previewPaneEl.scrollBy({ left: stepX, behavior: 'smooth' });
+              if (scroller) scroller.scrollBy(0, stepX);
+              else this.previewPaneEl.scrollBy({ left: stepX, behavior: 'auto' });
             } else if (e.key === (kb.scroll_left || 'h')) {
               e.preventDefault();
-              this.previewPaneEl.scrollBy({ left: -stepX, behavior: 'smooth' });
+              if (scroller) scroller.scrollBy(0, -stepX);
+              else this.previewPaneEl.scrollBy({ left: -stepX, behavior: 'auto' });
             } else if (e.key === (kb.save_file || 'w')) {
               e.preventDefault();
               this.save();
+            } else if (e.key === 'G') {
+              e.preventDefault();
+              const max = this.previewPaneEl.scrollHeight - this.previewPaneEl.clientHeight;
+              if (scroller) scroller.scrollTo(max);
+              else this.previewPaneEl.scrollTop = max;
+            } else if (e.key === 'g' && !e.shiftKey) {
+              if (this._previewG) {
+                this._previewG = false;
+                e.preventDefault();
+                if (scroller) scroller.scrollTo(0);
+                else this.previewPaneEl.scrollTop = 0;
+              } else {
+                this._previewG = true;
+                setTimeout(() => { this._previewG = false; }, 400);
+              }
             }
           }
         });
@@ -4084,12 +5542,26 @@
         if (btn) btn.classList.add('active');
 
         if (mode === 'preview') {
+          VimMode.deactivate();
           this.statusModeEl.innerText = 'MODE: PREVIEW (NVIM: j/k/h/l)';
           this.renderMarkdown();
         } else if (mode === 'split') {
-          this.statusModeEl.innerText = 'MODE: SPLIT (NVIM PURGED)';
+          if (VimMode.enabled) {
+            VimMode.activate();
+            this.statusModeEl.innerText = 'MODE: SPLIT (VIM MODE)';
+          } else {
+            VimMode.deactivate();
+            this.statusModeEl.innerText = 'MODE: SPLIT';
+          }
+          this.renderMarkdown();
         } else {
-          this.statusModeEl.innerText = 'MODE: EDIT (NVIM PURGED)';
+          if (VimMode.enabled) {
+            VimMode.activate();
+            this.statusModeEl.innerText = 'MODE: EDIT (VIM MODE)';
+          } else {
+            VimMode.deactivate();
+            this.statusModeEl.innerText = 'MODE: EDIT';
+          }
         }
       },
 
@@ -4294,12 +5766,23 @@
         this.editorEl.addEventListener('scroll', () => {
           this.lineNumbersEl.scrollTop = this.editorEl.scrollTop;
           if (this.mode === 'split') {
-            const ratio = this.editorEl.scrollTop / (this.editorEl.scrollHeight - this.editorEl.clientHeight);
-            this.previewPaneEl.scrollTop = ratio * (this.previewPaneEl.scrollHeight - this.previewPaneEl.clientHeight);
+            const scroller = SmoothScroller.get(this.editorEl);
+            if (!scroller || !scroller.state.animating) {
+              const maxEditor = Math.max(1, this.editorEl.scrollHeight - this.editorEl.clientHeight);
+              const ratio = this.editorEl.scrollTop / maxEditor;
+              this.previewPaneEl.scrollTop = ratio * (this.previewPaneEl.scrollHeight - this.previewPaneEl.clientHeight);
+            }
           }
+          VimMode.updateCursorPosition();
         });
 
         this.editorEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab' && e.shiftKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.cycleMode();
+            return;
+          }
           if (e.key === 'Tab') {
             e.preventDefault();
             const start = this.editorEl.selectionStart;
@@ -4329,6 +5812,13 @@
         document.getElementById('mode-preview').addEventListener('click', () => this.setMode('preview'));
         document.getElementById('mode-split').addEventListener('click', () => this.setMode('split'));
         document.getElementById('mode-edit').addEventListener('click', () => this.setMode('edit'));
+
+        const btnVim = document.getElementById('btn-vim-toggle');
+        if (btnVim) {
+          btnVim.addEventListener('click', () => {
+            VimMode.toggle();
+          });
+        }
 
         document.getElementById('btn-theme').addEventListener('click', () => {
           const current = document.body.getAttribute('data-theme');
