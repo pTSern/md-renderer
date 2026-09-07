@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDViewer</title>
+  <style>
+    :root {
+      --bg-primary: #1e1e2e;
+      --bg-secondary: #181825;
+      --bg-tertiary: #313244;
+      --bg-card: #252538;
+      --text-primary: #cdd6f4;
+      --text-secondary: #a6adc8;
+      --text-muted: #6c7086;
+      --accent: #89b4fa;
+      --accent-hover: #b4befe;
+      --accent-glow: rgba(137, 180, 250, 0.25);
+      --border: #45475a;
+      --border-light: #313244;
+      --code-bg: #11111b;
+      --danger: #f38ba8;
+      --success: #a6e3a1;
+      --warning: #f9e2af;
+      --info: #89dceb;
+      --toolbar-h: 46px;
+      --statusbar-h: 28px;
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.15);
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --code-bg: #f8fafc;
+      --danger: #e11d48;
+      --success: #16a34a;
+      --warning: #d97706;
+      --info: #0284c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      height: var(--toolbar-h);
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      gap: 8px;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 12px;
+      border-right: 1px solid var(--border);
+    }
+
+    .file-badge {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background-color: var(--bg-tertiary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dirty-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--warning);
+      display: none;
+    }
+    .dirty-dot.is-dirty {
+      display: inline-block;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--bg-tertiary);
+      border-color: var(--border);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #11111b;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      border-color: var(--accent);
+    }
+
+    .btn-group {
+      display: flex;
+      background: var(--bg-tertiary);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-group .btn {
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .btn-group .btn.active {
+      background: var(--accent);
+      color: #11111b;
+      font-weight: 700;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: var(--bg-secondary);
+      min-width: 230px;
+      box-shadow: 0px 8px 20px rgba(0,0,0,0.45);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px;
+      z-index: 100;
+      margin-top: 4px;
+    }
+
+    .dropdown-content.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 7px 10px;
+      font-size: 12px;
+      color: var(--text-primary);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--bg-tertiary);
+      color: var(--accent);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background-color: var(--border);
+      margin: 4px 0;
+    }
+
+    /* Main Container */
+    .main-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - var(--toolbar-h) - var(--statusbar-h));
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Editor Pane */
+    .editor-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 200px;
+      height: 100%;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    .editor-container {
+      display: flex;
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .line-numbers {
+      width: 48px;
+      padding: 16px 8px 16px 0;
+      background-color: var(--bg-secondary);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: right;
+      overflow: hidden;
+      user-select: none;
+      border-right: 1px solid var(--border-light);
+    }
+
+    .editor-textarea {
+      flex: 1;
+      height: 100%;
+      padding: 16px;
+      background: transparent;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      border: none;
+      outline: none;
+      resize: none;
+      overflow-y: auto;
+      white-space: pre;
+      tab-size: 2;
+      user-select: text;
+    }
+
+    /* Splitter */
+    .splitter {
+      width: 6px;
+      background-color: var(--border-light);
+      cursor: col-resize;
+      transition: background-color 0.15s;
+      z-index: 5;
+    }
+
+    .splitter:hover, .splitter.dragging {
+      background-color: var(--accent);
+    }
+
+    /* Preview Pane (Default View) */
+    .preview-pane {
+      flex: 1;
+      min-width: 200px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 32px 48px;
+      background-color: var(--bg-primary);
+      user-select: text;
+      scroll-behavior: smooth;
+    }
+
+    /* Default View: Mode Preview */
+    body.mode-preview .editor-pane,
+    body.mode-preview .splitter {
+      display: none !important;
+    }
+    body.mode-preview .preview-pane {
+      flex: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    body.mode-edit .preview-pane,
+    body.mode-edit .splitter {
+      display: none !important;
+    }
+    body.mode-edit .editor-pane {
+      border-right: none;
+    }
+
+    /* Markdown Rendered Content Styles */
+    .markdown-body {
+      font-size: 15.5px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      word-wrap: break-word;
+    }
+
+    .markdown-body h1, .markdown-body h2, .markdown-body h3,
+    .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+      margin-top: 26px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--text-primary);
+    }
+
+    .markdown-body h1 {
+      font-size: 2.1rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .markdown-body h2 {
+      font-size: 1.55rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 6px;
+    }
+    .markdown-body h3 { font-size: 1.3rem; }
+
+    .markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body blockquote {
+      margin-bottom: 16px;
+    }
+
+    .markdown-body ul, .markdown-body ol {
+      padding-left: 24px;
+    }
+
+    .markdown-body li {
+      margin-bottom: 5px;
+    }
+
+    .markdown-body a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .markdown-body a:hover {
+      text-decoration: underline;
+    }
+
+    /* Inline Code */
+    .markdown-body code:not(.code-body *) {
+      font-family: var(--font-mono);
+      background-color: var(--code-bg);
+      color: var(--accent-hover);
+      padding: 3px 7px;
+      border-radius: 5px;
+      font-size: 88%;
+      border: 1px solid var(--border-light);
+    }
+
+    .markdown-body blockquote {
+      border-left: 4px solid var(--accent);
+      padding: 10px 18px;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .markdown-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 22px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .markdown-body th, .markdown-body td {
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      text-align: left;
+    }
+
+    .markdown-body th {
+      background-color: var(--bg-secondary);
+      font-weight: 600;
+    }
+
+    .markdown-body tr:nth-child(even) {
+      background-color: var(--bg-tertiary);
+    }
+
+    .markdown-body hr {
+      border: 0;
+      height: 1px;
+      background: var(--border);
+      margin: 28px 0;
+    }
+
+    /* Alerts / Callouts */
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--bg-card);
+      border-radius: 6px;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border-light);
+      border-left-width: 4px;
+    }
+    .callout.note { border-left-color: var(--accent); }
+    .callout.tip { border-left-color: var(--success); }
+    .callout.important { border-left-color: var(--info); }
+    .callout.warning { border-left-color: var(--warning); }
+    .callout.caution { border-left-color: var(--danger); }
+    .callout-title {
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* =========================================================================
+       CODE VIEW BOX STYLING & THEME COLORING
+       ========================================================================= */
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 22px 0;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+      font-family: var(--font-mono);
+    }
+
+    .code-box-header {
+      background: #181825;
+      border-bottom: 1px solid var(--border-light);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    [data-theme="light"] .code-box-header {
+      background: #f1f5f9;
+      border-bottom-color: #e2e8f0;
+    }
+
+    .code-box-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .code-box-mac-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mac-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .mac-dot.red { background: #f38ba8; }
+    .mac-dot.yellow { background: #f9e2af; }
+    .mac-dot.green { background: #a6e3a1; }
+
+    .code-box-lang {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+      border: 1px solid var(--border-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .code-copy-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-family: inherit;
+      padding: 3px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .code-copy-btn:hover {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+
+    .code-content-wrapper {
+      display: flex;
+      overflow-x: auto;
+      padding: 14px 0;
+      background: #11111b;
+    }
+    [data-theme="light"] .code-content-wrapper {
+      background: #f8fafc;
+    }
+
+    .code-line-numbers {
+      padding: 0 12px 0 16px;
+      text-align: right;
+      color: #585b70;
+      user-select: none;
+      font-size: 13px;
+      line-height: 1.65;
+      border-right: 1px solid #313244;
+      min-width: 44px;
+    }
+    [data-theme="light"] .code-line-numbers {
+      color: #94a3b8;
+      border-right-color: #e2e8f0;
+    }
+
+    .code-body {
+      flex: 1;
+      padding: 0 16px;
+      margin: 0;
+      font-size: 13.5px;
+      line-height: 1.65;
+      white-space: pre;
+      color: #cdd6f4;
+      overflow-x: visible;
+      user-select: text;
+    }
+    [data-theme="light"] .code-body {
+      color: #1e293b;
+    }
+
+    /* VIBRANT SYNTAX TOKEN COLORS (Dark Theme - Catppuccin / OneDark Inspired) */
+    .tok-kw { color: #cba6f7; font-weight: 600; }     /* Purple: fn, let, mut, if, else, class, def */
+    .tok-type { color: #89dceb; font-weight: 600; }   /* Cyan: String, u32, bool, Vec, Option */
+    .tok-str { color: #a6e3a1; }                      /* Emerald Green: "string", 'char' */
+    .tok-num { color: #fab387; }                      /* Orange: 123, 0x4A, 3.14 */
+    .tok-comment { color: #6c7086; font-style: italic; } /* Muted Gray-Lavender: // comment */
+    .tok-fn { color: #89b4fa; font-weight: 600; }     /* Blue: functionName() */
+    .tok-macro { color: #f9e2af; font-weight: 600; }  /* Yellow Gold: println!, @decorator */
+    .tok-const { color: #f38ba8; font-weight: 600; }  /* Coral Red: true, false, null, None */
+    .tok-op { color: #94e2d5; }                       /* Teal: =>, ->, ::, ==, != */
+    .tok-prop { color: #f2cdcd; }                     /* Flamingo: object keys, struct fields */
+
+    /* VIBRANT SYNTAX TOKEN COLORS (Light Theme) */
+    [data-theme="light"] .tok-kw { color: #8b5cf6; }
+    [data-theme="light"] .tok-type { color: #0284c7; }
+    [data-theme="light"] .tok-str { color: #15803d; }
+    [data-theme="light"] .tok-num { color: #ea580c; }
+    [data-theme="light"] .tok-comment { color: #64748b; }
+    [data-theme="light"] .tok-fn { color: #2563eb; }
+    [data-theme="light"] .tok-macro { color: #b45309; }
+    [data-theme="light"] .tok-const { color: #e11d48; }
+    [data-theme="light"] .tok-op { color: #0f766e; }
+    [data-theme="light"] .tok-prop { color: #be185d; }
+
+    /* =========================================================================
+       DIAGRAM CARDS & ENHANCED BIG SIZING
+       ========================================================================= */
+    .diagram-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 24px 0;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      width: 100%;
+    }
+
+    .diagram-header {
+      background: var(--bg-secondary);
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .diagram-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .diagram-zoom-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 2px 7px;
+      font-size: 11px;
+      font-family: inherit;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .diagram-zoom-btn:hover {
+      background: var(--border);
+      color: var(--accent);
+    }
+
+    .diagram-zoom-val {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      min-width: 42px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .diagram-badge {
+      background: var(--accent-glow);
+      color: var(--accent);
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .diagram-body {
+      padding: 24px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 180px;
+      background: var(--bg-secondary);
+    }
+
+    .diagram-zoom-wrapper {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      transform-origin: center top;
+      transition: transform 0.15s ease-out;
+      width: 100%;
+    }
+
+    /* MERMAID BIG RENDERING FIX */
+    .mermaid {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .mermaid svg {
+      max-width: none !important;
+      height: auto !important;
+      font-family: var(--font-ui) !important;
+      font-size: 16px !important;
+    }
+
+    /* UDP & Packet Diagram SVG Styling */
+    .packet-diagram {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* Fullscreen Modal Lightbox */
+    .diagram-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 10, 15, 0.88);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      flex-direction: column;
+    }
+    .diagram-modal.show {
+      display: flex;
+    }
+    .modal-header {
+      height: 48px;
+      padding: 0 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Status Bar */
+    .statusbar {
+      height: var(--statusbar-h);
+      background-color: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .statusbar-left, .statusbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .statusbar-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  </style>
+</head>
+<body class="mode-preview" data-theme="dark">
+
+  <!-- Toolbar -->
+  <header class="toolbar">
+    <div class="tool-group">
+      <div class="app-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>MDViewer</span>
+      </div>
+
+      <button class="btn" id="btn-new" title="New Document (Ctrl+N)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        New
+      </button>
+      <button class="btn" id="btn-open" title="Open Markdown File (Ctrl+O)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Open
+      </button>
+      <button class="btn btn-primary" id="btn-save" title="Save File (Ctrl+S)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+      <button class="btn" id="btn-save-as" title="Save As (Ctrl+Shift+S)">Save As...</button>
+
+      <div class="dropdown">
+        <button class="btn" id="btn-insert" title="Insert Diagrams & Templates">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Insert Diagram ▾
+        </button>
+        <div class="dropdown-content" id="dropdown-diagrams">
+          <div class="dropdown-item" data-template="udp-rfc">⚡ UDP Header (RFC 768)</div>
+          <div class="dropdown-item" data-template="udp-dsl">⚡ UDP Header (Custom DSL)</div>
+          <div class="dropdown-item" data-template="tcp-rfc">📦 TCP Header (RFC 793)</div>
+          <div class="dropdown-item" data-template="ip-rfc">🌐 IPv4 Header (RFC 791)</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" data-template="mermaid-sequence">📊 Mermaid: Sequence (UDP Flow)</div>
+          <div class="dropdown-item" data-template="mermaid-flowchart">📊 Mermaid: Flowchart</div>
+          <div class="dropdown-item" data-template="mermaid-class">📊 Mermaid: Class Diagram</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active File Badge -->
+    <div class="file-badge" id="file-badge" title="No file opened">
+      <span class="dirty-dot" id="dirty-dot"></span>
+      <span id="file-name">Welcome.md</span>
+    </div>
+
+    <div class="tool-group">
+      <!-- Mode switcher (Preview is default) -->
+      <div class="btn-group">
+        <button class="btn" id="mode-edit" title="Editor Only">Edit</button>
+        <button class="btn" id="mode-split" title="Side-by-Side Split View">Split</button>
+        <button class="btn active" id="mode-preview" title="Rendered Preview Only">Preview</button>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button class="btn" id="btn-theme" title="Toggle Dark/Light Mode">
+        <span id="theme-icon">🌙</span>
+      </button>
+
+      <!-- Print / Export -->
+      <button class="btn" id="btn-print" title="Print or Export to PDF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container" id="main-container">
+    <!-- Editor Pane -->
+    <section class="editor-pane" id="editor-pane">
+      <div class="editor-container">
+        <div class="line-numbers" id="line-numbers">1</div>
+        <textarea class="editor-textarea" id="editor" spellcheck="false" placeholder="Type markdown here or open a file..."></textarea>
+      </div>
+    </section>
+
+    <!-- Resizable Splitter -->
+    <div class="splitter" id="splitter"></div>
+
+    <!-- Preview Pane (Default Visible) -->
+    <section class="preview-pane" id="preview-pane">
+      <article class="markdown-body" id="preview"></article>
+    </section>
+  </main>
+
+  <!-- Status Bar -->
+  <footer class="statusbar">
+    <div class="statusbar-left">
+      <span class="statusbar-item" id="status-file">📄 Welcome.md</span>
+      <span class="statusbar-item" id="status-cursor">Ln 1, Col 1</span>
+    </div>
+    <div class="statusbar-right">
+      <span class="statusbar-item" id="status-words">0 words</span>
+      <span class="statusbar-item" id="status-lines">1 line</span>
+      <span class="statusbar-item" id="status-save">✓ Ready</span>
+    </div>
+  </footer>
+
+  <!-- Diagram Lightbox Modal -->
+  <div class="diagram-modal" id="diagram-modal">
+    <div class="modal-header">
+      <span id="modal-title">Diagram View</span>
+      <div class="tool-group">
+        <button class="btn" id="modal-zoom-out">- Zoom</button>
+        <span class="diagram-zoom-val" id="modal-zoom-val">100%</span>
+        <button class="btn" id="modal-zoom-in">+ Zoom</button>
+        <button class="btn btn-primary" id="modal-close">Close ✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+
+  <!-- Mermaid Library -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <script>
+    /* =========================================================================
+       1. PACKET & UDP DIAGRAM RENDERER (NATIVE SVG ENGINE)
+       ========================================================================= */
+    const PacketRenderer = {
+      parseRfcAscii(text) {
+        const lines = text.trim().split('\n').map(l => l.trimRight());
+        const rowLines = [];
+        let currentRow = [];
+        for (let line of lines) {
+          const trimmed = line.trim();
+          if (/^\+[-+=| ]+\+$/.test(trimmed)) {
+            if (currentRow.length > 0) {
+              rowLines.push(currentRow);
+              currentRow = [];
+            }
+          } else if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+            currentRow.push(line);
+          }
+        }
+        if (currentRow.length > 0) rowLines.push(currentRow);
+        if (rowLines.length === 0) return null;
+
+        const rows = [];
+        for (let row of rowLines) {
+          const ref = row[0];
+          const barPositions = [];
+          for (let i = 0; i < ref.length; i++) {
+            if (ref[i] === '|') barPositions.push(i);
+          }
+          if (barPositions.length < 2) continue;
+
+          const totalWidth = barPositions[barPositions.length - 1] - barPositions[0];
+          const fields = [];
+
+          for (let i = 0; i < barPositions.length - 1; i++) {
+            const start = barPositions[i];
+            const end = barPositions[i + 1];
+            const colWidth = end - start;
+            const cellLines = row.map(r => {
+              if (r.length > start && r.length >= end) {
+                return r.substring(start + 1, end).trim();
+              }
+              return '';
+            }).filter(Boolean);
+
+            const label = cellLines.join(' ');
+            const bitRatio = colWidth / totalWidth;
+            const bits = Math.round(bitRatio * 32);
+            fields.push({ label, bits, widthPercent: (bits / 32) * 100 });
+          }
+          rows.push(fields);
+        }
+        return rows;
+      },
+
+      parseDsl(text) {
+        const lines = text.trim().split('\n');
+        let title = 'Protocol Packet Header';
+        let width = 32;
+        const fields = [];
+
+        for (let line of lines) {
+          line = line.trim();
+          if (!line || line.startsWith('#')) continue;
+
+          if (line.toLowerCase().startsWith('title:')) {
+            title = line.substring(6).trim();
+            continue;
+          }
+          if (line.toLowerCase().startsWith('width:')) {
+            width = parseInt(line.substring(6).trim(), 10) || 32;
+            continue;
+          }
+
+          const match = line.match(/^(\d+)\s*[-:]\s*(\d+)\s*:\s*(.+)$/);
+          if (match) {
+            const start = parseInt(match[1], 10);
+            const end = parseInt(match[2], 10);
+            let rest = match[3].trim();
+            let color = null;
+
+            const colorMatch = rest.match(/\[(.*?)\]/);
+            if (colorMatch) {
+              const meta = colorMatch[1];
+              const cMatch = meta.match(/color=([#\w]+)/);
+              if (cMatch) color = cMatch[1];
+              rest = rest.replace(/\[(.*?)\]/, '').trim();
+            }
+
+            const bits = (end - start) + 1;
+            fields.push({ start, end, bits, label: rest, color });
+          }
+        }
+
+        const rows = [];
+        let currentRow = [];
+        let currentBitsInRow = 0;
+
+        for (let f of fields) {
+          currentRow.push(f);
+          currentBitsInRow += f.bits;
+          if (currentBitsInRow >= width) {
+            rows.push(currentRow);
+            currentRow = [];
+            currentBitsInRow = 0;
+          }
+        }
+        if (currentRow.length > 0) rows.push(currentRow);
+        return { title, width, rows };
+      },
+
+      renderToSvg(parsed, customTitle) {
+        const rowHeight = 48;
+        const bitHeaderHeight = 28;
+        const titleHeight = 38;
+        const width = 840;
+        const marginX = 24;
+        const innerWidth = width - (marginX * 2);
+
+        let rows = [];
+        let diagramTitle = customTitle || "Packet Specification Diagram";
+
+        if (Array.isArray(parsed)) {
+          rows = parsed;
+        } else if (parsed && parsed.rows) {
+          rows = parsed.rows;
+          if (parsed.title) diagramTitle = parsed.title;
+        }
+
+        if (!rows || rows.length === 0) return null;
+
+        const totalHeight = titleHeight + bitHeaderHeight + (rows.length * rowHeight) + 20;
+
+        const colors = [
+          { fill: "#1e3a8a", border: "#3b82f6", text: "#93c5fd" },
+          { fill: "#4c1d95", border: "#8b5cf6", text: "#c4b5fd" },
+          { fill: "#064e3b", border: "#10b981", text: "#6ee7b7" },
+          { fill: "#78350f", border: "#f59e0b", text: "#fcd34d" },
+          { fill: "#701a75", border: "#d946ef", text: "#f0abfc" },
+          { fill: "#134e4a", border: "#14b8a6", text: "#5eead4" },
+          { fill: "#831843", border: "#f43f5e", text: "#fda4af" }
+        ];
+
+        let svg = `<svg class="packet-diagram" viewBox="0 0 ${width} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .pkt-title { font-size: 15px; font-weight: 700; fill: #89b4fa; font-family: monospace; }
+            .pkt-bit { font-size: 10px; fill: #6c7086; font-family: monospace; text-anchor: middle; }
+            .pkt-byte { font-size: 11px; fill: #a6adc8; font-family: monospace; font-weight: bold; }
+            .pkt-label { font-size: 13px; font-family: -apple-system, sans-serif; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+            .pkt-sub { font-size: 11px; font-family: monospace; opacity: 0.85; text-anchor: middle; dominant-baseline: middle; }
+            .pkt-grid { stroke: #313244; stroke-width: 1; stroke-dasharray: 2 2; }
+          </style>
+          <rect width="100%" height="100%" rx="8" fill="#181825" stroke="#313244" stroke-width="1.5" />
+          <text x="${marginX}" y="26" class="pkt-title">⚡ ${diagramTitle}</text>
+        `;
+
+        const headerY = titleHeight + 16;
+        const colW = innerWidth / 32;
+
+        for (let b = 0; b < 4; b++) {
+          const bx = marginX + (b * 8 * colW) + (4 * colW);
+          svg += `<text x="${bx}" y="${headerY - 14}" class="pkt-byte" text-anchor="middle">Octet ${b}</text>`;
+        }
+
+        for (let i = 0; i < 32; i++) {
+          const bx = marginX + (i * colW) + (colW / 2);
+          svg += `<text x="${bx}" y="${headerY}" class="pkt-bit">${i % 10}</text>`;
+          if (i % 8 === 0) {
+            svg += `<line x1="${marginX + i * colW}" y1="${headerY + 4}" x2="${marginX + i * colW}" y2="${totalHeight - 10}" class="pkt-grid" />`;
+          }
+        }
+
+        let colorIdx = 0;
+        let startY = titleHeight + bitHeaderHeight;
+
+        rows.forEach((row, rIdx) => {
+          const curY = startY + (rIdx * rowHeight);
+          let curX = marginX;
+          const byteOffset = rIdx * 4;
+
+          svg += `<text x="${marginX - 8}" y="${curY + (rowHeight / 2) + 4}" class="pkt-byte" text-anchor="end">+${byteOffset}</text>`;
+
+          row.forEach(field => {
+            const bits = field.bits || 16;
+            const fieldW = (bits / 32) * innerWidth;
+            const color = colors[colorIdx % colors.length];
+            colorIdx++;
+
+            const fieldX = curX;
+            const textX = fieldX + (fieldW / 2);
+            const textY = curY + (rowHeight / 2);
+
+            svg += `
+              <g class="pkt-cell">
+                <rect x="${fieldX + 1}" y="${curY + 1}" width="${fieldW - 2}" height="${rowHeight - 2}" rx="5"
+                      fill="${color.fill}" stroke="${color.border}" stroke-width="1.2" />
+                <text x="${textX}" y="${textY - 5}" class="pkt-label" fill="${color.text}">${field.label || 'Field'}</text>
+                <text x="${textX}" y="${textY + 12}" class="pkt-sub" fill="${color.text}">(${bits} bits)</text>
+              </g>
+            `;
+
+            curX += fieldW;
+          });
+        });
+
+        svg += `</svg>`;
+        return svg;
+      }
+    };
+
+    /* =========================================================================
+       2. SYNTAX HIGHLIGHTER ENGINE (OFFLINE, MULTI-LANGUAGE)
+       Tokenizes and colors keywords, types, strings, numbers, functions, macros.
+       ========================================================================= */
+    const CodeHighlighter = {
+      keywords: {
+        rust: /\b(fn|let|mut|struct|enum|impl|trait|pub|mod|use|as|const|static|match|if|else|for|while|loop|return|break|continue|async|await|unsafe|type|ref|self|Self|where|move|dyn)\b/g,
+        python: /\b(def|return|if|elif|else|for|while|break|continue|import|from|as|class|try|except|finally|raise|with|lambda|pass|global|nonlocal|yield|async|await|assert)\b/g,
+        javascript: /\b(function|return|if|else|for|while|switch|case|break|const|let|var|import|export|from|default|class|extends|new|try|catch|finally|throw|async|await|yield|typeof|instanceof|void|delete|in|of)\b/g,
+        typescript: /\b(function|return|if|else|for|while|switch|case|break|const|let|var|import|export|from|default|class|extends|new|try|catch|finally|throw|async|await|yield|typeof|instanceof|interface|type|enum|implements|declare|readonly|abstract|namespace)\b/g,
+        c: /\b(int|char|void|float|double|long|short|unsigned|signed|struct|union|enum|typedef|sizeof|if|else|for|while|do|switch|case|default|break|continue|return|goto|const|static|volatile|extern|inline)\b/g,
+        cpp: /\b(int|char|void|float|double|long|short|unsigned|signed|struct|union|enum|typedef|sizeof|if|else|for|while|do|switch|case|default|break|continue|return|goto|const|static|volatile|extern|inline|class|public|private|protected|virtual|override|template|typename|namespace|using|new|delete|try|catch|throw|auto|constexpr|nullptr)\b/g,
+        go: /\b(func|package|import|var|const|type|struct|interface|return|if|else|for|range|switch|case|default|select|defer|go|break|continue|fallthrough|chan|map)\b/g,
+        sql: /\b(SELECT|FROM|WHERE|INSERT|INTO|UPDATE|DELETE|CREATE|TABLE|DROP|ALTER|JOIN|LEFT|RIGHT|INNER|OUTER|GROUP|BY|ORDER|HAVING|LIMIT|AND|OR|NOT|IN|AS|DISTINCT|SET|VALUES|INDEX|KEY|PRIMARY|FOREIGN|REFERENCES)\b/gi,
+        bash: /\b(echo|if|then|else|elif|fi|for|in|do|done|while|until|case|esac|function|select|time|exit|return|source|alias|export|unset|read)\b/g
+      },
+
+      types: /\b(u8|u16|u32|u64|u128|i8|i16|i32|i64|i128|usize|isize|f32|f64|bool|char|str|String|Vec|Option|Result|Box|Rc|Arc|Mutex|Cell|RefCell|Path|PathBuf|File|SocketAddr|UdpSocket|TcpStream|TcpListener|int|float|str|dict|list|set|tuple|bytes|number|string|boolean|any|unknown|never|void|Promise|Array|Map|Set|Object)\b/g,
+      constants: /\b(true|false|True|False|null|None|nil|undefined|NaN|Infinity|Ok|Err|Some|NULL)\b/g,
+
+      highlight(code, lang) {
+        let safeLang = (lang || 'code').toLowerCase().trim();
+        if (safeLang === 'ts') safeLang = 'typescript';
+        if (safeLang === 'js') safeLang = 'javascript';
+        if (safeLang === 'py') safeLang = 'python';
+        if (safeLang === 'rs') safeLang = 'rust';
+        if (safeLang === 'sh' || safeLang === 'zsh') safeLang = 'bash';
+
+        // Escape HTML
+        let escaped = code
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        // Token extraction using placeholders to avoid nested replacements
+        const tokens = [];
+        const save = (html) => {
+          const id = `___TOK${tokens.length}___`;
+          tokens.push(html);
+          return id;
+        };
+
+        // 1. Comments
+        escaped = escaped.replace(/(\/\/[^\n]*|#[^\n]*)/g, m => save(`<span class="tok-comment">${m}</span>`));
+        escaped = escaped.replace(/(\/\*[\s\S]*?\*\/)/g, m => save(`<span class="tok-comment">${m}</span>`));
+
+        // 2. Strings & template literals
+        escaped = escaped.replace(/("(\\"|[^"])*")/g, m => save(`<span class="tok-str">${m}</span>`));
+        escaped = escaped.replace(/('(\\'|[^'])*')/g, m => save(`<span class="tok-str">${m}</span>`));
+        escaped = escaped.replace(/(`(\\`|[^`])*`)/g, m => save(`<span class="tok-str">${m}</span>`));
+
+        // 3. Numbers (Hex, Binary, Decimals)
+        escaped = escaped.replace(/\b(0x[0-9a-fA-F]+|0b[01]+|\d+(\.\d+)?([eE][+-]?\d+)?)\b/g, m => save(`<span class="tok-num">${m}</span>`));
+
+        // 4. Rust Macros / Python Decorators
+        escaped = escaped.replace(/\b([a-zA-Z_]\w*!)|(@[a-zA-Z_]\w*)/g, m => save(`<span class="tok-macro">${m}</span>`));
+
+        // 5. Language Keywords
+        const kwRegex = this.keywords[safeLang] || this.keywords.rust;
+        escaped = escaped.replace(kwRegex, m => save(`<span class="tok-kw">${m}</span>`));
+
+        // 6. Built-in Types
+        escaped = escaped.replace(this.types, m => save(`<span class="tok-type">${m}</span>`));
+
+        // 7. Constants
+        escaped = escaped.replace(this.constants, m => save(`<span class="tok-const">${m}</span>`));
+
+        // 8. Function invocations: foo(...)
+        escaped = escaped.replace(/\b([a-zA-Z_]\w*)\s*(?=\()/g, m => save(`<span class="tok-fn">${m}</span>`));
+
+        // 9. Common Operators: =>, ->, ::, ==, !=
+        escaped = escaped.replace(/(=&gt;|-&gt;|::|==|!=|&lt;=|&gt;=)/g, m => save(`<span class="tok-op">${m}</span>`));
+
+        // Restore token placeholders
+        for (let i = tokens.length - 1; i >= 0; i--) {
+          escaped = escaped.replace(`___TOK${i}___`, tokens[i]);
+        }
+
+        return escaped;
+      }
+    };
+
+    /* =========================================================================
+       3. MARKDOWN PARSER WITH STYLED CODE BOX
+       ========================================================================= */
+    const SimpleMarkdown = {
+      render(md) {
+        if (!md) return '';
+
+        let out = '';
+        const lines = md.split(/\r?\n/);
+        let inCode = false;
+        let codeLang = '';
+        let codeBuffer = [];
+        let inList = false;
+        let listType = '';
+        let inTable = false;
+        let tableRows = [];
+
+        function flushList() {
+          if (inList) {
+            out += listType === 'ul' ? '</ul>\n' : '</ol>\n';
+            inList = false;
+          }
+        }
+
+        function flushTable() {
+          if (inTable && tableRows.length > 0) {
+            out += '<table>\n';
+            tableRows.forEach((row, i) => {
+              const tag = i === 0 ? 'th' : 'td';
+              out += '  <tr>' + row.map(c => `<${tag}>${SimpleMarkdown.inline(c.trim())}</${tag}>`).join('') + '</tr>\n';
+            });
+            out += '</table>\n';
+            inTable = false;
+            tableRows = [];
+          }
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+
+          if (line.trim().startsWith('```')) {
+            flushList();
+            flushTable();
+            if (!inCode) {
+              inCode = true;
+              codeLang = line.trim().substring(3).trim().toLowerCase();
+              codeBuffer = [];
+            } else {
+              inCode = false;
+              const rawCode = codeBuffer.join('\n');
+              out += SimpleMarkdown.renderCodeBlock(codeLang, rawCode);
+              codeBuffer = [];
+            }
+            continue;
+          }
+
+          if (inCode) {
+            codeBuffer.push(line);
+            continue;
+          }
+
+          if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+            flushList();
+            const cells = line.trim().slice(1, -1).split('|');
+            if (cells.every(c => /^[\s-:]+$/.test(c))) {
+              // delimiter
+            } else {
+              inTable = true;
+              tableRows.push(cells);
+            }
+            continue;
+          } else {
+            flushTable();
+          }
+
+          if (!line.trim()) {
+            flushList();
+            out += '\n';
+            continue;
+          }
+
+          const hMatch = line.match(/^(#{1,6})\s+(.*)$/);
+          if (hMatch) {
+            flushList();
+            const level = hMatch[1].length;
+            const text = SimpleMarkdown.inline(hMatch[2]);
+            const id = hMatch[2].toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+            out += `<h${level} id="${id}">${text}</h${level}>\n`;
+            continue;
+          }
+
+          const alertMatch = line.match(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$/i);
+          if (alertMatch) {
+            flushList();
+            const type = alertMatch[1].toLowerCase();
+            const extra = alertMatch[2] ? `<p>${SimpleMarkdown.inline(alertMatch[2])}</p>` : '';
+            out += `<div class="callout ${type}"><div class="callout-title">${type}</div>${extra}</div>\n`;
+            continue;
+          }
+
+          if (line.startsWith('>')) {
+            flushList();
+            out += `<blockquote>${SimpleMarkdown.inline(line.replace(/^>\s*/, ''))}</blockquote>\n`;
+            continue;
+          }
+
+          if (/^(\*\*\*|---|___)$/.test(line.trim())) {
+            flushList();
+            out += '<hr>\n';
+            continue;
+          }
+
+          const taskMatch = line.match(/^(\s*)[-*]\s+\[([ xX])\]\s+(.*)$/);
+          if (taskMatch) {
+            if (!inList || listType !== 'ul') {
+              flushList();
+              inList = true;
+              listType = 'ul';
+              out += '<ul class="task-list" style="list-style:none; padding-left:4px;">\n';
+            }
+            const checked = taskMatch[2].toLowerCase() === 'x' ? 'checked' : '';
+            out += `<li><input type="checkbox" ${checked} disabled> ${SimpleMarkdown.inline(taskMatch[3])}</li>\n`;
+            continue;
+          }
+
+          const ulMatch = line.match(/^(\s*)[-*+]\s+(.*)$/);
+          if (ulMatch) {
+            if (!inList || listType !== 'ul') {
+              flushList();
+              inList = true;
+              listType = 'ul';
+              out += '<ul>\n';
+            }
+            out += `<li>${SimpleMarkdown.inline(ulMatch[2])}</li>\n`;
+            continue;
+          }
+
+          const olMatch = line.match(/^(\s*)\d+\.\s+(.*)$/);
+          if (olMatch) {
+            if (!inList || listType !== 'ol') {
+              flushList();
+              inList = true;
+              listType = 'ol';
+              out += '<ol>\n';
+            }
+            out += `<li>${SimpleMarkdown.inline(olMatch[2])}</li>\n`;
+            continue;
+          }
+
+          flushList();
+          out += `<p>${SimpleMarkdown.inline(line)}</p>\n`;
+        }
+
+        flushList();
+        flushTable();
+        return out;
+      },
+
+      inline(text) {
+        if (!text) return '';
+        let s = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        s = s.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+        s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        s = s.replace(/___([^_]+)___/g, '<strong><em>$1</em></strong>');
+        s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+        s = s.replace(/_([^_]+)_/g, '<em>$1</em>');
+        s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+        s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius:6px;">');
+
+        return s;
+      },
+
+      renderCodeBlock(lang, code) {
+        const blockId = 'diag-' + Math.random().toString(36).substr(2, 9);
+
+        // 1. Packet / UDP diagram
+        if (lang === 'udp' || lang === 'packet' || lang === 'bytefield' || lang === 'rfc') {
+          let parsed = PacketRenderer.parseRfcAscii(code);
+          let title = lang === 'udp' ? 'UDP Datagram Header (RFC 768)' : 'Protocol Packet Header';
+
+          if (!parsed) {
+            parsed = PacketRenderer.parseDsl(code);
+            if (parsed && parsed.title) title = parsed.title;
+          }
+
+          if (parsed) {
+            const svg = PacketRenderer.renderToSvg(parsed, title);
+            return `
+              <div class="diagram-card" id="${blockId}">
+                <div class="diagram-header">
+                  <span>${title}</span>
+                  <div class="diagram-controls">
+                    <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', -0.2)">−</button>
+                    <span class="diagram-zoom-val">100%</span>
+                    <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', 0.2)">+</button>
+                    <button class="diagram-zoom-btn" onclick="App.resetZoomDiagram('${blockId}')">Reset</button>
+                    <button class="diagram-zoom-btn" onclick="App.fullscreenDiagram('${blockId}')" title="Expand Fullscreen">⛶</button>
+                    <span class="diagram-badge">PACKET</span>
+                  </div>
+                </div>
+                <div class="diagram-body">
+                  <div class="diagram-zoom-wrapper">${svg}</div>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        // 2. Mermaid diagram
+        if (lang === 'mermaid') {
+          const mermaidId = 'mermaid-' + Math.random().toString(36).substr(2, 9);
+          return `
+            <div class="diagram-card" id="${blockId}">
+              <div class="diagram-header">
+                <span>Mermaid Diagram</span>
+                <div class="diagram-controls">
+                  <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', -0.25)">−</button>
+                  <span class="diagram-zoom-val">100%</span>
+                  <button class="diagram-zoom-btn" onclick="App.zoomDiagram('${blockId}', 0.25)">+</button>
+                  <button class="diagram-zoom-btn" onclick="App.resetZoomDiagram('${blockId}')">Reset</button>
+                  <button class="diagram-zoom-btn" onclick="App.fullscreenDiagram('${blockId}')" title="Expand Fullscreen">⛶</button>
+                  <span class="diagram-badge">MERMAID</span>
+                </div>
+              </div>
+              <div class="diagram-body">
+                <div class="diagram-zoom-wrapper">
+                  <div class="mermaid" id="${mermaidId}">${code}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // 3. STYLED CODE VIEW BOX WITH SYNTAX HIGHLIGHTING & COPY BUTTON
+        const displayLang = (lang || 'TEXT').toUpperCase();
+        const highlighted = CodeHighlighter.highlight(code, lang);
+
+        // Generate line numbers
+        const lineCount = code.split('\n').length;
+        const lineNumbersHtml = Array.from({ length: lineCount }, (_, i) => i + 1).join('<br>');
+
+        return `
+          <div class="code-box">
+            <div class="code-box-header">
+              <div class="code-box-left">
+                <div class="code-box-mac-dots">
+                  <span class="mac-dot red"></span>
+                  <span class="mac-dot yellow"></span>
+                  <span class="mac-dot green"></span>
+                </div>
+                <span class="code-box-lang">${displayLang}</span>
+              </div>
+              <button class="code-copy-btn" onclick="App.copyCode(this)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copy</span>
+              </button>
+            </div>
+            <div class="code-content-wrapper">
+              <div class="code-line-numbers">${lineNumbersHtml}</div>
+              <pre class="code-body"><code>${highlighted}</code></pre>
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    /* =========================================================================
+       4. APP STATE & CONTROLLER
+       ========================================================================= */
+    const App = {
+      filePath: null,
+      fileName: 'Welcome.md',
+      isDirty: false,
+      editorEl: document.getElementById('editor'),
+      previewEl: document.getElementById('preview'),
+      lineNumbersEl: document.getElementById('line-numbers'),
+      fileNameEl: document.getElementById('file-name'),
+      dirtyDotEl: document.getElementById('dirty-dot'),
+      statusFileEl: document.getElementById('status-file'),
+      statusCursorEl: document.getElementById('status-cursor'),
+      statusWordsEl: document.getElementById('status-words'),
+      statusLinesEl: document.getElementById('status-lines'),
+      statusSaveEl: document.getElementById('status-save'),
+
+      // Modal
+      modalEl: document.getElementById('diagram-modal'),
+      modalBodyEl: document.getElementById('modal-body'),
+      modalTitleEl: document.getElementById('modal-title'),
+      modalZoomValEl: document.getElementById('modal-zoom-val'),
+      modalScale: 1.0,
+
+      init() {
+        this.setupEditorEvents();
+        this.setupToolbarEvents();
+        this.setupSplitter();
+        this.setupKeyboardShortcuts();
+        this.setupModalEvents();
+
+        // MERMAID CONFIGURATION: BIGGER FONTS AND NO CONSTRAINTS
+        if (window.mermaid) {
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'dark',
+            securityLevel: 'loose',
+            fontSize: 18,
+            flowchart: {
+              useMaxWidth: false,
+              htmlLabels: true,
+              curve: 'basis',
+              nodeSpacing: 50,
+              rankSpacing: 50
+            },
+            sequence: {
+              useMaxWidth: false,
+              actorFontSize: 18,
+              messageFontSize: 16,
+              noteFontSize: 15,
+              actorMargin: 80,
+              width: 180
+            },
+            class: { useMaxWidth: false },
+            state: { useMaxWidth: false }
+          });
+        }
+
+        // Set default mode to Preview
+        this.setMode('preview');
+
+        // Request initial file from Rust backend
+        this.sendIpc('get_init_data', {});
+      },
+
+      copyCode(btn) {
+        const codeBox = btn.closest('.code-box');
+        if (!codeBox) return;
+        const codeEl = codeBox.querySelector('.code-body code');
+        if (!codeEl) return;
+
+        navigator.clipboard.writeText(codeEl.innerText).then(() => {
+          const span = btn.querySelector('span');
+          const original = span.innerText;
+          span.innerText = 'Copied! ✓';
+          btn.style.color = 'var(--success)';
+          btn.style.borderColor = 'var(--success)';
+          setTimeout(() => {
+            span.innerText = original;
+            btn.style.color = '';
+            btn.style.borderColor = '';
+          }, 1600);
+        });
+      },
+
+      sendIpc(cmd, payload) {
+        if (window.ipc) {
+          window.ipc.postMessage(JSON.stringify({ cmd, ...payload }));
+        } else {
+          console.log('[IPC Dev Mode]', cmd, payload);
+        }
+      },
+
+      handleIpc(message) {
+        try {
+          const data = typeof message === 'string' ? JSON.parse(message) : message;
+          switch (data.type) {
+            case 'init':
+            case 'file_opened':
+              this.loadFile(data.path, data.name, data.content);
+              break;
+            case 'file_saved':
+              this.onFileSaved(data.path, data.name);
+              break;
+            case 'error':
+              alert('Error: ' + data.message);
+              break;
+          }
+        } catch (e) {
+          console.error('IPC error:', e);
+        }
+      },
+
+      loadFile(path, name, content) {
+        this.filePath = path;
+        this.fileName = name || 'Welcome.md';
+        this.editorEl.value = content || '';
+        this.isDirty = false;
+        this.updateFileDisplay();
+        this.updateEditor();
+        this.renderMarkdown();
+        
+        // ALWAYS default to PREVIEW mode when opening files!
+        this.setMode('preview');
+      },
+
+      onFileSaved(path, name) {
+        this.filePath = path;
+        this.fileName = name;
+        this.isDirty = false;
+        this.statusSaveEl.innerText = '✓ Saved';
+        this.updateFileDisplay();
+      },
+
+      updateFileDisplay() {
+        this.fileNameEl.innerText = this.fileName;
+        this.dirtyDotEl.classList.toggle('is-dirty', this.isDirty);
+        this.statusFileEl.innerText = `📄 ${this.fileName}`;
+        const fullTitle = `${this.isDirty ? '● ' : ''}${this.fileName} - MDViewer`;
+        document.title = fullTitle;
+        this.sendIpc('set_title', { title: fullTitle });
+      },
+
+      markDirty() {
+        if (!this.isDirty) {
+          this.isDirty = true;
+          this.statusSaveEl.innerText = '● Unsaved';
+          this.updateFileDisplay();
+        }
+      },
+
+      renderMarkdown() {
+        const text = this.editorEl.value;
+        this.previewEl.innerHTML = SimpleMarkdown.render(text);
+
+        // Run Mermaid if loaded
+        if (window.mermaid) {
+          try {
+            const mermaidNodes = this.previewEl.querySelectorAll('.mermaid');
+            if (mermaidNodes.length > 0) {
+              mermaid.run({
+                nodes: mermaidNodes
+              }).then(() => {
+                this.enlargeMermaidDiagrams();
+              }).catch(e => {
+                console.error('Mermaid render error:', e);
+                this.enlargeMermaidDiagrams();
+              });
+            }
+          } catch (e) {
+            console.error('Mermaid sync error:', e);
+          }
+        }
+      },
+
+      enlargeMermaidDiagrams() {
+        const svgs = this.previewEl.querySelectorAll('.mermaid svg');
+        svgs.forEach(svg => {
+          svg.style.maxWidth = 'none';
+
+          const viewBox = svg.viewBox && svg.viewBox.baseVal;
+          if (viewBox && viewBox.width > 0) {
+            const vbWidth = viewBox.width;
+            if (vbWidth > 700) {
+              const targetWidth = Math.max(vbWidth * 1.3, 1100);
+              svg.style.minWidth = targetWidth + 'px';
+              svg.style.width = targetWidth + 'px';
+            } else {
+              svg.style.minWidth = Math.min(vbWidth * 1.35, 900) + 'px';
+              svg.style.transform = 'scale(1.25)';
+              svg.style.transformOrigin = 'center top';
+            }
+          } else {
+            svg.style.minWidth = '100%';
+            svg.style.transform = 'scale(1.2)';
+            svg.style.transformOrigin = 'center top';
+          }
+        });
+      },
+
+      zoomDiagram(cardId, delta) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        const wrapper = card.querySelector('.diagram-zoom-wrapper');
+        const valLabel = card.querySelector('.diagram-zoom-val');
+        if (!wrapper) return;
+
+        let currentScale = parseFloat(wrapper.getAttribute('data-scale') || '1.0');
+        currentScale = Math.max(0.4, Math.min(3.5, currentScale + delta));
+        wrapper.setAttribute('data-scale', currentScale);
+        wrapper.style.transform = `scale(${currentScale})`;
+        if (valLabel) valLabel.innerText = Math.round(currentScale * 100) + '%';
+      },
+
+      resetZoomDiagram(cardId) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        const wrapper = card.querySelector('.diagram-zoom-wrapper');
+        const valLabel = card.querySelector('.diagram-zoom-val');
+        if (!wrapper) return;
+
+        wrapper.setAttribute('data-scale', '1.0');
+        wrapper.style.transform = 'scale(1.0)';
+        if (valLabel) valLabel.innerText = '100%';
+      },
+
+      fullscreenDiagram(cardId) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        const headerTitle = card.querySelector('.diagram-header span').innerText;
+        const content = card.querySelector('.diagram-body').innerHTML;
+
+        this.modalTitleEl.innerText = headerTitle;
+        this.modalBodyEl.innerHTML = content;
+        this.modalScale = 1.3;
+        this.updateModalZoom();
+        this.modalEl.classList.add('show');
+      },
+
+      updateModalZoom() {
+        const wrapper = this.modalBodyEl.querySelector('.diagram-zoom-wrapper') || this.modalBodyEl.firstElementChild;
+        if (wrapper) {
+          wrapper.style.transform = `scale(${this.modalScale})`;
+          wrapper.style.transformOrigin = 'center top';
+        }
+        this.modalZoomValEl.innerText = Math.round(this.modalScale * 100) + '%';
+      },
+
+      setupModalEvents() {
+        document.getElementById('modal-close').addEventListener('click', () => {
+          this.modalEl.classList.remove('show');
+          this.modalBodyEl.innerHTML = '';
+        });
+
+        document.getElementById('modal-zoom-in').addEventListener('click', () => {
+          this.modalScale = Math.min(4.0, this.modalScale + 0.25);
+          this.updateModalZoom();
+        });
+
+        document.getElementById('modal-zoom-out').addEventListener('click', () => {
+          this.modalScale = Math.max(0.4, this.modalScale - 0.25);
+          this.updateModalZoom();
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.modalEl.classList.contains('show')) {
+            this.modalEl.classList.remove('show');
+          }
+        });
+      },
+
+      updateEditor() {
+        const lines = this.editorEl.value.split('\n');
+        const count = lines.length;
+        this.lineNumbersEl.innerHTML = Array.from({ length: count }, (_, i) => i + 1).join('<br>');
+
+        const words = (this.editorEl.value.match(/\b\S+\b/g) || []).length;
+        this.statusWordsEl.innerText = `${words} words`;
+        this.statusLinesEl.innerText = `${count} lines`;
+      },
+
+      updateCursor() {
+        const text = this.editorEl.value;
+        const pos = this.editorEl.selectionStart;
+        const lines = text.substring(0, pos).split('\n');
+        const line = lines.length;
+        const col = lines[lines.length - 1].length + 1;
+        this.statusCursorEl.innerText = `Ln ${line}, Col ${col}`;
+      },
+
+      setupEditorEvents() {
+        let timer = null;
+        this.editorEl.addEventListener('input', () => {
+          this.markDirty();
+          this.updateEditor();
+          clearTimeout(timer);
+          timer = setTimeout(() => this.renderMarkdown(), 150);
+        });
+
+        this.editorEl.addEventListener('click', () => this.updateCursor());
+        this.editorEl.addEventListener('keyup', () => this.updateCursor());
+
+        this.editorEl.addEventListener('scroll', () => {
+          this.lineNumbersEl.scrollTop = this.editorEl.scrollTop;
+          
+          if (document.body.classList.contains('mode-split')) {
+            const ratio = this.editorEl.scrollTop / (this.editorEl.scrollHeight - this.editorEl.clientHeight);
+            this.previewEl.scrollTop = ratio * (this.previewEl.scrollHeight - this.previewEl.clientHeight);
+          }
+        });
+
+        this.editorEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.editorEl.selectionStart;
+            const end = this.editorEl.selectionEnd;
+            this.editorEl.value = this.editorEl.value.substring(0, start) + '  ' + this.editorEl.value.substring(end);
+            this.editorEl.selectionStart = this.editorEl.selectionEnd = start + 2;
+            this.markDirty();
+            this.updateEditor();
+          }
+        });
+      },
+
+      setupToolbarEvents() {
+        document.getElementById('btn-new').addEventListener('click', () => {
+          if (this.isDirty && !confirm('Discard unsaved changes?')) return;
+          this.loadFile(null, 'Untitled.md', '# New Document\n\nWrite your markdown here.\n');
+          this.setMode('split');
+        });
+
+        document.getElementById('btn-open').addEventListener('click', () => {
+          this.sendIpc('open_file', {});
+        });
+
+        document.getElementById('btn-save').addEventListener('click', () => {
+          this.save();
+        });
+
+        document.getElementById('btn-save-as').addEventListener('click', () => {
+          this.saveAs();
+        });
+
+        document.getElementById('mode-edit').addEventListener('click', () => this.setMode('edit'));
+        document.getElementById('mode-split').addEventListener('click', () => this.setMode('split'));
+        document.getElementById('mode-preview').addEventListener('click', () => this.setMode('preview'));
+
+        document.getElementById('btn-theme').addEventListener('click', () => {
+          const current = document.body.getAttribute('data-theme');
+          const next = current === 'dark' ? 'light' : 'dark';
+          document.body.setAttribute('data-theme', next);
+          document.getElementById('theme-icon').innerText = next === 'dark' ? '🌙' : '☀️';
+          if (window.mermaid) {
+            mermaid.initialize({ theme: next === 'dark' ? 'dark' : 'default' });
+            this.renderMarkdown();
+          }
+        });
+
+        document.getElementById('btn-print').addEventListener('click', () => {
+          window.print();
+        });
+
+        const dropdownBtn = document.getElementById('btn-insert');
+        const dropdownContent = document.getElementById('dropdown-diagrams');
+
+        dropdownBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdownContent.classList.toggle('show');
+        });
+
+        window.addEventListener('click', () => {
+          dropdownContent.classList.remove('show');
+        });
+
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const template = item.getAttribute('data-template');
+            this.insertTemplate(template);
+          });
+        });
+      },
+
+      setMode(mode) {
+        document.body.className = `mode-${mode}`;
+        document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById(`mode-${mode}`);
+        if (btn) btn.classList.add('active');
+        if (mode !== 'edit') {
+          this.renderMarkdown();
+        }
+      },
+
+      setupSplitter() {
+        const splitter = document.getElementById('splitter');
+        const editorPane = document.getElementById('editor-pane');
+        const container = document.getElementById('main-container');
+
+        let isDragging = false;
+
+        splitter.addEventListener('mousedown', () => {
+          isDragging = true;
+          splitter.classList.add('dragging');
+          document.body.style.cursor = 'col-resize';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          const containerRect = container.getBoundingClientRect();
+          const offset = e.clientX - containerRect.left;
+          const percentage = (offset / containerRect.width) * 100;
+          if (percentage > 15 && percentage < 85) {
+            editorPane.style.flex = 'none';
+            editorPane.style.width = `${percentage}%`;
+          }
+        });
+
+        window.addEventListener('mouseup', () => {
+          if (isDragging) {
+            isDragging = false;
+            splitter.classList.remove('dragging');
+            document.body.style.cursor = 'default';
+          }
+        });
+      },
+
+      setupKeyboardShortcuts() {
+        window.addEventListener('keydown', (e) => {
+          if (e.ctrlKey || e.metaKey) {
+            if (e.key === 's') {
+              e.preventDefault();
+              if (e.shiftKey) this.saveAs();
+              else this.save();
+            } else if (e.key === 'o') {
+              e.preventDefault();
+              this.sendIpc('open_file', {});
+            } else if (e.key === 'n') {
+              e.preventDefault();
+              document.getElementById('btn-new').click();
+            } else if (e.key === 'p') {
+              e.preventDefault();
+              const curMode = document.body.className;
+              this.setMode(curMode === 'mode-preview' ? 'mode-split' : 'mode-preview');
+            } else if (e.key === 'e') {
+              e.preventDefault();
+              const curMode = document.body.className;
+              this.setMode(curMode === 'mode-edit' ? 'mode-split' : 'mode-edit');
+            }
+          }
+        });
+      },
+
+      save() {
+        if (this.filePath) {
+          this.sendIpc('save_file', { path: this.filePath, content: this.editorEl.value });
+        } else {
+          this.saveAs();
+        }
+      },
+
+      saveAs() {
+        this.sendIpc('save_file_as', { content: this.editorEl.value, defaultName: this.fileName });
+      },
+
+      insertTemplate(type) {
+        let snippet = '';
+        switch (type) {
+          case 'udp-rfc':
+            snippet = `\n\`\`\`udp
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |       Destination Port        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Length             |           Checksum            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                             data                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\`\`\`\n`;
+            break;
+
+          case 'udp-dsl':
+            snippet = `\n\`\`\`packet
+title: User Datagram Protocol Header (RFC 768)
+width: 32
+0-15: Source Port (16 bits)
+16-31: Destination Port (16 bits)
+32-47: Length in Octets (16 bits)
+48-63: Checksum (16 bits)
+64-95: Application Payload Data
+\`\`\`\n`;
+            break;
+
+          case 'tcp-rfc':
+            snippet = `\n\`\`\`packet
+title: Transmission Control Protocol Header (RFC 793)
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |       Destination Port        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Sequence Number                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Acknowledgment Number                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Data |           |U|A|P|R|S|F|                               |
+| Offset| Reserved  |R|C|S|S|Y|I|            Window             |
+|       |           |G|K|H|T|N|N|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Checksum            |         Urgent Pointer        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\`\`\`\n`;
+            break;
+
+          case 'ip-rfc':
+            snippet = `\n\`\`\`packet
+title: Internet Protocol v4 Header (RFC 791)
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  IHL  |Type of Service|          Total Length         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Identification        |Flags|      Fragment Offset    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Time to Live |    Protocol   |        Header Checksum        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Source Address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Destination Address                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\`\`\`\n`;
+            break;
+
+          case 'mermaid-sequence':
+            snippet = `\n\`\`\`mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant DNS as DNS Server (UDP:53)
+    participant Web as Web Server (TCP:443)
+
+    Note over Client,DNS: UDP Query - Fast, Connectionless
+    Client->>DNS: UDP Datagram: Query "example.com"
+    DNS-->>Client: UDP Datagram: Response "93.184.216.34"
+
+    Note over Client,Web: TCP Handshake & TLS
+    Client->>Web: TCP SYN
+    Web-->>Client: TCP SYN-ACK
+    Client->>Web: TCP ACK (Established)
+\`\`\`\n`;
+            break;
+
+          case 'mermaid-flowchart':
+            snippet = `\n\`\`\`mermaid
+flowchart TD
+    A[Incoming UDP Packet] --> B{Valid Checksum?}
+    B -- Yes --> C{Port 53?}
+    B -- No --> D[Drop Packet silently]
+    C -- Yes --> E[Dispatch to DNS Handler]
+    C -- No --> F[Dispatch to General UDP Handler]
+\`\`\`\n`;
+            break;
+
+          case 'mermaid-class':
+            snippet = `\n\`\`\`mermaid
+classDiagram
+    class UdpHeader {
+        +uint16 source_port
+        +uint16 dest_port
+        +uint16 length
+        +uint16 checksum
+        +validate() bool
+    }
+    class UdpPacket {
+        +UdpHeader header
+        +bytes payload
+        +serialize() bytes
+    }
+    UdpPacket *-- UdpHeader
+\`\`\`\n`;
+            break;
+        }
+
+        const start = this.editorEl.selectionStart;
+        const end = this.editorEl.selectionEnd;
+        const before = this.editorEl.value.substring(0, start);
+        const after = this.editorEl.value.substring(end);
+
+        this.editorEl.value = before + snippet + after;
+        this.editorEl.selectionStart = this.editorEl.selectionEnd = start + snippet.length;
+        this.editorEl.focus();
+        this.markDirty();
+        this.updateEditor();
+        this.renderMarkdown();
+      }
+    };
+
+    window.receiveFromRust = (msg) => {
+      App.handleIpc(msg);
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      App.init();
+    });
+  </script>
+</body>
+</html>
