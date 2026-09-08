@@ -1,5 +1,6 @@
 {
   "preview": {
+    "enable_cursor": true,
     "scroll_down": "j",
     "scroll_up": "k",
     "scroll_right": "l",
@@ -27,7 +28,20 @@
       "nav_up": "k"
     }
   },
+  "theme": {
+    "heading_color": "#58a6ff",
+    "bold_color": "#f0883e",
+    "italic_color": "#d29922",
+    "inline_code_color": "#ff7b72",
+    "inline_code_bg": "#21262d",
+    "link_color": "#58a6ff",
+    "blockquote_color": "#8b949e",
+    "text_color": "#c9d1d9",
+    "table_border_color": "#30363d",
+    "hr_color": "#30363d"
+  },
   "settings": {
+    "is_copy_to_yank": true,
     "scroll_step_y": 60,
     "scroll_step_x": 60,
     "max_fps": 60

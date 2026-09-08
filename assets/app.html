@@ -29,6 +29,18 @@
       --statusbar-h: 26px;
       --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-mono: "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+
+      /* Markdown Custom Theme Colors */
+      --md-heading: #58a6ff;
+      --md-bold: #f0883e;
+      --md-italic: #d29922;
+      --md-inline-code: #ff7b72;
+      --md-inline-code-bg: #21262d;
+      --md-link: #58a6ff;
+      --md-blockquote: #8b949e;
+      --md-text: #cdd6f4;
+      --md-table-border: #45475a;
+      --md-hr: #45475a;
     }
 
     [data-theme="light"] {
@@ -424,12 +436,9 @@
       box-shadow: 0 0 8px rgba(88, 166, 255, 0.55);
       border-radius: 2px;
     }
-    .vim-cursor.insert {
-      display: block !important;
-      width: 2.5px !important;
-      background: var(--accent);
-      box-shadow: 0 0 6px rgba(88, 166, 255, 0.85);
-      animation: vim-cursor-blink 1s infinite;
+    .vim-cursor.insert,
+    body.vim-mode-insert .vim-cursor {
+      display: none !important;
     }
     .vim-cursor.visual {
       display: block !important;
@@ -524,6 +533,7 @@
 
     /* Preview Pane (Default View) */
     .preview-pane {
+      position: relative;
       flex: 1;
       min-width: 150px;
       height: 100%;
@@ -533,6 +543,72 @@
       background-color: var(--bg-primary);
       user-select: text;
       scroll-behavior: auto;
+    }
+
+    /* Floating Neovide Preview Cursor */
+    .preview-cursor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10;
+      box-sizing: border-box;
+      display: none;
+      transition: transform 0.08s cubic-bezier(0.18, 0.89, 0.32, 1.15), width 0.08s ease, height 0.08s ease;
+      border-radius: 2px;
+    }
+    .preview-cursor.normal {
+      display: block !important;
+      background: rgba(88, 166, 255, 0.45);
+      border: 1.5px solid var(--accent);
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.55);
+    }
+    .preview-cursor.visual {
+      display: block !important;
+      background: rgba(210, 153, 34, 0.45);
+      border: 1.5px solid var(--warning);
+      box-shadow: 0 0 10px rgba(210, 153, 34, 0.55);
+    }
+
+    /* Active & Visual line/block highlight */
+    .preview-active-block {
+      background: rgba(88, 166, 255, 0.08) !important;
+      border-left: 3.5px solid var(--accent) !important;
+      padding-left: 8px !important;
+      border-radius: 3px;
+      transition: background 0.08s ease;
+    }
+
+    .preview-visual-block {
+      background: rgba(210, 153, 34, 0.20) !important;
+      border-left: 3.5px solid var(--warning) !important;
+      padding-left: 8px !important;
+      border-radius: 3px;
+      transition: background 0.08s ease;
+    }
+
+    /* Sleek UI Toast notification */
+    .app-toast {
+      position: fixed;
+      bottom: 36px;
+      right: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--accent);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+      z-index: 99999;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .app-toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* Layout Modes */
@@ -717,7 +793,7 @@
     .markdown-body {
       font-size: 14.5px;
       line-height: 1.65;
-      color: var(--text-primary);
+      color: var(--md-text, var(--text-primary));
       word-wrap: break-word;
     }
     .markdown-body h1, .markdown-body h2, .markdown-body h3,
@@ -726,7 +802,13 @@
       margin-bottom: 10px;
       font-weight: 600;
       line-height: 1.25;
-      color: var(--text-primary);
+      color: var(--md-heading, var(--text-primary));
+    }
+    .markdown-body strong {
+      color: var(--md-bold, #f0883e);
+    }
+    .markdown-body em {
+      color: var(--md-italic, #d29922);
     }
     .markdown-body h1 {
       font-size: 1.85rem;
@@ -746,23 +828,23 @@
       padding-left: 22px;
     }
     .markdown-body li { margin-bottom: 3px; }
-    .markdown-body a { color: var(--accent); text-decoration: none; }
+    .markdown-body a { color: var(--md-link, var(--accent)); text-decoration: none; }
     .markdown-body a:hover { text-decoration: underline; }
 
     .markdown-body code:not(.code-body *) {
       font-family: var(--font-mono);
-      background-color: var(--code-bg);
-      color: var(--accent-hover);
-      padding: 2px 5px;
+      background-color: var(--md-inline-code-bg, var(--code-bg)) !important;
+      color: var(--md-inline-code, var(--accent-hover)) !important;
+      padding: 2px 6px;
       border-radius: 4px;
       font-size: 88%;
       border: 1px solid var(--border-light);
     }
 
     .markdown-body blockquote {
-      border-left: 4px solid var(--accent);
+      border-left: 4px solid var(--md-blockquote, var(--accent));
       padding: 8px 16px;
-      color: var(--text-secondary);
+      color: var(--md-blockquote, var(--text-secondary));
       background: var(--bg-tertiary);
       border-radius: 0 5px 5px 0;
     }
@@ -771,12 +853,12 @@
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 18px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--md-table-border, var(--border));
       border-radius: 6px;
       overflow: hidden;
     }
     .markdown-body th, .markdown-body td {
-      border: 1px solid var(--border);
+      border: 1px solid var(--md-table-border, var(--border));
       padding: 8px 14px;
       text-align: left;
     }
@@ -790,7 +872,7 @@
     .markdown-body hr {
       border: 0;
       height: 1px;
-      background: var(--border);
+      background: var(--md-hr, var(--border));
       margin: 24px 0;
     }
 
@@ -1631,6 +1713,41 @@
       background: var(--bg-card);
       color: var(--text-primary);
     }
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .color-swatch-picker {
+      -webkit-appearance: none;
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 32px;
+      height: 28px;
+      padding: 0;
+      cursor: pointer;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .color-swatch-picker:hover {
+      border-color: var(--accent);
+    }
+    .color-swatch-picker::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+    .color-swatch-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: 4px;
+    }
+    .color-hex-box {
+      width: 95px !important;
+      font-family: var(--font-mono);
+      text-transform: lowercase;
+      font-size: 12px;
+      text-align: center;
+    }
     .kb-alert {
       padding: 10px 14px;
       border-radius: 6px;
@@ -1835,6 +1952,7 @@
     </aside>
 
     <section class="preview-pane" id="preview-pane">
+      <div class="preview-cursor" id="preview-cursor"></div>
       <article class="markdown-body" id="preview"></article>
     </section>
   </main>
@@ -1926,6 +2044,16 @@
           <div class="kb-group">
             <div class="kb-group-title">
               <span>🖱️ Preview Mode Navigation</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Enable Cursor</span>
+                <span class="kb-row-desc">Show interactive cursor &amp; Vim Normal/Visual selection</span>
+              </div>
+              <select class="kb-input-box" data-cat="preview" data-key="enable_cursor" id="kb-preview-enable-cursor">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -2023,83 +2151,194 @@
             </div>
 
             <!-- Side Tab Options -->
-            <div class="kb-group-title" style="margin-top:4px; font-size:10px; color:var(--accent);">
-              <span>📌 Side Tab Mode Options</span>
-            </div>
-            <div class="kb-row">
-              <div class="kb-row-info">
-                <span class="kb-row-label">Side Tab Position</span>
-                <span class="kb-row-desc">Placement: Left or Right of window (Default: Left)</span>
+            <div id="toc-sidetab-fields" style="display:flex; flex-direction:column; gap:8px;">
+              <div class="kb-group-title" style="margin-top:4px; font-size:10px; color:var(--accent);">
+                <span>📌 Side Tab Mode Options</span>
               </div>
-              <select class="kb-input-box" data-cat="toc.side_tab" data-key="position">
-                <option value="left">Left</option>
-                <option value="right">Right</option>
-              </select>
-            </div>
-            <div class="kb-row">
-              <div class="kb-row-info">
-                <span class="kb-row-label">Side Tab Width (%)</span>
-                <span class="kb-row-desc">Percentage of window width (e.g. 15% - 50%)</span>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Side Tab Position</span>
+                  <span class="kb-row-desc">Placement: Left or Right of window (Default: Left)</span>
+                </div>
+                <select class="kb-input-box" data-cat="toc.side_tab" data-key="position">
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
               </div>
-              <input type="number" min="10" max="60" step="5" class="kb-input-box" data-cat="toc.side_tab" data-key="width_percent" placeholder="20">
-            </div>
-            <div class="kb-row">
-              <div class="kb-row-info">
-                <span class="kb-row-label">Side Tab Navigate Down</span>
-                <span class="kb-row-desc">Key to move selection down in Side Tab (Default: j)</span>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Side Tab Width (%)</span>
+                  <span class="kb-row-desc">Percentage of window width (e.g. 15% - 50%)</span>
+                </div>
+                <input type="number" min="10" max="60" step="5" class="kb-input-box" data-cat="toc.side_tab" data-key="width_percent" placeholder="20">
               </div>
-              <input type="text" class="kb-input-box" data-cat="toc.side_tab" data-key="nav_down" placeholder="j">
-            </div>
-            <div class="kb-row">
-              <div class="kb-row-info">
-                <span class="kb-row-label">Side Tab Navigate Up</span>
-                <span class="kb-row-desc">Key to move selection up in Side Tab (Default: k)</span>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Side Tab Navigate Down</span>
+                  <span class="kb-row-desc">Key to move selection down in Side Tab (Default: j)</span>
+                </div>
+                <input type="text" class="kb-input-box" data-cat="toc.side_tab" data-key="nav_down" placeholder="j">
               </div>
-              <input type="text" class="kb-input-box" data-cat="toc.side_tab" data-key="nav_up" placeholder="k">
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Side Tab Navigate Up</span>
+                  <span class="kb-row-desc">Key to move selection up in Side Tab (Default: k)</span>
+                </div>
+                <input type="text" class="kb-input-box" data-cat="toc.side_tab" data-key="nav_up" placeholder="k">
+              </div>
             </div>
 
             <!-- Floating Window Options -->
-            <div class="kb-group-title" style="margin-top:4px; font-size:10px; color:var(--accent);">
-              <span>🪟 Floating Window Mode Options</span>
+            <div id="toc-floating-fields" style="display:flex; flex-direction:column; gap:8px;">
+              <div class="kb-group-title" style="margin-top:4px; font-size:10px; color:var(--accent);">
+                <span>🪟 Floating Window Mode Options</span>
+              </div>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Floating Window Position</span>
+                  <span class="kb-row-desc">Placement: Center, Top, or Bottom (Default: Center)</span>
+                </div>
+                <select class="kb-input-box" data-cat="toc.floating_window" data-key="position">
+                  <option value="center">Center</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </div>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Floating Window Width (%)</span>
+                  <span class="kb-row-desc">Percentage of window width (e.g. 30% - 90%)</span>
+                </div>
+                <input type="number" min="20" max="95" step="5" class="kb-input-box" data-cat="toc.floating_window" data-key="width_percent" placeholder="50">
+              </div>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Floating Window Height (%)</span>
+                  <span class="kb-row-desc">Percentage of window height (e.g. 30% - 90%)</span>
+                </div>
+                <input type="number" min="20" max="95" step="5" class="kb-input-box" data-cat="toc.floating_window" data-key="height_percent" placeholder="60">
+              </div>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Floating Window Navigate Down</span>
+                  <span class="kb-row-desc">Key to move selection down in Floating Window (Default: j)</span>
+                </div>
+                <input type="text" class="kb-input-box" data-cat="toc.floating_window" data-key="nav_down" placeholder="j">
+              </div>
+              <div class="kb-row">
+                <div class="kb-row-info">
+                  <span class="kb-row-label">Floating Window Navigate Up</span>
+                  <span class="kb-row-desc">Key to move selection up in Floating Window (Default: k)</span>
+                </div>
+                <input type="text" class="kb-input-box" data-cat="toc.floating_window" data-key="nav_up" placeholder="k">
+              </div>
+            </div>
+          </div>
+
+          <!-- Markdown Color Rendering Theme -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>🎨 Markdown Color Rendering Theme</span>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
-                <span class="kb-row-label">Floating Window Position</span>
-                <span class="kb-row-desc">Placement: Center, Top, or Bottom (Default: Center)</span>
+                <span class="kb-row-label">Header Color (#)</span>
+                <span class="kb-row-desc">Color for headings and title levels (# to ######)</span>
               </div>
-              <select class="kb-input-box" data-cat="toc.floating_window" data-key="position">
-                <option value="center">Center</option>
-                <option value="top">Top</option>
-                <option value="bottom">Bottom</option>
-              </select>
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.heading_color" value="#58a6ff">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="heading_color" spellcheck="false" placeholder="#58a6ff">
+              </div>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
-                <span class="kb-row-label">Floating Window Width (%)</span>
-                <span class="kb-row-desc">Percentage of window width (e.g. 30% - 90%)</span>
+                <span class="kb-row-label">Bold Text Color (**)</span>
+                <span class="kb-row-desc">Color for **bold** text and strong elements</span>
               </div>
-              <input type="number" min="20" max="95" step="5" class="kb-input-box" data-cat="toc.floating_window" data-key="width_percent" placeholder="50">
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.bold_color" value="#f0883e">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="bold_color" spellcheck="false" placeholder="#f0883e">
+              </div>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
-                <span class="kb-row-label">Floating Window Height (%)</span>
-                <span class="kb-row-desc">Percentage of window height (e.g. 30% - 90%)</span>
+                <span class="kb-row-label">Italic Text Color (*)</span>
+                <span class="kb-row-desc">Color for *italic* text and emphasis elements</span>
               </div>
-              <input type="number" min="20" max="95" step="5" class="kb-input-box" data-cat="toc.floating_window" data-key="height_percent" placeholder="60">
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.italic_color" value="#d29922">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="italic_color" spellcheck="false" placeholder="#d29922">
+              </div>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
-                <span class="kb-row-label">Floating Window Navigate Down</span>
-                <span class="kb-row-desc">Key to move selection down in Floating Window (Default: j)</span>
+                <span class="kb-row-label">Inline Code Text Color</span>
+                <span class="kb-row-desc">Color for text inside `code` boxes</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="toc.floating_window" data-key="nav_down" placeholder="j">
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.inline_code_color" value="#ff7b72">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="inline_code_color" spellcheck="false" placeholder="#ff7b72">
+              </div>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
-                <span class="kb-row-label">Floating Window Navigate Up</span>
-                <span class="kb-row-desc">Key to move selection up in Floating Window (Default: k)</span>
+                <span class="kb-row-label">Inline Code Box Background</span>
+                <span class="kb-row-desc">Background color for `code` boxes</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="toc.floating_window" data-key="nav_up" placeholder="k">
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.inline_code_bg" value="#21262d">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="inline_code_bg" spellcheck="false" placeholder="#21262d">
+              </div>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Link / URL Color</span>
+                <span class="kb-row-desc">Color for markdown [links](url)</span>
+              </div>
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.link_color" value="#58a6ff">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="link_color" spellcheck="false" placeholder="#58a6ff">
+              </div>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Quote / Blockquote Color</span>
+                <span class="kb-row-desc">Color for > blockquote text and side border</span>
+              </div>
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.blockquote_color" value="#8b949e">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="blockquote_color" spellcheck="false" placeholder="#8b949e">
+              </div>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Body Text Color</span>
+                <span class="kb-row-desc">Base paragraph and text color</span>
+              </div>
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.text_color" value="#c9d1d9">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="text_color" spellcheck="false" placeholder="#c9d1d9">
+              </div>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Divider Line Color (---)</span>
+                <span class="kb-row-desc">Color for horizontal rules &amp; dividers</span>
+              </div>
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.hr_color" value="#30363d">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="hr_color" spellcheck="false" placeholder="#30363d">
+              </div>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Table Border Color</span>
+                <span class="kb-row-desc">Color for markdown table borders and lines</span>
+              </div>
+              <div class="color-picker-wrapper">
+                <input type="color" class="color-swatch-picker" data-sync="theme.table_border_color" value="#30363d">
+                <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="table_border_color" spellcheck="false" placeholder="#30363d">
+              </div>
             </div>
           </div>
 
@@ -2127,7 +2366,17 @@
           <!-- Performance & Display Settings -->
           <div class="kb-group">
             <div class="kb-group-title">
-              <span>🖥️ Performance &amp; Display</span>
+              <span>🖥️ Performance &amp; Vim Settings</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Yank to Clipboard</span>
+                <span class="kb-row-desc">Pressing 'y' copies to OS clipboard (true) or only inside Vim buffer (false)</span>
+              </div>
+              <select class="kb-input-box" data-cat="settings" data-key="is_copy_to_yank">
+                <option value="true">true (System Clipboard)</option>
+                <option value="false">false (Vim Only)</option>
+              </select>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -3636,10 +3885,12 @@
         let inCode = false;
         let codeLang = '';
         let codeBuffer = [];
+        let codeStartLine = 1;
         let inList = false;
         let listType = '';
         let inTable = false;
         let tableRows = [];
+        let tableStartLine = 1;
 
         function flushList() {
           if (inList) {
@@ -3649,7 +3900,7 @@
         }
         function flushTable() {
           if (inTable && tableRows.length > 0) {
-            out += '<table>\n';
+            out += `<table data-line="${tableStartLine}">\n`;
             tableRows.forEach((row, i) => {
               const tag = i === 0 ? 'th' : 'td';
               out += '  <tr>' + row.map(c => `<${tag}>${SimpleMarkdown.inline(c.trim())}</${tag}>`).join('') + '</tr>\n';
@@ -3662,17 +3913,19 @@
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
+          const lineNum = i + 1;
           if (line.trim().startsWith('```')) {
             flushList();
             flushTable();
             if (!inCode) {
               inCode = true;
               codeLang = line.trim().substring(3).trim().toLowerCase();
+              codeStartLine = lineNum;
               codeBuffer = [];
             } else {
               inCode = false;
               const rawCode = codeBuffer.join('\n');
-              out += SimpleMarkdown.renderCodeBlock(codeLang, rawCode);
+              out += SimpleMarkdown.renderCodeBlock(codeLang, rawCode, codeStartLine);
               codeBuffer = [];
             }
             continue;
@@ -3687,6 +3940,7 @@
             flushList();
             const cells = line.trim().slice(1, -1).split('|');
             if (!cells.every(c => /^[\s-:]+$/.test(c))) {
+              if (!inTable) tableStartLine = lineNum;
               inTable = true;
               tableRows.push(cells);
             }
@@ -3707,7 +3961,7 @@
             const level = hMatch[1].length;
             const text = SimpleMarkdown.inline(hMatch[2]);
             const id = hMatch[2].toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-            out += `<h${level} id="${id}">${text}</h${level}>\n`;
+            out += `<h${level} id="${id}" data-line="${lineNum}">${text}</h${level}>\n`;
             continue;
           }
 
@@ -3716,19 +3970,19 @@
             flushList();
             const type = alertMatch[1].toLowerCase();
             const extra = alertMatch[2] ? `<p>${SimpleMarkdown.inline(alertMatch[2])}</p>` : '';
-            out += `<div class="callout ${type}"><div class="callout-title">${type}</div>${extra}</div>\n`;
+            out += `<div class="callout ${type}" data-line="${lineNum}"><div class="callout-title">${type}</div>${extra}</div>\n`;
             continue;
           }
 
           if (line.startsWith('>')) {
             flushList();
-            out += `<blockquote>${SimpleMarkdown.inline(line.replace(/^>\s*/, ''))}</blockquote>\n`;
+            out += `<blockquote data-line="${lineNum}">${SimpleMarkdown.inline(line.replace(/^>\s*/, ''))}</blockquote>\n`;
             continue;
           }
 
           if (/^(\*\*\*|---|___)$/.test(line.trim())) {
             flushList();
-            out += '<hr>\n';
+            out += `<hr data-line="${lineNum}">\n`;
             continue;
           }
 
@@ -3741,7 +3995,7 @@
               out += '<ul class="task-list" style="list-style:none; padding-left:4px;">\n';
             }
             const checked = taskMatch[2].toLowerCase() === 'x' ? 'checked' : '';
-            out += `<li><input type="checkbox" ${checked} disabled> ${SimpleMarkdown.inline(taskMatch[3])}</li>\n`;
+            out += `<li data-line="${lineNum}"><input type="checkbox" ${checked} disabled> ${SimpleMarkdown.inline(taskMatch[3])}</li>\n`;
             continue;
           }
 
@@ -3753,7 +4007,7 @@
               listType = 'ul';
               out += '<ul>\n';
             }
-            out += `<li>${SimpleMarkdown.inline(ulMatch[2])}</li>\n`;
+            out += `<li data-line="${lineNum}">${SimpleMarkdown.inline(ulMatch[2])}</li>\n`;
             continue;
           }
 
@@ -3765,12 +4019,12 @@
               listType = 'ol';
               out += '<ol>\n';
             }
-            out += `<li>${SimpleMarkdown.inline(olMatch[2])}</li>\n`;
+            out += `<li data-line="${lineNum}">${SimpleMarkdown.inline(olMatch[2])}</li>\n`;
             continue;
           }
 
           flushList();
-          out += `<p>${SimpleMarkdown.inline(line)}</p>\n`;
+          out += `<p data-line="${lineNum}">${SimpleMarkdown.inline(line)}</p>\n`;
         }
 
         flushList();
@@ -3785,21 +4039,46 @@
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;');
 
-        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // 1. Extract and protect inline code spans FIRST to prevent underscore/asterisk corruption
+        const codeSpans = [];
+        s = s.replace(/`([^`]+)`/g, (_, code) => {
+          const id = codeSpans.length;
+          codeSpans.push(`<code>${code}</code>`);
+          return `\x1aCODE${id}\x1a`;
+        });
+
+        // 2. Extract and protect links and images
+        const links = [];
+        s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+          const id = links.length;
+          links.push(`<img src="${src}" alt="${alt}" style="max-width:100%; border-radius:6px;">`);
+          return `\x1aLINK${id}\x1a`;
+        });
+        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, txt, url) => {
+          const id = links.length;
+          links.push(`<a href="${url}" target="_blank">${txt}</a>`);
+          return `\x1aLINK${id}\x1a`;
+        });
+
+        // 3. Bold and Italic formatting
         s = s.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
         s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
         s = s.replace(/___([^_]+)___/g, '<strong><em>$1</em></strong>');
         s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-        s = s.replace(/_([^_]+)_/g, '<em>$1</em>');
+        // Underscore italic: only when not flanked by word characters (GFM intraword rule)
+        s = s.replace(/(^|[^\w])_([^_]+)_(?!\w)/g, '$1<em>$2</em>');
         s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-        s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius:6px;">');
+
+        // 4. Restore protected links and inline code
+        s = s.replace(/\x1aLINK(\d+)\x1a/g, (_, id) => links[Number(id)]);
+        s = s.replace(/\x1aCODE(\d+)\x1a/g, (_, id) => codeSpans[Number(id)]);
         return s;
       },
 
-      renderCodeBlock(lang, code) {
+      renderCodeBlock(lang, code, lineNum = 1) {
         const blockId = 'diag-' + Math.random().toString(36).substr(2, 9);
+        const lineAttr = lineNum ? ` data-line="${lineNum}"` : '';
 
         // 1. Packet / UDP diagram
         if (lang === 'udp' || lang === 'packet' || lang === 'bytefield' || lang === 'rfc') {
@@ -3812,7 +4091,7 @@
           if (parsed) {
             const svg = PacketRenderer.renderToSvg(parsed, title);
             return `
-              <div class="diagram-card" id="${blockId}">
+              <div class="diagram-card" id="${blockId}"${lineAttr}>
                 <div class="diagram-header">
                   <div class="diagram-title-group">
                     <span>${title}</span>
@@ -3848,7 +4127,7 @@
               DynamicGraphRenderer.cacheParsed(blockId, parsed);
               const dynHtml = DynamicGraphRenderer.renderHtml(blockId, parsed);
               return `
-                <div class="diagram-card" id="${blockId}" style="height: 520px;">
+                <div class="diagram-card" id="${blockId}"${lineAttr} style="height: 520px;">
                   <div class="diagram-header">
                     <div class="diagram-title-group">
                       <span>Dynamic Flowchart</span>
@@ -3882,7 +4161,7 @@
           }
 
           return `
-            <div class="diagram-card" id="${blockId}">
+            <div class="diagram-card" id="${blockId}"${lineAttr}>
               <div class="diagram-header">
                 <div class="diagram-title-group">
                   <span>Mermaid Diagram</span>
@@ -3915,7 +4194,7 @@
         const lineNumbersHtml = Array.from({ length: lineCount }, (_, i) => i + 1).join('<br>');
 
         return `
-          <div class="code-box">
+          <div class="code-box"${lineAttr}>
             <div class="code-box-header">
               <div class="code-box-left">
                 <div class="code-box-mac-dots">
@@ -3968,11 +4247,18 @@
         const clamp = () => {
           const maxY = Math.max(0, element.scrollHeight - element.clientHeight);
           const maxX = Math.max(0, element.scrollWidth - element.clientWidth);
+          if (isNaN(state.targetY)) state.targetY = element.scrollTop;
+          if (isNaN(state.targetX)) state.targetX = element.scrollLeft;
           state.targetY = Math.max(0, Math.min(state.targetY, maxY));
           state.targetX = Math.max(0, Math.min(state.targetX, maxX));
         };
 
         const step = (timestamp) => {
+          if (isNaN(state.currentY)) state.currentY = element.scrollTop;
+          if (isNaN(state.currentX)) state.currentX = element.scrollLeft;
+          if (isNaN(state.targetY)) state.targetY = state.currentY;
+          if (isNaN(state.targetX)) state.targetX = state.currentX;
+
           const maxFps = (window.App && typeof App.getMaxFps === 'function') ? App.getMaxFps() : 60;
           if (maxFps > 0 && state.lastFrameTime && timestamp) {
             const minInterval = 1000 / maxFps;
@@ -3993,6 +4279,7 @@
             state.el.scrollTop = Math.round(state.currentY);
             state.el.scrollLeft = Math.round(state.currentX);
             state.animating = false;
+            state.rafId = null;
             state.lastFrameTime = 0;
             if (state.onStep) state.onStep(state);
             return;
@@ -4040,6 +4327,8 @@
         const controller = {
           state,
           scrollBy(deltaY, deltaX = 0) {
+            if (isNaN(deltaY)) deltaY = 0;
+            if (isNaN(deltaX)) deltaX = 0;
             clamp();
             state.targetY += deltaY;
             state.targetX += deltaX;
@@ -4052,8 +4341,8 @@
             }
           },
           scrollTo(targetY, targetX = null) {
-            state.targetY = targetY;
-            if (targetX !== null) state.targetX = targetX;
+            if (targetY !== null && !isNaN(targetY)) state.targetY = targetY;
+            if (targetX !== null && !isNaN(targetX)) state.targetX = targetX;
             clamp();
             if (!state.animating) {
               state.animating = true;
@@ -4063,6 +4352,11 @@
             }
           },
           sync() {
+            if (state.rafId) {
+              cancelAnimationFrame(state.rafId);
+              state.rafId = null;
+            }
+            state.animating = false;
             state.currentY = state.targetY = element.scrollTop;
             state.currentX = state.targetX = element.scrollLeft;
           }
@@ -4277,7 +4571,7 @@
 
       updateCursorPosition() {
         if (!this.cursorEl) return;
-        if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split')) {
+        if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split') || this.mode === 'INSERT') {
           this.cursorEl.style.display = 'none';
           return;
         }
@@ -4307,9 +4601,7 @@
         this.cursorEl.style.width = Math.max(8, Math.round(metrics.width)) + 'px';
         this.cursorEl.style.height = Math.round(metrics.height) + 'px';
 
-        if (this.mode === 'INSERT') {
-          this.cursorEl.className = 'vim-cursor insert';
-        } else if (this.mode === 'VISUAL' || this.mode === 'VISUAL_LINE') {
+        if (this.mode === 'VISUAL' || this.mode === 'VISUAL_LINE') {
           this.cursorEl.className = 'vim-cursor visual';
         } else {
           this.cursorEl.className = 'vim-cursor normal';
@@ -4325,7 +4617,16 @@
 
         document.body.classList.remove('vim-mode-normal', 'vim-mode-insert', 'vim-mode-visual');
 
-        if (newMode === 'NORMAL') {
+        if (newMode === 'INSERT') {
+          document.body.classList.add('vim-mode-insert');
+          if (this.cursorEl) this.cursorEl.style.display = 'none';
+          if (this.badgeEl) {
+            this.badgeEl.className = 'vim-badge insert';
+            this.badgeEl.innerText = '-- INSERT --';
+            this.badgeEl.style.display = 'inline-flex';
+          }
+          if (this.cmdBarEl) this.cmdBarEl.style.display = 'none';
+        } else if (newMode === 'NORMAL') {
           document.body.classList.add('vim-mode-normal');
           if (this.badgeEl) {
             this.badgeEl.className = 'vim-badge normal';
@@ -4597,6 +4898,13 @@
         this.setMode('INSERT');
       },
 
+      isCopyToYank() {
+        if (!this.app || !this.app.keybindings || !this.app.keybindings.settings) return true;
+        const v = this.app.keybindings.settings.is_copy_to_yank;
+        if (v === undefined) return true;
+        return v === true || v === 'true';
+      },
+
       yankLines(count = 1) {
         const info = this.getLineInfo();
         const text = this.editorEl.value;
@@ -4611,7 +4919,12 @@
 
         const yankText = text.substring(info.lineStart, Math.min(text.length, endPos + 1));
         this.register = { text: yankText, isLine: true };
-        navigator.clipboard.writeText(yankText).catch(() => {});
+        if (this.isCopyToYank()) {
+          navigator.clipboard.writeText(yankText).catch(() => {});
+          if (this.app) this.app.showToast(`Yanked ${linesCounted} line(s) to system clipboard`);
+        } else {
+          if (this.app) this.app.showToast(`Yanked ${linesCounted} line(s) (Vim only)`);
+        }
       },
 
       paste(before = false) {
@@ -4684,6 +4997,7 @@
         if ((this.app.matchesCombo && this.app.matchesCombo(e, cycleBinding)) || (e.key === 'Tab' && e.shiftKey)) {
           e.preventDefault();
           e.stopPropagation();
+          e.stopImmediatePropagation();
           this.app.cycleMode();
           return;
         }
@@ -4740,6 +5054,28 @@
         // Pending operator handling (e.g. dd, dw, cw, yy, r, f, etc.)
         if (this.pendingOperator) {
           const op = this.pendingOperator;
+
+          if (op === 'm') {
+            if (/^[a-zA-Z]$/.test(key)) {
+              const markName = key.toLowerCase();
+              const info = this.getLineInfo();
+              const lineNum = info.lineIndex + 1;
+              this.app.setMark(markName, lineNum);
+            }
+            this.pendingOperator = '';
+            this.pendingCount = '';
+            return;
+          }
+
+          if (op === "'" || op === '`') {
+            if (/^[a-zA-Z]$/.test(key)) {
+              const markName = key.toLowerCase();
+              this.app.jumpToMark(markName);
+            }
+            this.pendingOperator = '';
+            this.pendingCount = '';
+            return;
+          }
 
           if (op === 'r') {
             if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -4837,7 +5173,12 @@
               else if (op === 'c') { this.deleteRange(start, end); this.setMode('INSERT'); }
               else if (op === 'y') {
                 this.register = { text: text.substring(start, end), isLine: false };
-                navigator.clipboard.writeText(this.register.text).catch(() => {});
+                if (this.isCopyToYank()) {
+                  navigator.clipboard.writeText(this.register.text).catch(() => {});
+                  if (this.app) this.app.showToast('Yanked to system clipboard');
+                } else {
+                  if (this.app) this.app.showToast('Yanked (Vim only)');
+                }
               }
             }
 
@@ -4874,7 +5215,12 @@
             const min = Math.min(startPos, targetPos);
             const max = Math.max(startPos, targetPos);
             this.register = { text: this.editorEl.value.substring(min, max), isLine: false };
-            navigator.clipboard.writeText(this.register.text).catch(() => {});
+            if (this.isCopyToYank()) {
+              navigator.clipboard.writeText(this.register.text).catch(() => {});
+              if (this.app) this.app.showToast('Yanked to system clipboard');
+            } else {
+              if (this.app) this.app.showToast('Yanked (Vim only)');
+            }
             this.setCursor(min);
           }
 
@@ -5013,8 +5359,14 @@
         else if (key === ':') this.setMode('COMMAND');
 
         // Operators
-        else if (['d', 'c', 'y', 'r', 'f', 'F', 'g', '>', '<'].includes(key)) {
+        else if (['d', 'c', 'y', 'r', 'f', 'F', 'g', '>', '<', 'm', "'", '`'].includes(key)) {
           this.pendingOperator = key;
+          clearTimeout(this._opTimer);
+          this._opTimer = setTimeout(() => {
+            this.pendingOperator = '';
+            this.pendingKey = '';
+            this.pendingCount = '';
+          }, 3000);
         }
 
         this.pendingCount = '';
@@ -5046,7 +5398,12 @@
         else if (key === 'y') {
           const sel = this.editorEl.value.substring(this.editorEl.selectionStart, this.editorEl.selectionEnd);
           this.register = { text: sel, isLine: this.mode === 'VISUAL_LINE' };
-          navigator.clipboard.writeText(sel).catch(() => {});
+          if (this.isCopyToYank()) {
+            navigator.clipboard.writeText(sel).catch(() => {});
+            if (this.app) this.app.showToast('Yanked to system clipboard');
+          } else {
+            if (this.app) this.app.showToast('Yanked (Vim only)');
+          }
           this.setMode('NORMAL');
         }
         else if (key === 'd' || key === 'x') {
@@ -5676,6 +6033,368 @@
     };
 
     /* =========================================================================
+       3.9. PREVIEW CURSOR & VIM NAVIGATION ENGINE
+       ========================================================================= */
+    const PreviewCursor = {
+      app: null,
+      cursorEl: null,
+      currentIndex: 0,
+      visualAnchor: 0,
+      mode: 'NORMAL', // 'NORMAL' or 'VISUAL'
+      blocks: [],
+      _initialized: false,
+
+      init(app) {
+        if (app) this.app = app;
+        if (!this.app) this.app = (typeof App !== 'undefined' ? App : null);
+        this.cursorEl = document.getElementById('preview-cursor');
+
+        if (!this._initialized && this.app && this.app.previewEl) {
+          this._initialized = true;
+
+          // Click on preview element moves cursor
+          this.app.previewEl.addEventListener('click', (e) => {
+            if (!this.isEnabled() || this.app.mode !== 'preview') return;
+            const block = e.target.closest('[data-line]');
+            if (block) {
+              this.setIndexByElement(block);
+            }
+          });
+
+          // Smooth scrolling updates cursor position
+          if (this.app.previewPaneEl) {
+            this.app.previewPaneEl.addEventListener('scroll', () => {
+              if (this.isEnabled() && this.app.mode === 'preview') {
+                this.updateCursorGeometry();
+              }
+            }, { passive: true });
+          }
+        }
+
+        this.refreshBlocks();
+        this.render();
+      },
+
+      isEnabled() {
+        if (!this.app || !this.app.keybindings) return true;
+        const p = this.app.keybindings.preview;
+        if (p && p.enable_cursor !== undefined) {
+          return p.enable_cursor === true || p.enable_cursor === 'true';
+        }
+        return true;
+      },
+
+      refreshBlocks() {
+        if (!this.app || !this.app.previewEl) return [];
+        this.blocks = Array.from(this.app.previewEl.querySelectorAll('[data-line]'));
+        if (this.blocks.length === 0) {
+          this.currentIndex = 0;
+          return [];
+        }
+        if (this.currentIndex >= this.blocks.length) {
+          this.currentIndex = this.blocks.length - 1;
+        }
+        if (this.currentIndex < 0) {
+          this.currentIndex = 0;
+        }
+        return this.blocks;
+      },
+
+      setMode(newMode) {
+        this.mode = newMode;
+        if (newMode === 'VISUAL') {
+          this.visualAnchor = this.currentIndex;
+        }
+        this.render();
+      },
+
+      toggleVisual() {
+        if (this.mode === 'VISUAL') {
+          this.setMode('NORMAL');
+        } else {
+          this.setMode('VISUAL');
+        }
+      },
+
+      move(delta) {
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return false;
+        const oldIndex = this.currentIndex;
+        this.currentIndex = Math.max(0, Math.min(this.blocks.length - 1, this.currentIndex + delta));
+        this.scrollCurrentIntoView();
+        this.render();
+        return oldIndex !== this.currentIndex;
+      },
+
+      jumpToStart() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return;
+        this.currentIndex = 0;
+        const pane = this.app ? this.app.previewPaneEl : null;
+        const scroller = pane ? SmoothScroller.get(pane) : null;
+        if (scroller) scroller.scrollTo(0);
+        else if (pane) pane.scrollTop = 0;
+        this.render();
+      },
+
+      jumpToEnd() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return;
+        this.currentIndex = this.blocks.length - 1;
+        const pane = this.app ? this.app.previewPaneEl : null;
+        const scroller = pane ? SmoothScroller.get(pane) : null;
+        if (pane) {
+          const max = Math.max(0, pane.scrollHeight - pane.clientHeight);
+          if (scroller) scroller.scrollTo(max);
+          else pane.scrollTop = max;
+        }
+        this.render();
+      },
+
+      getCurrentLine() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0 || !this.blocks[this.currentIndex]) {
+          return 1;
+        }
+        const lineAttr = this.blocks[this.currentIndex].getAttribute('data-line');
+        const lineNum = parseInt(lineAttr, 10);
+        return isNaN(lineNum) ? 1 : lineNum;
+      },
+
+      jumpToLine(targetLine) {
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return;
+
+        let bestIdx = 0;
+        let minDiff = Infinity;
+        for (let i = 0; i < this.blocks.length; i++) {
+          const l = parseInt(this.blocks[i].getAttribute('data-line'), 10);
+          if (!isNaN(l)) {
+            const diff = Math.abs(l - targetLine);
+            if (diff < minDiff) {
+              minDiff = diff;
+              bestIdx = i;
+              if (diff === 0) break;
+            }
+          }
+        }
+        this.currentIndex = bestIdx;
+        const targetEl = this.blocks[bestIdx];
+        const pane = this.app ? this.app.previewPaneEl : null;
+        if (targetEl && pane) {
+          const targetY = Math.max(0, targetEl.offsetTop - (pane.clientHeight / 2));
+          const scroller = SmoothScroller.get(pane);
+          if (scroller) scroller.scrollTo(targetY);
+          else pane.scrollTop = targetY;
+        }
+        this.render();
+      },
+
+      setIndexByElement(el) {
+        this.refreshBlocks();
+        const idx = this.blocks.indexOf(el);
+        if (idx !== -1) {
+          this.currentIndex = idx;
+          this.render();
+        }
+      },
+
+      scrollCurrentIntoView() {
+        if (!this.blocks || !this.blocks[this.currentIndex] || !this.app || !this.app.previewPaneEl) return;
+        const el = this.blocks[this.currentIndex];
+        const pane = this.app.previewPaneEl;
+        const paneRect = pane.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        const margin = 70;
+        const scroller = SmoothScroller.get(pane);
+        const viewHeight = paneRect.height - (2 * margin);
+
+        if (elRect.height > viewHeight) {
+          // Tall block (larger than viewport height): align top into comfortable view
+          if (elRect.top < paneRect.top + margin || elRect.top > paneRect.top + margin + 120) {
+            const delta = elRect.top - (paneRect.top + margin);
+            if (!isNaN(delta) && Math.abs(delta) > 1) {
+              if (scroller) scroller.scrollBy(delta, 0);
+              else pane.scrollBy({ top: delta, behavior: 'auto' });
+            }
+          }
+        } else {
+          // Standard block: keep whole block between top and bottom margins
+          if (elRect.top < paneRect.top + margin) {
+            const delta = elRect.top - (paneRect.top + margin);
+            if (!isNaN(delta) && Math.abs(delta) > 1) {
+              if (scroller) scroller.scrollBy(delta, 0);
+              else pane.scrollBy({ top: delta, behavior: 'auto' });
+            }
+          } else if (elRect.bottom > paneRect.bottom - margin) {
+            const delta = elRect.bottom - (paneRect.bottom - margin);
+            if (!isNaN(delta) && Math.abs(delta) > 1) {
+              if (scroller) scroller.scrollBy(delta, 0);
+              else pane.scrollBy({ top: delta, behavior: 'auto' });
+            }
+          }
+        }
+      },
+
+      updateCursorGeometry() {
+        if (!this.cursorEl || !this.isEnabled() || !this.app || this.app.mode !== 'preview') {
+          if (this.cursorEl) this.cursorEl.style.display = 'none';
+          return;
+        }
+        if (this.blocks.length === 0 || !this.blocks[this.currentIndex]) {
+          this.cursorEl.style.display = 'none';
+          return;
+        }
+
+        const curBlock = this.blocks[this.currentIndex];
+        const pane = this.app.previewPaneEl;
+        const paneRect = pane.getBoundingClientRect();
+        const blockRect = curBlock.getBoundingClientRect();
+
+        const top = blockRect.top - paneRect.top + pane.scrollTop;
+        const left = blockRect.left - paneRect.left + pane.scrollLeft;
+        const height = Math.min(26, Math.max(18, blockRect.height));
+
+        this.cursorEl.style.display = 'block';
+        this.cursorEl.className = this.mode === 'VISUAL' ? 'preview-cursor visual' : 'preview-cursor normal';
+        this.cursorEl.style.transform = `translate(${Math.max(0, Math.round(left - 12))}px, ${Math.round(top + 2)}px)`;
+        this.cursorEl.style.height = Math.round(height) + 'px';
+        this.cursorEl.style.width = '8px';
+      },
+
+      render() {
+        if (!this.app || !this.app.previewPaneEl) return;
+
+        if (!this.isEnabled() || this.app.mode !== 'preview') {
+          if (this.cursorEl) this.cursorEl.style.display = 'none';
+          this.clearHighlights();
+          return;
+        }
+
+        this.refreshBlocks();
+        if (this.blocks.length === 0) {
+          if (this.cursorEl) this.cursorEl.style.display = 'none';
+          return;
+        }
+
+        this.clearHighlights();
+
+        if (this.mode === 'VISUAL') {
+          const minIdx = Math.min(this.visualAnchor, this.currentIndex);
+          const maxIdx = Math.max(this.visualAnchor, this.currentIndex);
+          for (let i = minIdx; i <= maxIdx; i++) {
+            if (this.blocks[i]) {
+              this.blocks[i].classList.add('preview-visual-block');
+            }
+          }
+        } else {
+          if (this.blocks[this.currentIndex]) {
+            this.blocks[this.currentIndex].classList.add('preview-active-block');
+          }
+        }
+
+        this.updateCursorGeometry();
+
+        const curLine = this.getCurrentLine();
+        if (this.app.statusCursorEl) {
+          this.app.statusCursorEl.textContent = `Ln ${curLine}, Col 1`;
+        }
+
+        const badgeEl = document.getElementById('status-vim-badge');
+        if (badgeEl) {
+          if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+            badgeEl.style.display = 'inline-block';
+            if (this.mode === 'VISUAL') {
+              badgeEl.className = 'vim-badge visual';
+              badgeEl.textContent = '-- VISUAL --';
+            } else {
+              badgeEl.className = 'vim-badge normal';
+              badgeEl.textContent = '-- NORMAL --';
+            }
+          } else {
+            badgeEl.style.display = 'none';
+          }
+        }
+      },
+
+      clearHighlights() {
+        if (!this.app || !this.app.previewEl) return;
+        const actives = this.app.previewEl.querySelectorAll('.preview-active-block, .preview-visual-block');
+        actives.forEach(el => {
+          el.classList.remove('preview-active-block', 'preview-visual-block');
+        });
+      },
+
+      clear() {
+        if (this.cursorEl) this.cursorEl.style.display = 'none';
+        this.clearHighlights();
+        this.mode = 'NORMAL';
+      },
+
+      yankSelected() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return;
+
+        let textToCopy = '';
+        let lineCount = 1;
+        const mdLines = this.app.editorEl ? this.app.editorEl.value.split('\n') : [];
+
+        if (this.mode === 'VISUAL') {
+          const minIdx = Math.min(this.visualAnchor, this.currentIndex);
+          const maxIdx = Math.max(this.visualAnchor, this.currentIndex);
+          const startLine = parseInt(this.blocks[minIdx].getAttribute('data-line'), 10) || 1;
+          const endBlockLine = parseInt(this.blocks[maxIdx].getAttribute('data-line'), 10) || startLine;
+
+          let endLine = endBlockLine;
+          if (maxIdx + 1 < this.blocks.length) {
+            const nextLine = parseInt(this.blocks[maxIdx + 1].getAttribute('data-line'), 10);
+            if (!isNaN(nextLine) && nextLine > endBlockLine) {
+              endLine = nextLine - 1;
+            }
+          } else {
+            endLine = mdLines.length;
+          }
+
+          if (mdLines.length > 0 && startLine <= mdLines.length) {
+            textToCopy = mdLines.slice(startLine - 1, Math.min(mdLines.length, endLine)).join('\n');
+          } else {
+            textToCopy = this.blocks.slice(minIdx, maxIdx + 1).map(b => b.innerText).join('\n');
+          }
+          lineCount = Math.max(1, endLine - startLine + 1);
+        } else {
+          const line = this.getCurrentLine();
+          if (mdLines.length > 0 && line <= mdLines.length) {
+            textToCopy = mdLines[line - 1] || '';
+          } else {
+            textToCopy = this.blocks[this.currentIndex].innerText || '';
+          }
+          lineCount = 1;
+        }
+
+        if (typeof VimMode !== 'undefined') {
+          VimMode.register = { text: textToCopy, isLine: true };
+        }
+
+        const copyToYank = (this.app && this.app.keybindings && this.app.keybindings.settings && this.app.keybindings.settings.is_copy_to_yank !== undefined)
+          ? (this.app.keybindings.settings.is_copy_to_yank === true || this.app.keybindings.settings.is_copy_to_yank === 'true')
+          : true;
+
+        if (copyToYank) {
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            this.app.showToast(`Yanked ${lineCount} line(s) to system clipboard`);
+          }).catch(() => {
+            this.app.showToast(`Yanked to system clipboard`);
+          });
+        } else {
+          this.app.showToast(`Yanked ${lineCount} line(s) (Vim only)`);
+        }
+
+        this.setMode('NORMAL');
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -5684,9 +6403,13 @@
       activeFileIndex: 0,
       mode: 'preview', // Default view mode is Preview
 
+      // Shared Vim marks across edit and preview modes
+      marks: {},
+
       // Keybindings
       defaultKeybindings: {
         preview: {
+          enable_cursor: true,
           scroll_down: "j",
           scroll_up: "k",
           scroll_right: "l",
@@ -5714,7 +6437,20 @@
             nav_up: "k"
           }
         },
+        theme: {
+          heading_color: "#58a6ff",
+          bold_color: "#f0883e",
+          italic_color: "#d29922",
+          inline_code_color: "#ff7b72",
+          inline_code_bg: "#21262d",
+          link_color: "#58a6ff",
+          blockquote_color: "#8b949e",
+          text_color: "#c9d1d9",
+          table_border_color: "#30363d",
+          hr_color: "#30363d"
+        },
         settings: {
+          is_copy_to_yank: true,
           scroll_step_y: 60,
           scroll_step_x: 60,
           max_fps: 60
@@ -5722,6 +6458,7 @@
       },
       keybindings: {
         preview: {
+          enable_cursor: true,
           scroll_down: "j",
           scroll_up: "k",
           scroll_right: "l",
@@ -5749,7 +6486,20 @@
             nav_up: "k"
           }
         },
+        theme: {
+          heading_color: "#58a6ff",
+          bold_color: "#f0883e",
+          italic_color: "#d29922",
+          inline_code_color: "#ff7b72",
+          inline_code_bg: "#21262d",
+          link_color: "#58a6ff",
+          blockquote_color: "#8b949e",
+          text_color: "#c9d1d9",
+          table_border_color: "#30363d",
+          hr_color: "#30363d"
+        },
         settings: {
+          is_copy_to_yank: true,
           scroll_step_y: 60,
           scroll_step_x: 60,
           max_fps: 60
@@ -5788,6 +6538,12 @@
       },
 
       cycleMode() {
+        const now = Date.now();
+        if (this._lastCycle && now - this._lastCycle < 250) {
+          return;
+        }
+        this._lastCycle = now;
+
         const modes = ['preview', 'split', 'edit'];
         const curIdx = modes.indexOf(this.mode);
         const nextMode = modes[(curIdx + 1) % modes.length];
@@ -5795,11 +6551,124 @@
         if (nextMode === 'edit' || nextMode === 'split') {
           setTimeout(() => {
             this.editorEl.focus();
-            if (VimMode.enabled) {
+            if (typeof VimMode !== 'undefined' && VimMode.enabled) {
               VimMode.updateCursorPosition();
             }
-          }, 20);
+          }, 30);
+        } else if (nextMode === 'preview') {
+          if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+            PreviewCursor.init(this);
+            const editLine = (typeof VimMode !== 'undefined') ? VimMode.getLineInfo().lineIndex + 1 : 1;
+            PreviewCursor.jumpToLine(editLine);
+          }
         }
+      },
+
+      setMark(name, line) {
+        if (!name) return;
+        const markName = name.toLowerCase();
+        this.marks[markName] = line;
+        this.showToast(`Mark '${markName}' set at line ${line}`);
+      },
+
+      getMark(name) {
+        if (!name) return null;
+        return this.marks[name.toLowerCase()] || null;
+      },
+
+      jumpToMark(name) {
+        if (!name) return;
+        const markName = name.toLowerCase();
+        const line = this.marks[markName];
+        if (line === undefined || line === null) {
+          this.showToast(`Mark '${markName}' not set`);
+          return;
+        }
+        if (this.mode === 'preview') {
+          this.jumpToLineInPreview(line);
+        } else {
+          this.jumpToLineInEditor(line);
+        }
+        this.showToast(`Jumped to mark '${markName}' (line ${line})`);
+      },
+
+      jumpToLineInPreview(line) {
+        if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+          PreviewCursor.jumpToLine(line);
+        } else {
+          let el = this.previewEl.querySelector(`[data-line="${line}"]`);
+          if (!el) {
+            const allWithLine = Array.from(this.previewEl.querySelectorAll('[data-line]'));
+            let closest = null;
+            let minDiff = Infinity;
+            for (const node of allWithLine) {
+              const l = parseInt(node.getAttribute('data-line'), 10);
+              if (!isNaN(l)) {
+                const diff = Math.abs(l - line);
+                if (diff < minDiff) {
+                  minDiff = diff;
+                  closest = node;
+                }
+              }
+            }
+            el = closest;
+          }
+          if (el && this.previewPaneEl) {
+            const targetY = Math.max(0, el.offsetTop - (this.previewPaneEl.clientHeight / 2));
+            const scroller = SmoothScroller.get(this.previewPaneEl);
+            if (scroller) scroller.scrollTo(targetY);
+            else this.previewPaneEl.scrollTop = targetY;
+          }
+        }
+      },
+
+      jumpToLineInEditor(line, targetMode = null) {
+        const text = this.editorEl.value;
+        const lines = text.split('\n');
+        const targetLineIdx = Math.max(0, Math.min(lines.length - 1, line - 1));
+        let charPos = 0;
+        for (let i = 0; i < targetLineIdx; i++) {
+          charPos += lines[i].length + 1;
+        }
+
+        if (targetMode === 'insert_after') {
+          charPos = Math.min(text.length, charPos + lines[targetLineIdx].length);
+        }
+
+        this.editorEl.focus();
+
+        if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+          if (targetMode === 'insert' || targetMode === 'insert_after') {
+            VimMode.setMode('INSERT');
+          }
+          VimMode.setCursor(charPos);
+        } else {
+          this.editorEl.selectionStart = this.editorEl.selectionEnd = charPos;
+        }
+
+        const lineHeight = 20.8;
+        const targetScroll = Math.max(0, targetLineIdx * lineHeight - (this.editorEl.clientHeight / 2));
+        if (typeof VimMode !== 'undefined' && VimMode.editorScroller) {
+          VimMode.editorScroller.scrollTo(targetScroll);
+        } else {
+          this.editorEl.scrollTop = targetScroll;
+        }
+      },
+
+      showToast(msg) {
+        let toast = document.getElementById('app-toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'app-toast';
+          toast.className = 'app-toast';
+          document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 1600);
       },
 
       // Elements
@@ -5824,9 +6693,17 @@
       modalScale: 1.0,
 
       init() {
-        SmoothScroller.attach(this.previewPaneEl);
+        SmoothScroller.attach(this.previewPaneEl, {
+          onStep: () => {
+            if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && this.mode === 'preview') {
+              PreviewCursor.updateCursorGeometry();
+            }
+          }
+        });
         VimMode.init(this);
         TableOfContents.init();
+        PreviewCursor.init(this);
+        this.applyTheme(this.keybindings && this.keybindings.theme ? this.keybindings.theme : this.defaultKeybindings.theme);
 
         this.setupEditorEvents();
         this.setupToolbarEvents();
@@ -6064,6 +6941,11 @@
         } else {
           DiagramPanZoom.initAll(this.previewEl);
         }
+
+        if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && this.mode === 'preview') {
+          PreviewCursor.refreshBlocks();
+          PreviewCursor.render();
+        }
       },
 
       /* DRAG-TO-READ ACTION */
@@ -6202,16 +7084,163 @@
             }
           }
 
-          // NVim single-key navigation (j, k, l, h, w, gg, G)
+          // Shared Memory Marks handling in Preview mode
+          if (this._previewPendingMark) {
+            clearTimeout(this._markTimer);
+            if (/^[a-zA-Z]$/.test(e.key)) {
+              e.preventDefault();
+              const curLine = (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled())
+                ? PreviewCursor.getCurrentLine()
+                : 1;
+              if (this._previewPendingMark === 'set') {
+                this.setMark(e.key.toLowerCase(), curLine);
+              } else if (this._previewPendingMark === 'jump') {
+                this.jumpToMark(e.key.toLowerCase());
+              }
+            } else {
+              this.showToast('Mark cancelled');
+            }
+            this._previewPendingMark = null;
+            return;
+          }
+
+          // Vim Mode commands in Preview mode (when Vim Mode is enabled)
+          if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+            // Quick enter Edit mode at current line ('i' = insert at line start, 'a' = insert append at line end)
+            if (e.key === 'i') {
+              e.preventDefault();
+              const line = (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled())
+                ? PreviewCursor.getCurrentLine()
+                : 1;
+              this.setMode('edit');
+              setTimeout(() => {
+                this.jumpToLineInEditor(line, 'insert');
+              }, 40);
+              return;
+            }
+            if (e.key === 'a') {
+              e.preventDefault();
+              const line = (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled())
+                ? PreviewCursor.getCurrentLine()
+                : 1;
+              this.setMode('edit');
+              setTimeout(() => {
+                this.jumpToLineInEditor(line, 'insert_after');
+              }, 40);
+              return;
+            }
+
+            // Set mark: m{a-z}
+            if (e.key === 'm') {
+              e.preventDefault();
+              this._previewPendingMark = 'set';
+              this.showToast('Press a-z to set mark...');
+              clearTimeout(this._markTimer);
+              this._markTimer = setTimeout(() => { this._previewPendingMark = null; }, 3000);
+              return;
+            }
+
+            // Jump to mark: '{a-z} or `{a-z}
+            if (e.key === "'" || e.key === '`') {
+              e.preventDefault();
+              this._previewPendingMark = 'jump';
+              this.showToast('Press a-z to jump to mark...');
+              clearTimeout(this._markTimer);
+              this._markTimer = setTimeout(() => { this._previewPendingMark = null; }, 3000);
+              return;
+            }
+
+            // Visual mode toggle & controls in Preview mode
+            if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+              if (e.key === 'v' || e.key === 'V') {
+                e.preventDefault();
+                PreviewCursor.toggleVisual();
+                return;
+              }
+
+              // In VISUAL mode
+              if (PreviewCursor.mode === 'VISUAL') {
+                if (e.key === 'Escape' || (e.ctrlKey && e.key === '[')) {
+                  e.preventDefault();
+                  PreviewCursor.setMode('NORMAL');
+                  return;
+                }
+                if (e.key === 'y') {
+                  e.preventDefault();
+                  PreviewCursor.yankSelected();
+                  return;
+                }
+                if (e.key === (kb.scroll_down || 'j') || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  const moved = PreviewCursor.move(1);
+                  if (!moved) {
+                    if (scroller) scroller.scrollBy(stepY, 0);
+                    else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
+                  }
+                  return;
+                }
+                if (e.key === (kb.scroll_up || 'k') || e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  const moved = PreviewCursor.move(-1);
+                  if (!moved) {
+                    if (scroller) scroller.scrollBy(-stepY, 0);
+                    else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
+                  }
+                  return;
+                }
+                if (e.key === 'G') {
+                  e.preventDefault();
+                  PreviewCursor.jumpToEnd();
+                  return;
+                }
+                if (e.key === 'g' && !e.shiftKey) {
+                  if (this._previewG) {
+                    this._previewG = false;
+                    e.preventDefault();
+                    PreviewCursor.jumpToStart();
+                  } else {
+                    this._previewG = true;
+                    setTimeout(() => { this._previewG = false; }, 400);
+                  }
+                  return;
+                }
+              }
+
+              // In NORMAL mode: 'y' yanks active line
+              if (e.key === 'y') {
+                e.preventDefault();
+                PreviewCursor.yankSelected();
+                return;
+              }
+            }
+          }
+
+          // Single-key navigation (j, k, l, h, w, gg, G)
           if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-            if (e.key === (kb.scroll_down || 'j')) {
+            if (e.key === (kb.scroll_down || 'j') || e.key === 'ArrowDown') {
               e.preventDefault();
-              if (scroller) scroller.scrollBy(stepY, 0);
-              else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
-            } else if (e.key === (kb.scroll_up || 'k')) {
+              if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+                const moved = PreviewCursor.move(1);
+                if (!moved) {
+                  if (scroller) scroller.scrollBy(stepY, 0);
+                  else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
+                }
+              } else {
+                if (scroller) scroller.scrollBy(stepY, 0);
+                else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
+              }
+            } else if (e.key === (kb.scroll_up || 'k') || e.key === 'ArrowUp') {
               e.preventDefault();
-              if (scroller) scroller.scrollBy(-stepY, 0);
-              else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
+              if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+                const moved = PreviewCursor.move(-1);
+                if (!moved) {
+                  if (scroller) scroller.scrollBy(-stepY, 0);
+                  else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
+                }
+              } else {
+                if (scroller) scroller.scrollBy(-stepY, 0);
+                else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
+              }
             } else if (e.key === (kb.scroll_right || 'l')) {
               e.preventDefault();
               if (scroller) scroller.scrollBy(0, stepX);
@@ -6225,15 +7254,23 @@
               this.save();
             } else if (e.key === 'G') {
               e.preventDefault();
-              const max = this.previewPaneEl.scrollHeight - this.previewPaneEl.clientHeight;
-              if (scroller) scroller.scrollTo(max);
-              else this.previewPaneEl.scrollTop = max;
+              if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+                PreviewCursor.jumpToEnd();
+              } else {
+                const max = Math.max(0, this.previewPaneEl.scrollHeight - this.previewPaneEl.clientHeight);
+                if (scroller) scroller.scrollTo(max);
+                else this.previewPaneEl.scrollTop = max;
+              }
             } else if (e.key === 'g' && !e.shiftKey) {
               if (this._previewG) {
                 this._previewG = false;
                 e.preventDefault();
-                if (scroller) scroller.scrollTo(0);
-                else this.previewPaneEl.scrollTop = 0;
+                if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+                  PreviewCursor.jumpToStart();
+                } else {
+                  if (scroller) scroller.scrollTo(0);
+                  else this.previewPaneEl.scrollTop = 0;
+                }
               } else {
                 this._previewG = true;
                 setTimeout(() => { this._previewG = false; }, 400);
@@ -6243,11 +7280,55 @@
         });
       },
 
+      applyTheme(theme) {
+        if (!theme) return;
+        const root = document.documentElement;
+        if (theme.heading_color) root.style.setProperty('--md-heading', theme.heading_color);
+        if (theme.bold_color) root.style.setProperty('--md-bold', theme.bold_color);
+        if (theme.italic_color) root.style.setProperty('--md-italic', theme.italic_color);
+        if (theme.inline_code_color) root.style.setProperty('--md-inline-code', theme.inline_code_color);
+        if (theme.inline_code_bg) root.style.setProperty('--md-inline-code-bg', theme.inline_code_bg);
+        if (theme.link_color) root.style.setProperty('--md-link', theme.link_color);
+        if (theme.blockquote_color) root.style.setProperty('--md-blockquote', theme.blockquote_color);
+        if (theme.text_color) root.style.setProperty('--md-text', theme.text_color);
+        if (theme.table_border_color) root.style.setProperty('--md-table-border', theme.table_border_color);
+        if (theme.hr_color) root.style.setProperty('--md-hr', theme.hr_color);
+      },
+
+      applyThemeFromInputs() {
+        const theme = {};
+        const inputs = document.querySelectorAll('.kb-input-box[data-cat="theme"]');
+        inputs.forEach(input => {
+          const key = input.getAttribute('data-key');
+          if (key && input.value) {
+            theme[key] = input.value.trim();
+          }
+        });
+        this.applyTheme(theme);
+      },
+
+      updateTocFieldsVisibility() {
+        const modeSelect = document.getElementById('kb-toc-mode');
+        if (!modeSelect) return;
+        const mode = modeSelect.value;
+        const sidetabEl = document.getElementById('toc-sidetab-fields');
+        const floatingEl = document.getElementById('toc-floating-fields');
+        if (sidetabEl) {
+          sidetabEl.style.display = (mode === 'side_tab') ? 'flex' : 'none';
+        }
+        if (floatingEl) {
+          floatingEl.style.display = (mode === 'floating_window') ? 'flex' : 'none';
+        }
+      },
+
       loadKeybindingsJson(jsonStr) {
         try {
           const parsed = JSON.parse(jsonStr);
-          if (parsed && (parsed.preview || parsed.toc)) {
+          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.settings)) {
             this.keybindings = parsed;
+            if (this.keybindings.theme) {
+              this.applyTheme(this.keybindings.theme);
+            }
             if (typeof TableOfContents !== 'undefined') {
               TableOfContents.applyLayout();
             }
@@ -6255,6 +7336,9 @@
         } catch (e) {
           console.error('Invalid keybindings JSON:', e);
           this.keybindings = JSON.parse(JSON.stringify(this.defaultKeybindings));
+          if (this.keybindings.theme) {
+            this.applyTheme(this.keybindings.theme);
+          }
           if (typeof TableOfContents !== 'undefined') {
             TableOfContents.applyLayout();
           }
@@ -6285,6 +7369,7 @@
 
       openKeybindingsModal() {
         this.populateKbFields();
+        this.updateTocFieldsVisibility();
         this.switchKbTab('visual');
         if (this.kbModalEl) this.kbModalEl.classList.add('show');
       },
@@ -6347,9 +7432,23 @@
           const path = cat ? `${cat}.${key}` : key;
           const val = this.getNestedValue(kb, path);
           if (val !== undefined) {
-            input.value = val;
+            if (typeof val === 'boolean') {
+              input.value = String(val);
+            } else {
+              input.value = val;
+            }
+            if (cat === 'theme') {
+              const swatch = document.querySelector(`.color-swatch-picker[data-sync="theme.${key}"]`);
+              if (swatch && typeof val === 'string' && /^#[0-9a-fA-F]{6}$/.test(val.trim())) {
+                swatch.value = val.trim();
+              }
+            }
           }
         });
+        this.updateTocFieldsVisibility();
+        if (kb.theme) {
+          this.applyTheme(kb.theme);
+        }
         if (this.kbTextareaEl) {
           this.kbTextareaEl.value = JSON.stringify(kb, null, 2);
         }
@@ -6359,6 +7458,7 @@
         const kb = JSON.parse(JSON.stringify(this.keybindings || this.defaultKeybindings));
         if (!kb.preview) kb.preview = {};
         if (!kb.toc) kb.toc = JSON.parse(JSON.stringify(this.defaultKeybindings.toc));
+        if (!kb.theme) kb.theme = JSON.parse(JSON.stringify(this.defaultKeybindings.theme));
         if (!kb.settings) kb.settings = {};
 
         const inputs = document.querySelectorAll('.kb-input-box');
@@ -6370,6 +7470,10 @@
           if (input.type === 'number') {
             const num = parseInt(val, 10);
             val = isNaN(num) ? 0 : num;
+          } else if (val === 'true') {
+            val = true;
+          } else if (val === 'false') {
+            val = false;
           } else if (typeof val === 'string') {
             val = val.trim();
           }
@@ -6377,6 +7481,9 @@
         });
 
         this.keybindings = kb;
+        if (kb.theme) {
+          this.applyTheme(kb.theme);
+        }
         if (this.kbTextareaEl) {
           this.kbTextareaEl.value = JSON.stringify(kb, null, 2);
         }
@@ -6395,9 +7502,23 @@
             const path = cat ? `${cat}.${key}` : key;
             const val = this.getNestedValue(parsed, path);
             if (val !== undefined) {
-              input.value = val;
+              if (typeof val === 'boolean') {
+                input.value = String(val);
+              } else {
+                input.value = val;
+              }
+              if (cat === 'theme') {
+                const swatch = document.querySelector(`.color-swatch-picker[data-sync="theme.${key}"]`);
+                if (swatch && typeof val === 'string' && /^#[0-9a-fA-F]{6}$/.test(val.trim())) {
+                  swatch.value = val.trim();
+                }
+              }
             }
           });
+          this.updateTocFieldsVisibility();
+          if (parsed.theme) {
+            this.applyTheme(parsed.theme);
+          }
         } catch (_) {
           // If raw json is currently invalid during switch, retain current values
         }
@@ -6420,8 +7541,14 @@
         }
 
         this.keybindings = kbToSave;
+        if (kbToSave && kbToSave.theme) {
+          this.applyTheme(kbToSave.theme);
+        }
         if (typeof TableOfContents !== 'undefined') {
           TableOfContents.applyLayout();
+        }
+        if (typeof PreviewCursor !== 'undefined') {
+          PreviewCursor.render();
         }
         this.sendIpc('save_keybindings', { json: JSON.stringify(kbToSave, null, 2) });
       },
@@ -6475,9 +7602,19 @@
 
         if (mode === 'preview') {
           VimMode.deactivate();
+          if (this.editorEl) this.editorEl.blur();
+          if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+          }
+          window.focus();
           this.statusModeEl.innerText = 'MODE: PREVIEW (NVIM: j/k/h/l)';
           this.renderMarkdown();
+          if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+            PreviewCursor.init(this);
+            PreviewCursor.render();
+          }
         } else if (mode === 'split') {
+          if (typeof PreviewCursor !== 'undefined') PreviewCursor.clear();
           if (VimMode.enabled) {
             VimMode.activate();
             this.statusModeEl.innerText = 'MODE: SPLIT (VIM MODE)';
@@ -6487,6 +7624,7 @@
           }
           this.renderMarkdown();
         } else {
+          if (typeof PreviewCursor !== 'undefined') PreviewCursor.clear();
           if (VimMode.enabled) {
             VimMode.activate();
             this.statusModeEl.innerText = 'MODE: EDIT (VIM MODE)';
@@ -6676,6 +7814,70 @@
           });
         }
 
+        // TOC mode dynamic fields visibility
+        const tocModeEl = document.getElementById('kb-toc-mode');
+        if (tocModeEl) {
+          tocModeEl.addEventListener('change', () => {
+            this.updateTocFieldsVisibility();
+          });
+        }
+
+        // Color Theme Swatches & Hex Inputs Event Bindings
+        const swatches = document.querySelectorAll('.color-swatch-picker');
+        swatches.forEach(swatch => {
+          swatch.addEventListener('input', (e) => {
+            const syncPath = swatch.getAttribute('data-sync');
+            if (!syncPath) return;
+            const key = syncPath.replace('theme.', '');
+            const hexInput = document.querySelector(`.kb-input-box[data-cat="theme"][data-key="${key}"]`);
+            if (hexInput) {
+              hexInput.value = e.target.value;
+            }
+            this.applyThemeFromInputs();
+          });
+        });
+
+        const hexInputs = document.querySelectorAll('.kb-input-box[data-cat="theme"]');
+        hexInputs.forEach(hexInput => {
+          hexInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            const key = hexInput.getAttribute('data-key');
+            const swatch = document.querySelector(`.color-swatch-picker[data-sync="theme.${key}"]`);
+            if (swatch && /^#[0-9a-fA-F]{6}$/.test(val)) {
+              swatch.value = val;
+            }
+            this.applyThemeFromInputs();
+          });
+        });
+
+        // Instant Preview Cursor toggle
+        const enableCursorEl = document.getElementById('kb-preview-enable-cursor');
+        if (enableCursorEl) {
+          enableCursorEl.addEventListener('change', (e) => {
+            const enabled = e.target.value === 'true';
+            if (!this.keybindings) this.keybindings = {};
+            if (!this.keybindings.preview) this.keybindings.preview = {};
+            this.keybindings.preview.enable_cursor = enabled;
+            if (typeof PreviewCursor !== 'undefined') {
+              if (!enabled) {
+                PreviewCursor.clear();
+              } else {
+                PreviewCursor.init(this);
+                PreviewCursor.render();
+              }
+            }
+          });
+        }
+
+        // Clicking preview pane clears active element focus so NVim keys never get suppressed
+        if (this.previewPaneEl) {
+          this.previewPaneEl.addEventListener('click', () => {
+            if (this.mode === 'preview' && document.activeElement && document.activeElement !== document.body) {
+              document.activeElement.blur();
+            }
+          });
+        }
+
         window.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
             this.diagramModalEl.classList.remove('show');
@@ -6710,6 +7912,9 @@
 
         this.editorEl.addEventListener('keydown', (e) => {
           if (e.key === 'Tab' && e.shiftKey) {
+            if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+              return; // Handled by VimMode.onKeyDown to prevent duplicate firing
+            }
             e.preventDefault();
             e.stopPropagation();
             this.cycleMode();
@@ -6935,5 +8140,6 @@ classDiagram
       App.init();
     });
   </script>
+  <div class="app-toast" id="app-toast"></div>
 </body>
 </html>
