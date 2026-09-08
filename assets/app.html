@@ -547,11 +547,139 @@
       width: 100%;
     }
     body.mode-edit .preview-pane,
-    body.mode-edit .splitter {
+    body.mode-edit .splitter,
+    body.mode-edit .toc-sidebar {
       display: none !important;
     }
     body.mode-edit .editor-pane {
       border-right: none;
+    }
+
+    /* Table of Contents (Outline) Sidebar */
+    .toc-sidebar {
+      width: 220px;
+      min-width: 180px;
+      max-width: 320px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      height: 100%;
+      overflow: hidden;
+      user-select: none;
+      z-index: 5;
+    }
+    .toc-header {
+      height: 34px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--bg-card);
+    }
+    .toc-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .toc-count {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .toc-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .toc-close-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    .toc-search-box {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .toc-search-box input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .toc-search-box input:focus {
+      border-color: var(--accent);
+    }
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.1s ease, color 0.1s ease;
+    }
+    .toc-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    .toc-item.active {
+      background: rgba(137, 180, 250, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .toc-item.toc-level-1 { padding-left: 6px; font-weight: 600; color: var(--text-primary); }
+    .toc-item.toc-level-2 { padding-left: 16px; }
+    .toc-item.toc-level-3 { padding-left: 26px; font-size: 11px; opacity: 0.9; }
+    .toc-item.toc-level-4 { padding-left: 36px; font-size: 11px; opacity: 0.8; }
+    .toc-item.toc-level-5, .toc-item.toc-level-6 { padding-left: 44px; font-size: 10.5px; opacity: 0.7; }
+    .toc-bullet {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .toc-item.active .toc-bullet {
+      background: var(--accent);
+      color: var(--bg-secondary);
+      font-weight: 700;
+    }
+    .toc-empty {
+      padding: 24px 12px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-muted);
     }
 
     /* =========================================================================
@@ -1600,6 +1728,11 @@
         <button class="btn" id="mode-edit" title="Editor Only">Edit</button>
       </div>
 
+      <!-- Table of Contents / Outline Toggle -->
+      <button class="btn" id="btn-toc" title="Toggle Document Outline / Table of Contents (Alt+O)">
+        📑 Outline
+      </button>
+
       <!-- Vim Mode Toggle -->
       <button class="btn active" id="btn-vim-toggle" title="Toggle Vim Mode for Editor (Ctrl+Alt+V)" style="font-weight:700; color:var(--accent); font-size:11.5px; padding:4px 9px;">
         VIM
@@ -1641,6 +1774,21 @@
     </section>
 
     <div class="splitter" id="splitter"></div>
+
+    <!-- Table of Contents Sidebar (Outline) -->
+    <aside class="toc-sidebar" id="toc-sidebar" style="display:none;">
+      <div class="toc-header">
+        <div class="toc-title">
+          <span>📑 Outline</span>
+          <span class="toc-count" id="toc-count"></span>
+        </div>
+        <button class="toc-close-btn" id="btn-toc-close" title="Close Outline (Alt+O)">✕</button>
+      </div>
+      <div class="toc-search-box">
+        <input type="text" id="toc-search-input" placeholder="Filter headings..." spellcheck="false" autocomplete="off">
+      </div>
+      <div class="toc-list" id="toc-list"></div>
+    </aside>
 
     <section class="preview-pane" id="preview-pane">
       <article class="markdown-body" id="preview"></article>
@@ -1797,6 +1945,13 @@
                 <span class="kb-row-desc">Switch between Preview, Split, and Edit modes</span>
               </div>
               <input type="text" class="kb-input-box" data-cat="preview" data-key="cycle_mode" spellcheck="false" placeholder="Shift+Tab">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Toggle Outline (TOC)</span>
+                <span class="kb-row-desc">Show or hide Table of Contents sidebar</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="toggle_toc" spellcheck="false" placeholder="Alt+O">
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -4378,10 +4533,20 @@
         if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split')) return;
 
         // Shift+Tab cycles mode between Preview -> Split -> Edit
-        if (e.key === 'Tab' && e.shiftKey) {
+        const cycleBinding = (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.cycle_mode) || 'Shift+Tab';
+        if ((this.app.matchesCombo && this.app.matchesCombo(e, cycleBinding)) || (e.key === 'Tab' && e.shiftKey)) {
           e.preventDefault();
           e.stopPropagation();
           this.app.cycleMode();
+          return;
+        }
+
+        // Toggle Outline (TOC) shortcut: Alt+O
+        const tocBinding = (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.toggle_toc) || 'Alt+O';
+        if ((this.app.matchesCombo && this.app.matchesCombo(e, tocBinding)) || (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o')) {
+          e.preventDefault();
+          e.stopPropagation();
+          TableOfContents.toggle();
           return;
         }
 
@@ -4873,6 +5038,215 @@
     };
 
     /* =========================================================================
+       3.8. TABLE OF CONTENTS (OUTLINE & INDEXING ENGINE)
+       ========================================================================= */
+    const TableOfContents = {
+      isOpen: false,
+      headings: [],
+      activeId: null,
+      scrollTimer: null,
+
+      init() {
+        const btnToc = document.getElementById('btn-toc');
+        const btnClose = document.getElementById('btn-toc-close');
+        const searchInput = document.getElementById('toc-search-input');
+
+        if (btnToc) {
+          btnToc.addEventListener('click', () => this.toggle());
+        }
+        if (btnClose) {
+          btnClose.addEventListener('click', () => this.close());
+        }
+        if (searchInput) {
+          searchInput.addEventListener('input', (e) => this.filter(e.target.value));
+        }
+
+        // Preview pane scrollspy
+        const previewPane = document.getElementById('preview-pane');
+        if (previewPane) {
+          previewPane.addEventListener('scroll', () => {
+            if (!this.isOpen) return;
+            clearTimeout(this.scrollTimer);
+            this.scrollTimer = setTimeout(() => this.updateActiveHeading(), 50);
+          }, { passive: true });
+        }
+      },
+
+      toggle() {
+        if (this.isOpen) this.close();
+        else this.open();
+      },
+
+      open() {
+        this.isOpen = true;
+        if (typeof App !== 'undefined' && App.mode === 'edit') {
+          App.setMode('split');
+        }
+        const sidebar = document.getElementById('toc-sidebar');
+        const btn = document.getElementById('btn-toc');
+        if (sidebar) sidebar.style.display = 'flex';
+        if (btn) btn.classList.add('active');
+        this.build();
+      },
+
+      close() {
+        this.isOpen = false;
+        const sidebar = document.getElementById('toc-sidebar');
+        const btn = document.getElementById('btn-toc');
+        if (sidebar) sidebar.style.display = 'none';
+        if (btn) btn.classList.remove('active');
+      },
+
+      build() {
+        const previewEl = document.getElementById('preview');
+        const tocListEl = document.getElementById('toc-list');
+        const tocCountEl = document.getElementById('toc-count');
+        if (!previewEl || !tocListEl) return;
+
+        const headingElements = previewEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        this.headings = [];
+        const idCounts = new Map();
+
+        headingElements.forEach((h, idx) => {
+          const level = parseInt(h.tagName.substring(1), 10);
+          let id = h.id;
+          if (!id) {
+            const rawText = h.innerText.trim();
+            id = rawText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') || `heading-${idx}`;
+            h.id = id;
+          }
+          if (idCounts.has(id)) {
+            const count = idCounts.get(id) + 1;
+            idCounts.set(id, count);
+            id = `${id}-${count}`;
+            h.id = id;
+          } else {
+            idCounts.set(id, 0);
+          }
+
+          this.headings.push({
+            id,
+            level,
+            text: h.innerText.trim() || `Heading ${idx + 1}`,
+            el: h
+          });
+        });
+
+        if (tocCountEl) {
+          tocCountEl.innerText = this.headings.length ? `(${this.headings.length})` : '';
+        }
+
+        const searchInput = document.getElementById('toc-search-input');
+        const currentQuery = searchInput ? searchInput.value : '';
+        this.filter(currentQuery);
+        this.updateActiveHeading();
+      },
+
+      renderList(items) {
+        const tocListEl = document.getElementById('toc-list');
+        if (!tocListEl) return;
+
+        if (items.length === 0) {
+          tocListEl.innerHTML = '<div class="toc-empty">No headings found</div>';
+          return;
+        }
+
+        tocListEl.innerHTML = items.map(item => `
+          <div class="toc-item toc-level-${item.level} ${item.id === this.activeId ? 'active' : ''}"
+               data-id="${item.id}"
+               title="H${item.level}: ${escapeHtml(item.text)}"
+               onclick="TableOfContents.jumpTo('${item.id}')">
+            <span class="toc-bullet">H${item.level}</span>
+            <span class="toc-text">${escapeHtml(item.text)}</span>
+          </div>
+        `).join('');
+      },
+
+      filter(query) {
+        const q = (query || '').toLowerCase().trim();
+        if (!q) {
+          this.renderList(this.headings);
+          return;
+        }
+        const filtered = this.headings.filter(h => h.text.toLowerCase().includes(q));
+        this.renderList(filtered);
+      },
+
+      jumpTo(id) {
+        const previewPane = document.getElementById('preview-pane');
+        const target = document.getElementById(id);
+        if (!target || !previewPane) return;
+
+        const targetTop = target.offsetTop - 16;
+        const scroller = SmoothScroller.get(previewPane);
+        if (scroller) {
+          scroller.scrollTo(Math.max(0, targetTop));
+        } else {
+          previewPane.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        }
+
+        this.activeId = id;
+        this.highlightActiveInList();
+
+        // If in Split mode, also position cursor in editor
+        if (App.mode === 'split' || App.mode === 'edit') {
+          const headingText = target.innerText.trim();
+          const editorText = App.editorEl.value;
+          const lines = editorText.split('\n');
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes(headingText)) {
+              let pos = 0;
+              for (let j = 0; j < i; j++) pos += lines[j].length + 1;
+              if (VimMode.enabled) {
+                VimMode.setCursor(pos);
+              } else {
+                App.editorEl.selectionStart = App.editorEl.selectionEnd = pos;
+                App.scrollCursorIntoView();
+              }
+              break;
+            }
+          }
+        }
+      },
+
+      updateActiveHeading() {
+        const previewPane = document.getElementById('preview-pane');
+        if (!previewPane || this.headings.length === 0) return;
+
+        const curScroll = previewPane.scrollTop + 60;
+        let current = this.headings[0];
+
+        for (let i = 0; i < this.headings.length; i++) {
+          const h = this.headings[i];
+          if (h.el.offsetTop <= curScroll) {
+            current = h;
+          } else {
+            break;
+          }
+        }
+
+        if (current && current.id !== this.activeId) {
+          this.activeId = current.id;
+          this.highlightActiveInList();
+        }
+      },
+
+      highlightActiveInList() {
+        const tocListEl = document.getElementById('toc-list');
+        if (!tocListEl) return;
+
+        tocListEl.querySelectorAll('.toc-item').forEach(item => {
+          if (item.getAttribute('data-id') === this.activeId) {
+            item.classList.add('active');
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -4892,7 +5266,8 @@
           next_file: "Alt+Shift+L",
           close_app: "Ctrl+q",
           save_file: "w",
-          cycle_mode: "Shift+Tab"
+          cycle_mode: "Shift+Tab",
+          toggle_toc: "Alt+O"
         },
         settings: {
           scroll_step_y: 60,
@@ -4910,7 +5285,8 @@
           next_file: "Alt+Shift+L",
           close_app: "Ctrl+q",
           save_file: "w",
-          cycle_mode: "Shift+Tab"
+          cycle_mode: "Shift+Tab",
+          toggle_toc: "Alt+O"
         },
         settings: {
           scroll_step_y: 60,
@@ -4924,6 +5300,30 @@
           ? parseInt(this.keybindings.settings.max_fps, 10)
           : 60;
         return isNaN(fps) ? 60 : fps;
+      },
+
+      matchesCombo(e, comboStr) {
+        if (!comboStr) return false;
+        const parts = comboStr.split('+').map(p => p.trim().toLowerCase());
+        const wantsCtrl = parts.includes('ctrl') || parts.includes('control');
+        const wantsAlt = parts.includes('alt');
+        const wantsShift = parts.includes('shift');
+        const wantsMeta = parts.includes('meta') || parts.includes('cmd');
+
+        if ((e.ctrlKey || false) !== wantsCtrl) return false;
+        if ((e.altKey || false) !== wantsAlt) return false;
+        if ((e.shiftKey || false) !== wantsShift) return false;
+        if ((e.metaKey || false) !== wantsMeta) return false;
+
+        const mainKey = parts.filter(p => !['ctrl', 'control', 'alt', 'shift', 'meta', 'cmd'].includes(p))[0];
+        if (!mainKey) return false;
+
+        const eKey = (e.key || '').toLowerCase();
+        if (mainKey === 'tab') return eKey === 'tab';
+        if (mainKey === 'esc' || mainKey === 'escape') return eKey === 'escape';
+        if (mainKey === 'enter') return eKey === 'enter';
+        if (mainKey === 'space') return eKey === ' ' || eKey === 'space';
+        return eKey === mainKey;
       },
 
       cycleMode() {
@@ -4965,6 +5365,7 @@
       init() {
         SmoothScroller.attach(this.previewPaneEl);
         VimMode.init(this);
+        TableOfContents.init();
 
         this.setupEditorEvents();
         this.setupToolbarEvents();
@@ -5175,6 +5576,10 @@
         DynamicGraphRenderer.parsedCache.clear();
         this.previewEl.innerHTML = SimpleMarkdown.render(text);
 
+        if (TableOfContents.isOpen) {
+          TableOfContents.build();
+        }
+
         // Initialize Dynamic Box Flowcharts (nexus-graph style)
         DynamicGraphRenderer.initAll(this.previewEl);
 
@@ -5237,10 +5642,20 @@
       /* NVIM KEYBINDINGS (ACTIVE ONLY IN PREVIEW MODE) */
       setupNVimKeybindings() {
         window.addEventListener('keydown', (e) => {
-          // Global shortcut: Shift+Tab cycles mode between Preview -> Split -> Edit
-          if (e.key === 'Tab' && e.shiftKey) {
+          // Global shortcut: Cycle mode between Preview -> Split -> Edit
+          const kb = (this.keybindings && this.keybindings.preview) || {};
+          const cycleBinding = kb.cycle_mode || 'Shift+Tab';
+          if (this.matchesCombo(e, cycleBinding) || (e.key === 'Tab' && e.shiftKey)) {
             e.preventDefault();
             this.cycleMode();
+            return;
+          }
+
+          // Global shortcut: Toggle Outline / TOC
+          const tocBinding = kb.toggle_toc || 'Alt+O';
+          if (this.matchesCombo(e, tocBinding) || (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o')) {
+            e.preventDefault();
+            TableOfContents.toggle();
             return;
           }
 
@@ -5282,7 +5697,7 @@
             return;
           }
 
-          const kb = this.keybindings.preview || {};
+          // NVim navigation parameters
           const stepY = (this.keybindings.settings && this.keybindings.settings.scroll_step_y) || 60;
           const stepX = (this.keybindings.settings && this.keybindings.settings.scroll_step_x) || 60;
           const scroller = SmoothScroller.get(this.previewPaneEl);
