@@ -15,6 +15,7 @@ use wry::{WebView, WebViewBuilder};
 const APP_HTML: &str = include_str!("../assets/app.html");
 const SAMPLE_MD: &str = include_str!("../assets/sample.md");
 const DEFAULT_KEYBINDINGS: &str = include_str!("../keybindings.json");
+const LOGO_RGBA: &[u8] = include_bytes!("../assets/logo.rgba");
 
 #[derive(Debug, Deserialize)]
 struct IpcRequest {
@@ -224,12 +225,20 @@ fn main() {
         run_ipc_server(proxy);
     });
 
-    let window = WindowBuilder::new()
+    let icon = tao::window::Icon::from_rgba(LOGO_RGBA.to_vec(), 128, 128).ok();
+
+    let mut window_builder = WindowBuilder::new()
         .with_title("MDViewer")
         .with_decorations(false) // Borderless window (custom title bar controls)
         .with_resizable(true)
         .with_inner_size(LogicalSize::new(960.0, 840.0)) // Half-screen target size
-        .with_min_inner_size(LogicalSize::new(460.0, 360.0))
+        .with_min_inner_size(LogicalSize::new(460.0, 360.0));
+
+    if let Some(ic) = icon {
+        window_builder = window_builder.with_window_icon(Some(ic));
+    }
+
+    let window = window_builder
         .build(&event_loop)
         .expect("Failed to create application window");
 

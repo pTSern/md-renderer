@@ -1,0 +1,18 @@
+{
+  "preview": {
+    "scroll_down": "j",
+    "scroll_up": "k",
+    "scroll_right": "l",
+    "scroll_left": "h",
+    "prev_file": "Alt+Shift+H",
+    "next_file": "Alt+Shift+L",
+    "close_app": "Ctrl+q",
+    "save_file": "w",
+    "cycle_mode": "Shift+Tab"
+  },
+  "settings": {
+    "scroll_step_y": 60,
+    "scroll_step_x": 60,
+    "max_fps": 60
+  }
+}
