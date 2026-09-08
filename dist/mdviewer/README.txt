@@ -13,13 +13,20 @@ HOW TO USE:
 
 KEYBOARD SHORTCUTS:
 - Shift+Tab            : Cycle view modes (Preview -> Split -> Edit -> Preview)
-- Alt+O / Ctrl+Shift+O : Toggle Table of Contents / Outline sidebar
+- Alt+O / Ctrl+Shift+O : Toggle Table of Contents / Outline
 - Ctrl+Alt+V           : Toggle Vim Mode for editor on / off
 - Ctrl+S               : Quick save
 - Ctrl+Shift+S         : Save As
 - Ctrl+O               : Open file dialog
 - Ctrl+N               : New document
 - Ctrl+Q               : Close application
+
+TABLE OF CONTENTS (OUTLINE):
+- Toggle Outline       : Alt+O (or click "Outline" button in toolbar)
+- 2 Display Modes      : Side Tab (Docked) or Floating Window (Overlay)
+- Side Tab Config      : Position (Left / Right), Width (%), Navigator keys (j / k)
+- Floating Window      : Position (Center / Top / Bottom), Width/Height (%), Navigator keys (j / k)
+- Navigation           : j / k (or Down/Up arrow) moves between headings, Enter jumps, Esc closes
 
 PREVIEW MODE (NVim Navigation):
 - j / k                : Smooth scroll down / up (Neovide fluid physics)
@@ -38,7 +45,7 @@ EDITOR VIM MODE (Edit & Split Modes):
 - Animated Caret       : Neovide-style floating smooth spring cursor
 
 SETTINGS:
-- Click the "Keys" button in the top bar to customize keybindings, scroll speed, and Max FPS.
+- Click the "Keys" button in the top bar to customize keybindings, scroll speed, TOC modes, and Max FPS.
 - Settings are automatically saved to keybindings.json.
 
 ================================================================================

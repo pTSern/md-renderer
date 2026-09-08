@@ -11,6 +11,22 @@
     "cycle_mode": "Shift+Tab",
     "toggle_toc": "Alt+O"
   },
+  "toc": {
+    "mode": "side_tab",
+    "side_tab": {
+      "width_percent": 20,
+      "position": "left",
+      "nav_down": "j",
+      "nav_up": "k"
+    },
+    "floating_window": {
+      "width_percent": 50,
+      "height_percent": 60,
+      "position": "center",
+      "nav_down": "j",
+      "nav_up": "k"
+    }
+  },
   "settings": {
     "scroll_step_y": 60,
     "scroll_step_x": 60,

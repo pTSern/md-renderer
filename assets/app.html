@@ -548,20 +548,16 @@
     }
     body.mode-edit .preview-pane,
     body.mode-edit .splitter,
-    body.mode-edit .toc-sidebar {
+    body.mode-edit .toc-sidebar:not(.toc-mode-floating) {
       display: none !important;
     }
     body.mode-edit .editor-pane {
       border-right: none;
     }
 
-    /* Table of Contents (Outline) Sidebar */
+    /* Table of Contents (Outline) Sidebar & Floating Window */
     .toc-sidebar {
-      width: 220px;
-      min-width: 180px;
-      max-width: 320px;
       background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -569,6 +565,39 @@
       overflow: hidden;
       user-select: none;
       z-index: 5;
+    }
+    .toc-sidebar:focus {
+      outline: none;
+    }
+    .toc-sidebar.toc-mode-side.pos-left {
+      order: -1;
+      border-right: 1px solid var(--border);
+      border-left: none;
+    }
+    .toc-sidebar.toc-mode-side.pos-right {
+      order: 10;
+      border-left: 1px solid var(--border);
+      border-right: none;
+    }
+    .toc-sidebar.toc-mode-floating {
+      position: fixed !important;
+      z-index: 1001 !important;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 10px !important;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+      max-width: 95vw !important;
+      max-height: 90vh !important;
+    }
+    .toc-floating-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 1000;
     }
     .toc-header {
       height: 34px;
@@ -1593,6 +1622,15 @@
       box-shadow: 0 0 0 2px var(--accent-glow);
       background: var(--bg-card);
     }
+    select.kb-input-box {
+      cursor: pointer;
+      text-align: left;
+      padding-right: 18px;
+    }
+    select.kb-input-box option {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
     .kb-alert {
       padding: 10px 14px;
       border-radius: 6px;
@@ -1775,19 +1813,25 @@
 
     <div class="splitter" id="splitter"></div>
 
-    <!-- Table of Contents Sidebar (Outline) -->
-    <aside class="toc-sidebar" id="toc-sidebar" style="display:none;">
+    <!-- Table of Contents Backdrop (for Floating Window Mode) -->
+    <div class="toc-floating-backdrop" id="toc-floating-backdrop" style="display:none;" onclick="TableOfContents.close()"></div>
+
+    <!-- Table of Contents Sidebar / Floating Window (Outline) -->
+    <aside class="toc-sidebar" id="toc-sidebar" style="display:none;" tabindex="0">
       <div class="toc-header">
         <div class="toc-title">
           <span>📑 Outline</span>
           <span class="toc-count" id="toc-count"></span>
         </div>
-        <button class="toc-close-btn" id="btn-toc-close" title="Close Outline (Alt+O)">✕</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="toc-nav-hint" id="toc-nav-hint" style="font-size:10px; color:var(--text-muted); opacity:0.85;">[j/k: nav • ↵: jump]</span>
+          <button class="toc-close-btn" id="btn-toc-close" title="Close Outline (Alt+O / Esc)">✕</button>
+        </div>
       </div>
       <div class="toc-search-box">
-        <input type="text" id="toc-search-input" placeholder="Filter headings..." spellcheck="false" autocomplete="off">
+        <input type="text" id="toc-search-input" placeholder="Filter headings (↓/↑ or j/k to nav)..." spellcheck="false" autocomplete="off">
       </div>
-      <div class="toc-list" id="toc-list"></div>
+      <div class="toc-list" id="toc-list" tabindex="0"></div>
     </aside>
 
     <section class="preview-pane" id="preview-pane">
@@ -1959,6 +2003,103 @@
                 <span class="kb-row-desc">Exit application</span>
               </div>
               <input type="text" class="kb-input-box" data-cat="preview" data-key="close_app" spellcheck="false" placeholder="Ctrl+q">
+            </div>
+          </div>
+
+          <!-- Table of Contents (Outline) Settings -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>📑 Table of Contents (Outline)</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">TOC Display Style</span>
+                <span class="kb-row-desc">Choose between docked Side Tab or Floating Window overlay</span>
+              </div>
+              <select class="kb-input-box" data-cat="toc" data-key="mode" id="kb-toc-mode">
+                <option value="side_tab">Side Tab (Docked)</option>
+                <option value="floating_window">Floating Window (Overlay)</option>
+              </select>
+            </div>
+
+            <!-- Side Tab Options -->
+            <div class="kb-group-title" style="margin-top:4px; font-size:10px; color:var(--accent);">
+              <span>📌 Side Tab Mode Options</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Side Tab Position</span>
+                <span class="kb-row-desc">Placement: Left or Right of window (Default: Left)</span>
+              </div>
+              <select class="kb-input-box" data-cat="toc.side_tab" data-key="position">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Side Tab Width (%)</span>
+                <span class="kb-row-desc">Percentage of window width (e.g. 15% - 50%)</span>
+              </div>
+              <input type="number" min="10" max="60" step="5" class="kb-input-box" data-cat="toc.side_tab" data-key="width_percent" placeholder="20">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Side Tab Navigate Down</span>
+                <span class="kb-row-desc">Key to move selection down in Side Tab (Default: j)</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="toc.side_tab" data-key="nav_down" placeholder="j">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Side Tab Navigate Up</span>
+                <span class="kb-row-desc">Key to move selection up in Side Tab (Default: k)</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="toc.side_tab" data-key="nav_up" placeholder="k">
+            </div>
+
+            <!-- Floating Window Options -->
+            <div class="kb-group-title" style="margin-top:4px; font-size:10px; color:var(--accent);">
+              <span>🪟 Floating Window Mode Options</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Floating Window Position</span>
+                <span class="kb-row-desc">Placement: Center, Top, or Bottom (Default: Center)</span>
+              </div>
+              <select class="kb-input-box" data-cat="toc.floating_window" data-key="position">
+                <option value="center">Center</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+              </select>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Floating Window Width (%)</span>
+                <span class="kb-row-desc">Percentage of window width (e.g. 30% - 90%)</span>
+              </div>
+              <input type="number" min="20" max="95" step="5" class="kb-input-box" data-cat="toc.floating_window" data-key="width_percent" placeholder="50">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Floating Window Height (%)</span>
+                <span class="kb-row-desc">Percentage of window height (e.g. 30% - 90%)</span>
+              </div>
+              <input type="number" min="20" max="95" step="5" class="kb-input-box" data-cat="toc.floating_window" data-key="height_percent" placeholder="60">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Floating Window Navigate Down</span>
+                <span class="kb-row-desc">Key to move selection down in Floating Window (Default: j)</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="toc.floating_window" data-key="nav_down" placeholder="j">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Floating Window Navigate Up</span>
+                <span class="kb-row-desc">Key to move selection up in Floating Window (Default: k)</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="toc.floating_window" data-key="nav_up" placeholder="k">
             </div>
           </div>
 
@@ -4532,6 +4673,12 @@
       onKeyDown(e) {
         if (!this.enabled || (this.app.mode !== 'edit' && this.app.mode !== 'split')) return;
 
+        // If Floating TOC is open, route key events directly to it
+        if (typeof TableOfContents !== 'undefined' && TableOfContents.isOpen && TableOfContents.getConfig().mode === 'floating_window') {
+          TableOfContents.handleKeyDown(e);
+          return;
+        }
+
         // Shift+Tab cycles mode between Preview -> Split -> Edit
         const cycleBinding = (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.cycle_mode) || 'Shift+Tab';
         if ((this.app.matchesCombo && this.app.matchesCombo(e, cycleBinding)) || (e.key === 'Tab' && e.shiftKey)) {
@@ -5043,13 +5190,38 @@
     const TableOfContents = {
       isOpen: false,
       headings: [],
+      filteredHeadings: [],
       activeId: null,
       scrollTimer: null,
+      isNavigating: false,
+
+      getConfig() {
+        const kb = (typeof App !== 'undefined' && App.keybindings && App.keybindings.toc) 
+          ? App.keybindings.toc 
+          : ((typeof App !== 'undefined' && App.defaultKeybindings && App.defaultKeybindings.toc) ? App.defaultKeybindings.toc : {});
+        const mode = kb.mode || 'side_tab';
+        const sideTab = Object.assign({
+          width_percent: 20,
+          position: 'left',
+          nav_down: 'j',
+          nav_up: 'k'
+        }, kb.side_tab || {});
+        const floating = Object.assign({
+          width_percent: 50,
+          height_percent: 60,
+          position: 'center',
+          nav_down: 'j',
+          nav_up: 'k'
+        }, kb.floating_window || {});
+        return { mode, side_tab: sideTab, floating_window: floating };
+      },
 
       init() {
         const btnToc = document.getElementById('btn-toc');
         const btnClose = document.getElementById('btn-toc-close');
         const searchInput = document.getElementById('toc-search-input');
+        const sidebar = document.getElementById('toc-sidebar');
+        const listEl = document.getElementById('toc-list');
 
         if (btnToc) {
           btnToc.addEventListener('click', () => this.toggle());
@@ -5059,16 +5231,129 @@
         }
         if (searchInput) {
           searchInput.addEventListener('input', (e) => this.filter(e.target.value));
+          searchInput.addEventListener('keydown', (e) => {
+            const cfg = this.getConfig();
+            const modeCfg = cfg.mode === 'floating_window' ? cfg.floating_window : cfg.side_tab;
+            const navDown = modeCfg.nav_down || 'j';
+            const navUp = modeCfg.nav_up || 'k';
+
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              this.moveSelection(1);
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              this.moveSelection(-1);
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              this.jumpToActive();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              this.close();
+            } else if (App.matchesCombo(e, navDown) && (e.ctrlKey || e.altKey)) {
+              e.preventDefault();
+              this.moveSelection(1);
+            } else if (App.matchesCombo(e, navUp) && (e.ctrlKey || e.altKey)) {
+              e.preventDefault();
+              this.moveSelection(-1);
+            }
+          });
+        }
+
+        if (sidebar) {
+          sidebar.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        }
+        if (listEl) {
+          listEl.addEventListener('keydown', (e) => this.handleKeyDown(e));
         }
 
         // Preview pane scrollspy
         const previewPane = document.getElementById('preview-pane');
         if (previewPane) {
           previewPane.addEventListener('scroll', () => {
-            if (!this.isOpen) return;
+            if (!this.isOpen || this.isNavigating) return;
             clearTimeout(this.scrollTimer);
             this.scrollTimer = setTimeout(() => this.updateActiveHeading(), 50);
           }, { passive: true });
+        }
+      },
+
+      applyLayout() {
+        const sidebar = document.getElementById('toc-sidebar');
+        const backdrop = document.getElementById('toc-floating-backdrop');
+        const hintEl = document.getElementById('toc-nav-hint');
+        if (!sidebar) return;
+
+        const cfg = this.getConfig();
+        const mode = cfg.mode;
+        sidebar.classList.remove('toc-mode-side', 'toc-mode-floating', 'pos-left', 'pos-right', 'pos-center', 'pos-top', 'pos-bottom');
+
+        if (mode === 'floating_window') {
+          sidebar.classList.add('toc-mode-floating');
+          const floatCfg = cfg.floating_window;
+          const w = Math.min(95, Math.max(20, floatCfg.width_percent || 50));
+          const h = Math.min(95, Math.max(20, floatCfg.height_percent || 60));
+          const pos = floatCfg.position || 'center';
+
+          sidebar.style.width = `${w}%`;
+          sidebar.style.height = `${h}%`;
+          sidebar.style.order = '';
+
+          if (pos === 'top') {
+            sidebar.classList.add('pos-top');
+            sidebar.style.left = '50%';
+            sidebar.style.top = 'calc(var(--titlebar-h) + var(--toolbar-h) + 20px)';
+            sidebar.style.bottom = 'auto';
+            sidebar.style.transform = 'translateX(-50%)';
+          } else if (pos === 'bottom') {
+            sidebar.classList.add('pos-bottom');
+            sidebar.style.left = '50%';
+            sidebar.style.top = 'auto';
+            sidebar.style.bottom = 'calc(var(--statusbar-h) + 20px)';
+            sidebar.style.transform = 'translateX(-50%)';
+          } else {
+            // center
+            sidebar.classList.add('pos-center');
+            sidebar.style.left = '50%';
+            sidebar.style.top = '50%';
+            sidebar.style.bottom = 'auto';
+            sidebar.style.transform = 'translate(-50%, -50%)';
+          }
+
+          if (backdrop) {
+            backdrop.style.display = this.isOpen ? 'block' : 'none';
+          }
+          if (hintEl) {
+            hintEl.innerText = `[${floatCfg.nav_down}/${floatCfg.nav_up}: nav • ↵: jump • Esc: close]`;
+          }
+        } else {
+          // Side Tab mode
+          sidebar.classList.add('toc-mode-side');
+          const sideCfg = cfg.side_tab;
+          const w = Math.min(60, Math.max(10, sideCfg.width_percent || 20));
+          const pos = sideCfg.position || 'left';
+
+          sidebar.style.width = `${w}%`;
+          sidebar.style.height = '100%';
+          sidebar.style.position = '';
+          sidebar.style.left = '';
+          sidebar.style.top = '';
+          sidebar.style.bottom = '';
+          sidebar.style.transform = '';
+
+          if (pos === 'right') {
+            sidebar.classList.add('pos-right');
+            sidebar.style.order = '10';
+          } else {
+            sidebar.classList.add('pos-left');
+            sidebar.style.order = '-1';
+          }
+
+          if (backdrop) {
+            backdrop.style.display = 'none';
+          }
+          if (hintEl) {
+            hintEl.innerText = `[${sideCfg.nav_down}/${sideCfg.nav_up}: nav • ↵: jump]`;
+          }
         }
       },
 
@@ -5079,22 +5364,42 @@
 
       open() {
         this.isOpen = true;
-        if (typeof App !== 'undefined' && App.mode === 'edit') {
+        const cfg = this.getConfig();
+        if (cfg.mode === 'side_tab' && typeof App !== 'undefined' && App.mode === 'edit') {
           App.setMode('split');
         }
+
+        this.applyLayout();
         const sidebar = document.getElementById('toc-sidebar');
         const btn = document.getElementById('btn-toc');
         if (sidebar) sidebar.style.display = 'flex';
         if (btn) btn.classList.add('active');
         this.build();
+
+        // Immediate keyboard focus
+        const searchInput = document.getElementById('toc-search-input');
+        if (cfg.mode === 'floating_window') {
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        } else {
+          if (sidebar) sidebar.focus();
+        }
       },
 
       close() {
         this.isOpen = false;
         const sidebar = document.getElementById('toc-sidebar');
         const btn = document.getElementById('btn-toc');
+        const backdrop = document.getElementById('toc-floating-backdrop');
         if (sidebar) sidebar.style.display = 'none';
         if (btn) btn.classList.remove('active');
+        if (backdrop) backdrop.style.display = 'none';
+
+        if (App.mode === 'edit' || App.mode === 'split') {
+          if (App.editorEl) App.editorEl.focus();
+        }
       },
 
       build() {
@@ -5155,24 +5460,148 @@
           <div class="toc-item toc-level-${item.level} ${item.id === this.activeId ? 'active' : ''}"
                data-id="${item.id}"
                title="H${item.level}: ${escapeHtml(item.text)}"
-               onclick="TableOfContents.jumpTo('${item.id}')">
+               onclick="TableOfContents.onItemClick('${item.id}')">
             <span class="toc-bullet">H${item.level}</span>
             <span class="toc-text">${escapeHtml(item.text)}</span>
           </div>
         `).join('');
       },
 
+      onItemClick(id) {
+        this.activeId = id;
+        this.jumpTo(id, true);
+        const cfg = this.getConfig();
+        if (cfg.mode === 'floating_window') {
+          this.close();
+        }
+      },
+
       filter(query) {
         const q = (query || '').toLowerCase().trim();
         if (!q) {
-          this.renderList(this.headings);
-          return;
+          this.filteredHeadings = this.headings.slice();
+        } else {
+          this.filteredHeadings = this.headings.filter(h => h.text.toLowerCase().includes(q));
         }
-        const filtered = this.headings.filter(h => h.text.toLowerCase().includes(q));
-        this.renderList(filtered);
+        this.renderList(this.filteredHeadings);
+        if (this.filteredHeadings.length > 0) {
+          if (!this.filteredHeadings.some(h => h.id === this.activeId)) {
+            this.activeId = this.filteredHeadings[0].id;
+          }
+        } else {
+          this.activeId = null;
+        }
+        this.highlightActiveInList();
       },
 
-      jumpTo(id) {
+      moveSelection(delta) {
+        const list = (this.filteredHeadings && this.filteredHeadings.length > 0) ? this.filteredHeadings : this.headings;
+        if (!list || list.length === 0) return;
+
+        let curIdx = list.findIndex(h => h.id === this.activeId);
+        if (curIdx === -1) {
+          curIdx = delta > 0 ? 0 : list.length - 1;
+        } else {
+          curIdx += delta;
+        }
+
+        if (curIdx < 0) curIdx = 0;
+        if (curIdx >= list.length) curIdx = list.length - 1;
+
+        const target = list[curIdx];
+        this.activeId = target.id;
+        this.highlightActiveInList();
+
+        this.isNavigating = true;
+        clearTimeout(this._navTimer);
+        this._navTimer = setTimeout(() => { this.isNavigating = false; }, 350);
+
+        const cfg = this.getConfig();
+        if (cfg.mode === 'side_tab') {
+          this.jumpTo(target.id, false);
+        }
+      },
+
+      jumpToActive() {
+        if (this.activeId) {
+          this.jumpTo(this.activeId, true);
+          const cfg = this.getConfig();
+          if (cfg.mode === 'floating_window') {
+            this.close();
+          }
+        }
+      },
+
+      handleKeyDown(e) {
+        if (!this.isOpen) return;
+        const searchInput = document.getElementById('toc-search-input');
+        const isSearchFocused = document.activeElement === searchInput;
+
+        const cfg = this.getConfig();
+        const modeCfg = cfg.mode === 'floating_window' ? cfg.floating_window : cfg.side_tab;
+        const navDown = modeCfg.nav_down || 'j';
+        const navUp = modeCfg.nav_up || 'k';
+
+        // Close on Escape
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          e.stopPropagation();
+          this.close();
+          return;
+        }
+
+        // If in search input and not empty, don't intercept plain letter typing unless modified
+        if (isSearchFocused && searchInput.value.length > 0) {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.moveSelection(1);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.moveSelection(-1);
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            this.jumpToActive();
+          }
+          return;
+        }
+
+        // Down navigation
+        if (App.matchesCombo(e, navDown) || (e.key === navDown && !e.ctrlKey && !e.altKey && !e.metaKey) || e.key === 'ArrowDown') {
+          e.preventDefault();
+          e.stopPropagation();
+          this.moveSelection(1);
+          return;
+        }
+
+        // Up navigation
+        if (App.matchesCombo(e, navUp) || (e.key === navUp && !e.ctrlKey && !e.altKey && !e.metaKey) || e.key === 'ArrowUp') {
+          e.preventDefault();
+          e.stopPropagation();
+          this.moveSelection(-1);
+          return;
+        }
+
+        // Enter jumps
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          this.jumpToActive();
+          return;
+        }
+
+        // '/' focuses search filter
+        if (e.key === '/' && !isSearchFocused) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+          return;
+        }
+      },
+
+      jumpTo(id, syncEditor = true) {
         const previewPane = document.getElementById('preview-pane');
         const target = document.getElementById(id);
         if (!target || !previewPane) return;
@@ -5188,8 +5617,8 @@
         this.activeId = id;
         this.highlightActiveInList();
 
-        // If in Split mode, also position cursor in editor
-        if (App.mode === 'split' || App.mode === 'edit') {
+        // If in Split mode or Edit mode, also position cursor in editor
+        if (syncEditor && (App.mode === 'split' || App.mode === 'edit')) {
           const headingText = target.innerText.trim();
           const editorText = App.editorEl.value;
           const lines = editorText.split('\n');
@@ -5269,6 +5698,22 @@
           cycle_mode: "Shift+Tab",
           toggle_toc: "Alt+O"
         },
+        toc: {
+          mode: "side_tab",
+          side_tab: {
+            width_percent: 20,
+            position: "left",
+            nav_down: "j",
+            nav_up: "k"
+          },
+          floating_window: {
+            width_percent: 50,
+            height_percent: 60,
+            position: "center",
+            nav_down: "j",
+            nav_up: "k"
+          }
+        },
         settings: {
           scroll_step_y: 60,
           scroll_step_x: 60,
@@ -5287,6 +5732,22 @@
           save_file: "w",
           cycle_mode: "Shift+Tab",
           toggle_toc: "Alt+O"
+        },
+        toc: {
+          mode: "side_tab",
+          side_tab: {
+            width_percent: 20,
+            position: "left",
+            nav_down: "j",
+            nav_up: "k"
+          },
+          floating_window: {
+            width_percent: 50,
+            height_percent: 60,
+            position: "center",
+            nav_down: "j",
+            nav_up: "k"
+          }
         },
         settings: {
           scroll_step_y: 60,
@@ -5692,6 +6153,15 @@
             }
           }
 
+          // If TOC is open in floating window mode, route keypresses directly to it
+          if (typeof TableOfContents !== 'undefined' && TableOfContents.isOpen && TableOfContents.getConfig().mode === 'floating_window') {
+            const searchInput = document.getElementById('toc-search-input');
+            if (document.activeElement !== searchInput) {
+              TableOfContents.handleKeyDown(e);
+              return;
+            }
+          }
+
           // PURGE all NVim navigation if not in preview mode or if typing
           if (this.mode !== 'preview' || isTyping) {
             return;
@@ -5776,12 +6246,18 @@
       loadKeybindingsJson(jsonStr) {
         try {
           const parsed = JSON.parse(jsonStr);
-          if (parsed && parsed.preview) {
+          if (parsed && (parsed.preview || parsed.toc)) {
             this.keybindings = parsed;
+            if (typeof TableOfContents !== 'undefined') {
+              TableOfContents.applyLayout();
+            }
           }
         } catch (e) {
           console.error('Invalid keybindings JSON:', e);
           this.keybindings = JSON.parse(JSON.stringify(this.defaultKeybindings));
+          if (typeof TableOfContents !== 'undefined') {
+            TableOfContents.applyLayout();
+          }
         }
       },
 
@@ -5838,14 +6314,40 @@
         }
       },
 
+      getNestedValue(obj, path) {
+        if (!obj || !path) return undefined;
+        const parts = path.split('.');
+        let curr = obj;
+        for (const p of parts) {
+          if (curr === undefined || curr === null) return undefined;
+          curr = curr[p];
+        }
+        return curr;
+      },
+
+      setNestedValue(obj, path, val) {
+        const parts = path.split('.');
+        let curr = obj;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const p = parts[i];
+          if (!curr[p] || typeof curr[p] !== 'object') {
+            curr[p] = {};
+          }
+          curr = curr[p];
+        }
+        curr[parts[parts.length - 1]] = val;
+      },
+
       populateKbFields() {
         const kb = this.keybindings || this.defaultKeybindings;
         const inputs = document.querySelectorAll('.kb-input-box');
         inputs.forEach(input => {
           const cat = input.getAttribute('data-cat');
           const key = input.getAttribute('data-key');
-          if (kb[cat] && kb[cat][key] !== undefined) {
-            input.value = kb[cat][key];
+          const path = cat ? `${cat}.${key}` : key;
+          const val = this.getNestedValue(kb, path);
+          if (val !== undefined) {
+            input.value = val;
           }
         });
         if (this.kbTextareaEl) {
@@ -5856,18 +6358,22 @@
       syncFieldsToJson() {
         const kb = JSON.parse(JSON.stringify(this.keybindings || this.defaultKeybindings));
         if (!kb.preview) kb.preview = {};
+        if (!kb.toc) kb.toc = JSON.parse(JSON.stringify(this.defaultKeybindings.toc));
         if (!kb.settings) kb.settings = {};
 
         const inputs = document.querySelectorAll('.kb-input-box');
         inputs.forEach(input => {
           const cat = input.getAttribute('data-cat');
           const key = input.getAttribute('data-key');
-          if (cat === 'settings') {
-            const num = parseInt(input.value, 10);
-            kb.settings[key] = isNaN(num) ? 60 : num;
-          } else {
-            kb[cat][key] = input.value.trim();
+          const path = cat ? `${cat}.${key}` : key;
+          let val = input.value;
+          if (input.type === 'number') {
+            const num = parseInt(val, 10);
+            val = isNaN(num) ? 0 : num;
+          } else if (typeof val === 'string') {
+            val = val.trim();
           }
+          this.setNestedValue(kb, path, val);
         });
 
         this.keybindings = kb;
@@ -5886,8 +6392,10 @@
           inputs.forEach(input => {
             const cat = input.getAttribute('data-cat');
             const key = input.getAttribute('data-key');
-            if (parsed[cat] && parsed[cat][key] !== undefined) {
-              input.value = parsed[cat][key];
+            const path = cat ? `${cat}.${key}` : key;
+            const val = this.getNestedValue(parsed, path);
+            if (val !== undefined) {
+              input.value = val;
             }
           });
         } catch (_) {
@@ -5912,6 +6420,9 @@
         }
 
         this.keybindings = kbToSave;
+        if (typeof TableOfContents !== 'undefined') {
+          TableOfContents.applyLayout();
+        }
         this.sendIpc('save_keybindings', { json: JSON.stringify(kbToSave, null, 2) });
       },
 
