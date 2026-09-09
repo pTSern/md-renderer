@@ -188,6 +188,59 @@
       background: rgba(243, 139, 168, 0.2);
     }
 
+    /* Tab Context Menu */
+    .tab-context-menu {
+      position: fixed;
+      z-index: 10000;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+      padding: 4px;
+      min-width: 195px;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      user-select: none;
+    }
+    .tab-context-menu.show {
+      display: flex;
+    }
+    .tab-context-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+    .tab-context-menu-item:hover {
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+    .tab-context-menu-item.danger:hover {
+      background: rgba(243, 139, 168, 0.15);
+      color: var(--danger);
+    }
+    .tab-context-menu-divider {
+      height: 1px;
+      background: var(--border-light);
+      margin: 3px 0;
+    }
+
+    /* Markdown Image */
+    .markdown-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin: 10px 0;
+      display: block;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
     .btn-add-tab {
       background: transparent;
       border: none;
@@ -483,6 +536,126 @@
       color: var(--text-primary);
       font-family: var(--font-mono);
       font-size: 13px;
+    }
+
+    /* Floating Search Widget (Ctrl+F) */
+    .floating-search-widget {
+      position: fixed;
+      top: 44px;
+      right: 20px;
+      z-index: 9999;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      font-family: var(--font-ui);
+      user-select: none;
+      backdrop-filter: blur(8px);
+      animation: searchSlideIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes searchSlideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .search-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 5px;
+      padding: 3px 8px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .search-input-group:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+    .search-input-group input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      width: 170px;
+    }
+    .search-count-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 44px;
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+    .search-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+    }
+    .search-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    .search-btn.search-close:hover {
+      background: rgba(243, 139, 168, 0.2);
+      color: var(--danger);
+    }
+
+    /* Vim Bottom Status Search */
+    .vim-status-search {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-primary);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      padding: 0 6px;
+      height: 20px;
+      margin-left: 6px;
+    }
+    .vim-status-search-prompt {
+      color: var(--accent);
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .vim-status-search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      width: 160px;
+    }
+
+    /* Search Highlights in Preview */
+    mark.md-search-highlight {
+      background: rgba(249, 226, 175, 0.35);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 1px;
+      transition: background 0.1s ease;
+    }
+    mark.md-search-highlight.md-search-highlight-active {
+      background: #f9e2af !important;
+      color: #11111b !important;
+      font-weight: 600;
+      outline: 2px solid var(--accent);
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(249, 226, 175, 0.8);
     }
 
     /* Vim Mode Badge in Statusbar */
@@ -1963,13 +2136,31 @@
       <span id="status-vim-badge" class="vim-badge normal" style="display:none;">-- NORMAL --</span>
       <span id="status-mode">MODE: PREVIEW (NVIM: j/k/h/l)</span>
       <span id="status-cursor">Ln 1, Col 1</span>
+      <!-- Vim Search Bar (Triggered by / in Vim Mode) -->
+      <div id="status-vim-search" class="vim-status-search" style="display:none;">
+        <span class="vim-status-search-prompt">/</span>
+        <input type="text" id="status-vim-search-input" class="vim-status-search-input" spellcheck="false" autocomplete="off" placeholder="Search...">
+      </div>
     </div>
     <div class="statusbar-right">
+      <span id="status-search-info" style="display:none; color:var(--accent); font-weight:600; font-size:11px; margin-right:8px;"></span>
       <span id="status-words">0 words</span>
       <span id="status-lines">1 line</span>
       <span id="status-save">✓ Ready</span>
     </div>
   </footer>
+
+  <!-- Floating Search Widget (Ctrl+F) -->
+  <div id="floating-search-widget" class="floating-search-widget" style="display:none;">
+    <div class="search-input-group">
+      <span style="font-size:12px; color:var(--accent);">🔍</span>
+      <input type="text" id="floating-search-input" placeholder="Find in document..." spellcheck="false" autocomplete="off">
+    </div>
+    <span id="floating-search-count" class="search-count-badge">0/0</span>
+    <button class="search-btn" id="floating-search-prev" onclick="SearchEngine.prev()" title="Previous Match (Shift+Enter)">▲</button>
+    <button class="search-btn" id="floating-search-next" onclick="SearchEngine.next()" title="Next Match (Enter)">▼</button>
+    <button class="search-btn search-close" id="floating-search-close" onclick="SearchEngine.closeFloating()" title="Close (Esc)">✕</button>
+  </div>
 
   <!-- Drop File Overlay (Drag-to-Read) -->
   <div class="drop-overlay" id="drop-overlay">
@@ -2380,6 +2571,16 @@
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
+                <span class="kb-row-label">Middle Click to Close Tab</span>
+                <span class="kb-row-desc">Clicking a tab with middle mouse button closes it immediately</span>
+              </div>
+              <select class="kb-input-box" data-cat="settings" data-key="middle_click_close_tab">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
                 <span class="kb-row-label">Max FPS Limit</span>
                 <span class="kb-row-desc">Cap animation frame rate (e.g. 60, 120, 144, 240, or 0 for unlimited)</span>
               </div>
@@ -2403,6 +2604,28 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Tab Context Menu (Right Click on Tab) -->
+  <div id="tab-context-menu" class="tab-context-menu">
+    <div class="tab-context-menu-item" onclick="App.onTabContextAction('open_folder')">
+      <span>📁</span>
+      <span>Open Containing Folder</span>
+    </div>
+    <div class="tab-context-menu-divider"></div>
+    <div class="tab-context-menu-item" onclick="App.onTabContextAction('save')">
+      <span>💾</span>
+      <span>Save File</span>
+    </div>
+    <div class="tab-context-menu-divider"></div>
+    <div class="tab-context-menu-item danger" onclick="App.onTabContextAction('close')">
+      <span>✕</span>
+      <span>Close Tab</span>
+    </div>
+    <div class="tab-context-menu-item danger" onclick="App.onTabContextAction('close_others')">
+      <span>✕</span>
+      <span>Close Other Tabs</span>
     </div>
   </div>
 
@@ -4051,7 +4274,19 @@
         const links = [];
         s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
           const id = links.length;
-          links.push(`<img src="${src}" alt="${alt}" style="max-width:100%; border-radius:6px;">`);
+          let rawSrc = (src || '').trim();
+          const titleMatch = rawSrc.match(/\s+["']([^"']*)["']$/);
+          let titleAttr = '';
+          if (titleMatch) {
+            titleAttr = ` title="${escapeHtml(titleMatch[1])}"`;
+            rawSrc = rawSrc.substring(0, titleMatch.index).trim();
+          }
+          if (rawSrc.startsWith('<') && rawSrc.endsWith('>')) {
+            rawSrc = rawSrc.slice(1, -1).trim();
+          }
+          const resolved = App.resolveImageSrc(rawSrc);
+          const safeAlt = escapeHtml(alt || '');
+          links.push(`<img src="${resolved.displayUrl}" data-local-src="${escapeHtml(resolved.localPath || '')}" alt="${safeAlt}"${titleAttr} class="markdown-img" onerror="App.onImageLoadError(this)">`);
           return `\x1aLINK${id}\x1a`;
         });
         s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, txt, url) => {
@@ -5018,6 +5253,14 @@
           return;
         }
 
+        // Global search shortcut: Ctrl+F
+        if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'f' || e.key === 'F')) {
+          e.preventDefault();
+          e.stopPropagation();
+          SearchEngine.openFloating();
+          return;
+        }
+
         if (this.mode === 'INSERT') {
           if (e.key === 'Escape' || (e.ctrlKey && e.key === '[')) {
             e.preventDefault();
@@ -5283,6 +5526,17 @@
               if (target !== -1 && target >= info.lineStart) this.setCursor(target);
             }
           }
+        }
+
+        // Vim Search command (/) & navigation (n, N)
+        else if (key === '/') {
+          SearchEngine.openVim();
+        }
+        else if (key === 'n') {
+          SearchEngine.next();
+        }
+        else if (key === 'N') {
+          SearchEngine.prev();
         }
 
         // Entering Insert mode
@@ -6395,6 +6649,377 @@
     };
 
     /* =========================================================================
+       3.5. UNIFIED SEARCH ENGINE (CTRL+F & VIM / STYLE SEARCH)
+       ========================================================================= */
+    const SearchEngine = {
+      app: null,
+      query: '',
+      editorMatches: [],
+      previewMatches: [],
+      currentIndex: -1,
+      mode: 'none',
+
+      floatingWidgetEl: null,
+      floatingInputEl: null,
+      floatingCountEl: null,
+      vimSearchEl: null,
+      vimInputEl: null,
+      statusInfoEl: null,
+
+      init(app) {
+        this.app = app;
+        this.floatingWidgetEl = document.getElementById('floating-search-widget');
+        this.floatingInputEl = document.getElementById('floating-search-input');
+        this.floatingCountEl = document.getElementById('floating-search-count');
+        this.vimSearchEl = document.getElementById('status-vim-search');
+        this.vimInputEl = document.getElementById('status-vim-search-input');
+        this.statusInfoEl = document.getElementById('status-search-info');
+
+        if (this.floatingInputEl) {
+          this.floatingInputEl.addEventListener('input', () => {
+            this.execute(this.floatingInputEl.value, true);
+          });
+          this.floatingInputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (e.shiftKey) this.prev();
+              else this.next();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              this.closeFloating();
+            }
+          });
+        }
+
+        if (this.vimInputEl) {
+          this.vimInputEl.addEventListener('input', () => {
+            if (this.vimInputEl.value.trim()) {
+              this.execute(this.vimInputEl.value, false);
+            }
+          });
+          this.vimInputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const q = this.vimInputEl.value;
+              this.closeVimBar();
+              if (q.trim()) {
+                this.execute(q, true);
+                const total = this.getTotalMatches();
+                if (total > 0 && this.app) {
+                  this.app.showToast(`Search: 1/${total} for "${q}" (n: next, N: prev)`);
+                } else if (this.app) {
+                  this.app.showToast(`Pattern not found: ${q}`);
+                }
+              }
+              this.refocusCurrentView();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              this.closeVimBar();
+              this.clearHighlights();
+              this.refocusCurrentView();
+            }
+          });
+        }
+      },
+
+      openFloating() {
+        this.closeVimBar();
+        this.mode = 'floating';
+        if (this.floatingWidgetEl) {
+          this.floatingWidgetEl.style.display = 'flex';
+        }
+        if (this.app && this.app.editorEl) {
+          const selStart = this.app.editorEl.selectionStart;
+          const selEnd = this.app.editorEl.selectionEnd;
+          if (selEnd > selStart) {
+            const selectedText = this.app.editorEl.value.substring(selStart, selEnd).trim();
+            if (selectedText && selectedText.length <= 80 && !selectedText.includes('\n')) {
+              this.floatingInputEl.value = selectedText;
+            }
+          }
+        }
+        if (this.floatingInputEl) {
+          this.floatingInputEl.focus();
+          this.floatingInputEl.select();
+          if (this.floatingInputEl.value) {
+            this.execute(this.floatingInputEl.value, true);
+          }
+        }
+      },
+
+      closeFloating() {
+        if (this.floatingWidgetEl) {
+          this.floatingWidgetEl.style.display = 'none';
+        }
+        this.clearHighlights();
+        this.mode = 'none';
+        this.refocusCurrentView();
+      },
+
+      openVim() {
+        if (this.floatingWidgetEl) {
+          this.floatingWidgetEl.style.display = 'none';
+        }
+        this.mode = 'vim';
+        if (this.vimSearchEl) {
+          this.vimSearchEl.style.display = 'inline-flex';
+        }
+        if (this.vimInputEl) {
+          this.vimInputEl.value = this.query || '';
+          this.vimInputEl.focus();
+          this.vimInputEl.select();
+        }
+      },
+
+      closeVimBar() {
+        if (this.vimSearchEl) {
+          this.vimSearchEl.style.display = 'none';
+        }
+      },
+
+      refocusCurrentView() {
+        if (!this.app) return;
+        if (this.app.mode === 'edit' || this.app.mode === 'split') {
+          this.app.editorEl.focus();
+        } else if (this.app.mode === 'preview') {
+          this.app.previewPaneEl.focus();
+        }
+      },
+
+      execute(queryStr, jumpToNearest = true) {
+        this.query = (queryStr || '').trim();
+        this.clearHighlightsOnly();
+        this.editorMatches = [];
+        this.previewMatches = [];
+        this.currentIndex = -1;
+
+        if (!this.query) {
+          this.updateCountUI();
+          return;
+        }
+
+        // 1. Find matches in raw Markdown editor content
+        const text = this.app ? this.app.editorEl.value : '';
+        const lowerText = text.toLowerCase();
+        const lowerQuery = this.query.toLowerCase();
+        let idx = lowerText.indexOf(lowerQuery);
+        while (idx !== -1) {
+          const line = text.substring(0, idx).split('\n').length;
+          this.editorMatches.push({ start: idx, end: idx + this.query.length, line });
+          idx = lowerText.indexOf(lowerQuery, idx + this.query.length);
+        }
+
+        // 2. Find and highlight matches in rendered preview DOM
+        if (this.app && this.app.previewEl) {
+          this.previewMatches = this.highlightDom(this.app.previewEl, this.query);
+        }
+
+        const total = this.getTotalMatches();
+        if (total === 0) {
+          this.updateCountUI();
+          return;
+        }
+
+        // 3. Jump to nearest match
+        let targetIdx = 0;
+        if (jumpToNearest && this.app) {
+          if (this.app.mode === 'edit' || this.app.mode === 'split') {
+            const curPos = this.app.editorEl.selectionStart || 0;
+            const nearest = this.editorMatches.findIndex(m => m.start >= curPos);
+            targetIdx = nearest !== -1 ? nearest : 0;
+          } else if (this.app.mode === 'preview' && typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+            const curLine = PreviewCursor.getCurrentLine();
+            const nearest = this.previewMatches.findIndex(m => {
+              const block = m.closest('[data-line]');
+              const l = block ? parseInt(block.getAttribute('data-line'), 10) : 0;
+              return l >= curLine;
+            });
+            targetIdx = nearest !== -1 ? nearest : 0;
+          }
+        }
+
+        this.jumpTo(targetIdx);
+      },
+
+      getTotalMatches() {
+        return Math.max(this.editorMatches.length, this.previewMatches.length);
+      },
+
+      next() {
+        const total = this.getTotalMatches();
+        if (total === 0) return;
+        this.jumpTo((this.currentIndex + 1) % total);
+      },
+
+      prev() {
+        const total = this.getTotalMatches();
+        if (total === 0) return;
+        this.jumpTo((this.currentIndex - 1 + total) % total);
+      },
+
+      jumpTo(index) {
+        const total = this.getTotalMatches();
+        if (total === 0) {
+          this.currentIndex = -1;
+          this.updateCountUI();
+          return;
+        }
+
+        this.currentIndex = (index + total) % total;
+        this.updateCountUI();
+
+        // Active highlight in Preview
+        if (this.previewMatches.length > 0) {
+          const prevActive = this.app.previewEl.querySelector('.md-search-highlight-active');
+          if (prevActive) prevActive.classList.remove('md-search-highlight-active');
+
+          const activeMark = this.previewMatches[this.currentIndex % this.previewMatches.length];
+          if (activeMark) {
+            activeMark.classList.add('md-search-highlight-active');
+            activeMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && this.app.mode === 'preview') {
+              const parentBlock = activeMark.closest('[data-line]');
+              if (parentBlock) {
+                PreviewCursor.setIndexByElement(parentBlock);
+              }
+            }
+          }
+        }
+
+        // Active selection in Editor (for Edit and Split modes)
+        if (this.editorMatches.length > 0 && (this.app.mode === 'edit' || this.app.mode === 'split')) {
+          const match = this.editorMatches[this.currentIndex % this.editorMatches.length];
+          if (match) {
+            this.app.editorEl.setSelectionRange(match.start, match.end);
+            const lineHeight = 20;
+            const targetScroll = Math.max(0, (match.line - 5) * lineHeight);
+            const scroller = SmoothScroller.get(this.app.editorEl);
+            if (scroller) {
+              scroller.scrollTo(targetScroll);
+            } else {
+              this.app.editorEl.scrollTop = targetScroll;
+            }
+
+            if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+              VimMode.setCursor(match.start);
+              VimMode.updateCursorPosition();
+            }
+          }
+        }
+      },
+
+      updateCountUI() {
+        const total = this.getTotalMatches();
+        const display = total > 0 ? `${this.currentIndex + 1}/${total}` : (this.query ? '0/0' : '');
+
+        if (this.floatingCountEl) {
+          this.floatingCountEl.textContent = display || '0/0';
+          this.floatingCountEl.style.color = total === 0 && this.query ? 'var(--danger)' : 'var(--text-muted)';
+        }
+
+        if (this.statusInfoEl) {
+          if (total > 0) {
+            this.statusInfoEl.style.display = 'inline-block';
+            this.statusInfoEl.textContent = `🔍 ${this.currentIndex + 1}/${total}`;
+          } else {
+            this.statusInfoEl.style.display = 'none';
+          }
+        }
+      },
+
+      clearHighlightsOnly() {
+        if (!this.app || !this.app.previewEl) return;
+        const marks = this.app.previewEl.querySelectorAll('mark.md-search-highlight');
+        marks.forEach(m => {
+          const parent = m.parentNode;
+          if (parent) {
+            parent.replaceChild(document.createTextNode(m.textContent), m);
+            parent.normalize();
+          }
+        });
+      },
+
+      clearHighlights() {
+        this.clearHighlightsOnly();
+        this.query = '';
+        this.editorMatches = [];
+        this.previewMatches = [];
+        this.currentIndex = -1;
+        this.updateCountUI();
+      },
+
+      refreshHighlights() {
+        if (!this.query) return;
+        const savedIdx = this.currentIndex;
+        this.execute(this.query, false);
+        if (savedIdx >= 0) {
+          this.jumpTo(savedIdx);
+        }
+      },
+
+      highlightDom(rootEl, query) {
+        this.clearHighlightsOnly();
+        if (!query) return [];
+
+        const markElements = [];
+        const walker = document.createTreeWalker(
+          rootEl,
+          NodeFilter.SHOW_TEXT,
+          {
+            acceptNode: (node) => {
+              if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+              const p = node.parentElement;
+              if (!p) return NodeFilter.FILTER_REJECT;
+              const tag = p.tagName.toLowerCase();
+              if (tag === 'script' || tag === 'style' || tag === 'svg' || tag === 'path' || p.closest('.diagram-card')) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          }
+        );
+
+        const nodesToProcess = [];
+        while (walker.nextNode()) {
+          nodesToProcess.push(walker.currentNode);
+        }
+
+        const lowerQuery = query.toLowerCase();
+        nodesToProcess.forEach(node => {
+          const text = node.textContent;
+          let lower = text.toLowerCase();
+          let idx = lower.indexOf(lowerQuery);
+          if (idx === -1) return;
+
+          const frag = document.createDocumentFragment();
+          let lastIdx = 0;
+          while (idx !== -1) {
+            if (idx > lastIdx) {
+              frag.appendChild(document.createTextNode(text.substring(lastIdx, idx)));
+            }
+            const mark = document.createElement('mark');
+            mark.className = 'md-search-highlight';
+            mark.textContent = text.substring(idx, idx + query.length);
+            frag.appendChild(mark);
+            markElements.push(mark);
+
+            lastIdx = idx + query.length;
+            idx = lower.indexOf(lowerQuery, lastIdx);
+          }
+          if (lastIdx < text.length) {
+            frag.appendChild(document.createTextNode(text.substring(lastIdx)));
+          }
+          if (node.parentNode) {
+            node.parentNode.replaceChild(frag, node);
+          }
+        });
+
+        return markElements;
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -6450,6 +7075,7 @@
           hr_color: "#30363d"
         },
         settings: {
+          middle_click_close_tab: true,
           is_copy_to_yank: true,
           scroll_step_y: 60,
           scroll_step_x: 60,
@@ -6499,6 +7125,7 @@
           hr_color: "#30363d"
         },
         settings: {
+          middle_click_close_tab: true,
           is_copy_to_yank: true,
           scroll_step_y: 60,
           scroll_step_x: 60,
@@ -6703,6 +7330,7 @@
         VimMode.init(this);
         TableOfContents.init();
         PreviewCursor.init(this);
+        SearchEngine.init(this);
         this.applyTheme(this.keybindings && this.keybindings.theme ? this.keybindings.theme : this.defaultKeybindings.theme);
 
         this.setupEditorEvents();
@@ -6736,6 +7364,22 @@
           if (scriptTag) scriptTag.addEventListener('load', initMermaid);
         }
 
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('#tab-context-menu')) {
+            this.hideTabContextMenu();
+          }
+        });
+        document.addEventListener('contextmenu', (e) => {
+          if (!e.target.closest('.tab-item')) {
+            this.hideTabContextMenu();
+          }
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.hideTabContextMenu();
+          }
+        });
+
         this.setMode('preview');
         this.sendIpc('get_init_data', {});
       },
@@ -6764,6 +7408,11 @@
               break;
             case 'file_saved':
               this.onFileSaved(data.path, data.name);
+              break;
+            case 'image_data':
+              if (data.path && data.content) {
+                this.handleImageData(data.path, data.content);
+              }
               break;
             case 'keybindings_saved':
               if (data.json) this.loadKeybindingsJson(data.json);
@@ -6853,9 +7502,13 @@
       renderTabs() {
         this.tabsContainerEl.innerHTML = this.files.map((file, idx) => `
           <div class="tab-item ${idx === this.activeFileIndex ? 'active' : ''} ${file.isDirty ? 'is-dirty' : ''}"
-               onclick="App.switchFile(${idx})" title="${file.path || file.name}">
+               onclick="App.switchFile(${idx})"
+               onauxclick="App.onTabAuxClick(${idx}, event)"
+               oncontextmenu="App.onTabContextMenu(${idx}, event)"
+               onmousedown="if(event.button===1) event.preventDefault();"
+               title="${file.path || file.name}">
             <span class="tab-dirty"></span>
-            <span class="tab-name">${file.name}</span>
+            <span class="tab-name">${escapeHtml(file.name)}</span>
             <span class="tab-close" onclick="App.closeFile(${idx}, event)" title="Close Tab">✕</span>
           </div>
         `).join('');
@@ -6863,6 +7516,224 @@
         // Ensure active tab is visible in scroll
         const activeTab = this.tabsContainerEl.querySelector('.tab-item.active');
         if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      },
+
+      tabContextMenuTargetIndex: null,
+
+      onTabAuxClick(index, event) {
+        if (event.button === 1) { // Middle mouse button
+          event.preventDefault();
+          event.stopPropagation();
+          const allowMiddleClose = (this.keybindings && this.keybindings.settings && this.keybindings.settings.middle_click_close_tab !== undefined)
+            ? (this.keybindings.settings.middle_click_close_tab === true || this.keybindings.settings.middle_click_close_tab === 'true')
+            : true;
+          if (allowMiddleClose) {
+            this.closeFile(index, event);
+          }
+        }
+      },
+
+      onTabContextMenu(index, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.tabContextMenuTargetIndex = index;
+        const menu = document.getElementById('tab-context-menu');
+        if (!menu) return;
+        const x = Math.min(event.clientX, window.innerWidth - 210);
+        const y = Math.min(event.clientY, window.innerHeight - 160);
+        menu.style.left = `${Math.max(4, x)}px`;
+        menu.style.top = `${Math.max(4, y)}px`;
+        menu.classList.add('show');
+      },
+
+      hideTabContextMenu() {
+        const menu = document.getElementById('tab-context-menu');
+        if (menu) menu.classList.remove('show');
+        this.tabContextMenuTargetIndex = null;
+      },
+
+      onTabContextAction(action) {
+        const idx = this.tabContextMenuTargetIndex;
+        this.hideTabContextMenu();
+        if (idx === null || idx === undefined || !this.files[idx]) return;
+
+        if (action === 'open_folder') {
+          const file = this.files[idx];
+          if (file && file.path) {
+            const clean = this.cleanPath(file.path);
+            this.sendIpc('open_containing_folder', { path: clean || file.path });
+          } else {
+            this.showToast('File is not saved on disk yet');
+          }
+        } else if (action === 'save') {
+          if (idx === this.activeFileIndex) {
+            this.saveFile();
+          } else {
+            const file = this.files[idx];
+            if (file.path) {
+              this.sendIpc('save_file', { path: file.path, content: file.content });
+              file.isDirty = false;
+              this.renderTabs();
+              this.showToast(`Saved ${file.name}`);
+            } else {
+              this.switchFile(idx);
+              this.saveFileAs();
+            }
+          }
+        } else if (action === 'close') {
+          this.closeFile(idx);
+        } else if (action === 'close_others') {
+          this.closeOtherFiles(idx);
+        }
+      },
+
+      closeOtherFiles(keepIndex) {
+        const fileToKeep = this.files[keepIndex];
+        if (!fileToKeep) return;
+        const hasDirty = this.files.some((f, i) => i !== keepIndex && f.isDirty);
+        if (hasDirty && !confirm('Close other tabs and discard unsaved changes?')) {
+          return;
+        }
+        this.files = [fileToKeep];
+        this.activeFileIndex = 0;
+        this.renderTabs();
+        this.loadActiveFileIntoEditor();
+      },
+
+      cleanPath(raw) {
+        if (!raw) return '';
+        let s = raw.trim();
+        if ((s.startsWith('<') && s.endsWith('>')) ||
+            (s.startsWith('"') && s.endsWith('"')) ||
+            (s.startsWith("'") && s.endsWith("'"))) {
+          s = s.slice(1, -1).trim();
+        }
+        if (/%[0-9a-fA-F]{2}/.test(s)) {
+          try { s = decodeURIComponent(s); } catch (_) {}
+        }
+        s = s.replace(/^file:\/\/\/?/i, '');
+        s = s.replace(/\\/g, '/');
+        if (/^\/[a-zA-Z]:\//.test(s)) {
+          s = s.substring(1);
+        }
+        return s;
+      },
+
+      imageCache: new Map(),
+
+      resolveImageSrc(rawSrc) {
+        if (!rawSrc) return { displayUrl: '', localPath: '' };
+        let trimmed = rawSrc.trim();
+        if ((trimmed.startsWith('<') && trimmed.endsWith('>')) ||
+            (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+            (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+          trimmed = trimmed.slice(1, -1).trim();
+        }
+
+        // 1. Web URLs or Data URIs or already custom protocol
+        if (/^(https?:|data:|blob:|asset:)/i.test(trimmed)) {
+          return { displayUrl: trimmed, localPath: '' };
+        }
+
+        // 2. Base directory from currently active file
+        const currentFile = this.files && this.files[this.activeFileIndex];
+        let baseDir = '';
+        if (currentFile && currentFile.path) {
+          const normCurrent = this.cleanPath(currentFile.path);
+          const lastSlash = normCurrent.lastIndexOf('/');
+          if (lastSlash >= 0) {
+            baseDir = normCurrent.substring(0, lastSlash);
+          }
+        }
+
+        // 3. Resolve absolute path
+        const clean = this.cleanPath(trimmed);
+        let fullPath = clean;
+
+        const isWindowsAbs = /^[a-zA-Z]:\//.test(clean) || clean.startsWith('//');
+        const isUnixAbs = clean.startsWith('/') && !clean.startsWith('//');
+
+        if (isWindowsAbs) {
+          fullPath = clean;
+        } else if (isUnixAbs) {
+          if (baseDir && /^[a-zA-Z]:/.test(baseDir)) {
+            fullPath = baseDir.substring(0, 2) + clean;
+          } else {
+            fullPath = clean;
+          }
+        } else if (baseDir) {
+          const baseParts = baseDir.split('/').filter(Boolean);
+          const hasDrive = /^[a-zA-Z]:/.test(baseDir);
+          const drivePrefix = hasDrive ? baseParts[0] : '';
+          const parts = hasDrive ? baseParts.slice(1) : baseParts;
+
+          const relParts = clean.split('/');
+          for (const p of relParts) {
+            if (!p || p === '.') continue;
+            if (p === '..') {
+              if (parts.length > 0) parts.pop();
+            } else {
+              parts.push(p);
+            }
+          }
+          fullPath = hasDrive ? (drivePrefix + '/' + parts.join('/')) : ('/' + parts.join('/'));
+        }
+
+        if (this.imageCache.has(fullPath)) {
+          return { displayUrl: this.imageCache.get(fullPath), localPath: fullPath };
+        }
+        const normFullPath = fullPath.replace(/\\/g, '/');
+        if (this.imageCache.has(normFullPath)) {
+          return { displayUrl: this.imageCache.get(normFullPath), localPath: fullPath };
+        }
+
+        const displayUrl = `asset://localhost/?path=${encodeURIComponent(fullPath)}`;
+        return { displayUrl, localPath: fullPath };
+      },
+
+      onImageLoadError(imgEl) {
+        const localPath = imgEl.getAttribute('data-local-src');
+        if (localPath && !imgEl.dataset.fallbackAttempted) {
+          imgEl.dataset.fallbackAttempted = 'true';
+          this.sendIpc('read_image', { path: localPath });
+          return;
+        }
+
+        imgEl.style.display = 'none';
+        let fallbackBadge = imgEl.nextElementSibling;
+        if (!fallbackBadge || !fallbackBadge.classList.contains('img-error-badge')) {
+          fallbackBadge = document.createElement('span');
+          fallbackBadge.className = 'img-error-badge';
+          fallbackBadge.style.cssText = 'display:inline-flex; align-items:center; gap:6px; background:var(--bg-tertiary); border:1px dashed var(--danger); color:var(--text-secondary); font-size:11px; padding:4px 8px; border-radius:4px; margin:4px 0;';
+          const alt = imgEl.getAttribute('alt') || 'Image';
+          fallbackBadge.innerHTML = `⚠️ <span style="color:var(--danger); font-weight:600;">Image not found:</span> ${escapeHtml(alt)}`;
+          imgEl.parentNode.insertBefore(fallbackBadge, imgEl.nextSibling);
+        }
+      },
+
+      handleImageData(path, dataUrl) {
+        if (!path || !dataUrl) return;
+        this.imageCache.set(path, dataUrl);
+        const normPath = path.replace(/\\/g, '/');
+        this.imageCache.set(normPath, dataUrl);
+        const cleanP = this.cleanPath(path);
+        if (cleanP) this.imageCache.set(cleanP, dataUrl);
+
+        const imgs = document.querySelectorAll(`img[data-local-src]`);
+        imgs.forEach(img => {
+          const srcPath = img.getAttribute('data-local-src');
+          if (srcPath) {
+            const cleanSrc = this.cleanPath(srcPath);
+            if (srcPath === path || srcPath.replace(/\\/g, '/') === normPath || (cleanP && cleanSrc === cleanP)) {
+              img.src = dataUrl;
+              img.style.display = 'block';
+              const badge = img.nextElementSibling;
+              if (badge && badge.classList.contains('img-error-badge')) {
+                badge.remove();
+              }
+            }
+          }
+        });
       },
 
       loadActiveFileIntoEditor() {
@@ -6913,6 +7784,24 @@
         const text = this.editorEl.value;
         DynamicGraphRenderer.parsedCache.clear();
         this.previewEl.innerHTML = SimpleMarkdown.render(text);
+
+        // Apply cached image data URL if already loaded
+        const localImgs = this.previewEl.querySelectorAll('img[data-local-src]');
+        localImgs.forEach(img => {
+          const localPath = img.getAttribute('data-local-src');
+          if (localPath) {
+            const clean = this.cleanPath(localPath);
+            if (this.imageCache.has(localPath)) {
+              img.src = this.imageCache.get(localPath);
+            } else if (this.imageCache.has(clean)) {
+              img.src = this.imageCache.get(clean);
+            }
+          }
+        });
+
+        if (typeof SearchEngine !== 'undefined' && SearchEngine.query) {
+          SearchEngine.refreshHighlights();
+        }
 
         if (TableOfContents.isOpen) {
           TableOfContents.build();
@@ -7009,13 +7898,24 @@
             return;
           }
 
+          // Global escape to close floating search if open
+          if (e.key === 'Escape' && typeof SearchEngine !== 'undefined' && SearchEngine.mode === 'floating') {
+            e.preventDefault();
+            SearchEngine.closeFloating();
+            return;
+          }
+
           // If in an active input or textarea, or NOT in preview mode: PURGE keybinds!
           const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
           const isTyping = activeTag === 'textarea' || activeTag === 'input';
 
-          // General shortcuts (Ctrl+S, Ctrl+O, Ctrl+N)
+          // General shortcuts (Ctrl+F, Ctrl+S, Ctrl+O, Ctrl+N)
           if ((e.ctrlKey || e.metaKey) && !e.altKey) {
-            if (e.key === 's') {
+            if (e.key === 'f' || e.key === 'F') {
+              e.preventDefault();
+              SearchEngine.openFloating();
+              return;
+            } else if (e.key === 's') {
               e.preventDefault();
               if (e.shiftKey) App.saveAs();
               else App.save();
@@ -7147,6 +8047,25 @@
               this.showToast('Press a-z to jump to mark...');
               clearTimeout(this._markTimer);
               this._markTimer = setTimeout(() => { this._previewPendingMark = null; }, 3000);
+              return;
+            }
+
+            // Vim Search command (/) in Preview Mode
+            if (e.key === '/') {
+              e.preventDefault();
+              SearchEngine.openVim();
+              return;
+            }
+
+            // Vim Search navigation (n, N) in Preview Mode
+            if (e.key === 'n') {
+              e.preventDefault();
+              SearchEngine.next();
+              return;
+            }
+            if (e.key === 'N') {
+              e.preventDefault();
+              SearchEngine.prev();
               return;
             }
 

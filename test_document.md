@@ -182,3 +182,13 @@ title: Transmission Control Protocol Header (RFC 793)
 
 > [!TIP]
 > Notice how the UDP header is only **8 bytes** (64 bits), whereas the TCP header is at least **20 bytes** (160 bits)! This makes UDP significantly faster for real-time applications like DNS, VoIP, gaming, and HTTP/3 QUIC.
+
+---
+
+## 7. Image Rendering Showcase
+
+MDViewer seamlessly resolves relative paths, absolute local file paths, and web images:
+
+### Relative Path Image
+![MDViewer App Logo](./logo.png "MDViewer Logo")
+

@@ -11,6 +11,8 @@ use tao::{
     window::WindowBuilder,
 };
 use wry::{WebView, WebViewBuilder};
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 
 const APP_HTML: &str = include_str!("../assets/app.html");
 const SAMPLE_MD: &str = include_str!("../assets/sample.md");
@@ -37,6 +39,109 @@ struct IpcResponse<'a> {
     content: Option<String>,
     message: Option<String>,
     json: Option<String>,
+}
+
+fn url_decode(s: &str) -> String {
+    let mut bytes = Vec::new();
+    let mut chars = s.bytes();
+    while let Some(b) = chars.next() {
+        if b == b'%' {
+            let h1 = chars.next();
+            let h2 = chars.next();
+            if let (Some(h1), Some(h2)) = (h1, h2) {
+                let hex = [h1, h2];
+                if let Ok(val) = u8::from_str_radix(std::str::from_utf8(&hex).unwrap_or("00"), 16) {
+                    bytes.push(val);
+                    continue;
+                }
+            }
+        }
+        bytes.push(b);
+    }
+    String::from_utf8_lossy(&bytes).into_owned()
+}
+
+fn normalize_file_path(raw: &str) -> PathBuf {
+    let mut s = raw.trim();
+    if s.starts_with('<') && s.ends_with('>') && s.len() >= 2 {
+        s = s[1..s.len() - 1].trim();
+    }
+    if (s.starts_with('"') && s.ends_with('"') && s.len() >= 2)
+        || (s.starts_with('\'') && s.ends_with('\'') && s.len() >= 2) {
+        s = s[1..s.len() - 1].trim();
+    }
+    let mut decoded = url_decode(s);
+    if decoded.contains("%20") || decoded.contains("%2F") || decoded.contains("%2f") {
+        decoded = url_decode(&decoded);
+    }
+    let mut cleaned = decoded.trim();
+    if let Some(stripped) = cleaned.strip_prefix("file:///") {
+        cleaned = stripped;
+    } else if let Some(stripped) = cleaned.strip_prefix("file://") {
+        cleaned = stripped;
+    }
+    let trimmed = cleaned.trim_start_matches('/');
+    let path_str = if trimmed.len() >= 2 && trimmed.chars().nth(1) == Some(':') {
+        trimmed.replace('/', "\\")
+    } else if cleaned.starts_with(r"\\") {
+        cleaned.to_string()
+    } else {
+        cleaned.replace('/', "\\")
+    };
+    PathBuf::from(path_str)
+}
+
+fn open_in_explorer(p: &Path) {
+    #[cfg(target_os = "windows")]
+    {
+        if p.is_file() {
+            let _ = std::process::Command::new("explorer")
+                .raw_arg(format!(r#"/select,"{}""#, p.display()))
+                .spawn();
+        } else if p.is_dir() {
+            let _ = std::process::Command::new("explorer")
+                .raw_arg(format!(r#""{}""#, p.display()))
+                .spawn();
+        } else if let Some(parent) = p.parent() {
+            if parent.exists() {
+                let _ = std::process::Command::new("explorer")
+                    .raw_arg(format!(r#""{}""#, parent.display()))
+                    .spawn();
+            }
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let target = if p.is_file() {
+            p.parent().unwrap_or(p)
+        } else {
+            p
+        };
+        let _ = std::process::Command::new("xdg-open").arg(target).spawn();
+    }
+}
+
+fn to_base64(bytes: &[u8]) -> String {
+    const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out = String::with_capacity((bytes.len() + 2) / 3 * 4);
+    for chunk in bytes.chunks(3) {
+        let b0 = chunk[0];
+        let b1 = if chunk.len() > 1 { chunk[1] } else { 0 };
+        let b2 = if chunk.len() > 2 { chunk[2] } else { 0 };
+        out.push(TABLE[(b0 >> 2) as usize] as char);
+        out.push(TABLE[(((b0 & 3) << 4) | (b1 >> 4)) as usize] as char);
+        if chunk.len() > 1 {
+            out.push(TABLE[(((b1 & 0xF) << 2) | (b2 >> 6)) as usize] as char);
+        } else {
+            out.push('=');
+        }
+        if chunk.len() > 2 {
+            out.push(TABLE[(b2 & 0x3F) as usize] as char);
+        } else {
+            out.push('=');
+        }
+    }
+    out
 }
 
 fn send_to_webview(webview: &WebView, response: &IpcResponse) {
@@ -252,6 +357,50 @@ fn main() {
 
     let webview = WebViewBuilder::new()
         .with_html(APP_HTML)
+        .with_custom_protocol("asset".into(), move |_id, req| {
+            let mut file_path = String::new();
+            if let Some(query) = req.uri().query() {
+                for pair in query.split('&') {
+                    if let Some((k, v)) = pair.split_once('=') {
+                        if k == "path" {
+                            file_path = url_decode(v);
+                        }
+                    }
+                }
+            }
+            if file_path.is_empty() {
+                let path_str = req.uri().path();
+                file_path = url_decode(path_str);
+            }
+
+            let path = normalize_file_path(&file_path);
+            if path.exists() && path.is_file() {
+                if let Ok(bytes) = fs::read(&path) {
+                    let mime = match path.extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()).as_deref() {
+                        Some("png") => "image/png",
+                        Some("jpg") | Some("jpeg") => "image/jpeg",
+                        Some("gif") => "image/gif",
+                        Some("webp") => "image/webp",
+                        Some("svg") => "image/svg+xml",
+                        Some("bmp") => "image/bmp",
+                        Some("ico") => "image/x-icon",
+                        _ => "application/octet-stream",
+                    };
+                    return wry::http::Response::builder()
+                        .status(200)
+                        .header("Content-Type", mime)
+                        .header("Access-Control-Allow-Origin", "*")
+                        .body(std::borrow::Cow::Owned(bytes))
+                        .unwrap();
+                }
+            }
+
+            wry::http::Response::builder()
+                .status(404)
+                .header("Access-Control-Allow-Origin", "*")
+                .body(std::borrow::Cow::Borrowed(b"Not Found" as &[u8]))
+                .unwrap()
+        })
         .with_ipc_handler(move |req| {
             let body = req.body();
             if let Ok(request) = serde_json::from_str::<IpcRequest>(body) {
@@ -316,7 +465,7 @@ fn main() {
 
                         "read_file" => {
                             if let Some(path_str) = request.path {
-                                let path = PathBuf::from(&path_str);
+                                let path = normalize_file_path(&path_str);
                                 if path.exists() {
                                     if let Ok(content) = fs::read_to_string(&path) {
                                         let name = path
@@ -386,8 +535,8 @@ fn main() {
 
                         "save_file" => {
                             if let (Some(path_str), Some(content)) = (request.path, request.content) {
-                                let path = Path::new(&path_str);
-                                match fs::write(path, content) {
+                                let path = normalize_file_path(&path_str);
+                                match fs::write(&path, content) {
                                     Ok(_) => {
                                         let name = path
                                             .file_name()
@@ -537,6 +686,46 @@ fn main() {
                         "set_title" => {
                             if let Some(title) = request.title {
                                 window_clone_ipc.set_title(&title);
+                            }
+                        }
+
+                        "open_containing_folder" => {
+                            if let Some(path_str) = request.path {
+                                let p = normalize_file_path(&path_str);
+                                open_in_explorer(&p);
+                            }
+                        }
+
+                        "read_image" => {
+                            if let Some(path_str) = request.path {
+                                let p = normalize_file_path(&path_str);
+                                if p.exists() && p.is_file() {
+                                    if let Ok(bytes) = fs::read(&p) {
+                                        let mime = match p.extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()).as_deref() {
+                                            Some("png") => "image/png",
+                                            Some("jpg") | Some("jpeg") => "image/jpeg",
+                                            Some("gif") => "image/gif",
+                                            Some("webp") => "image/webp",
+                                            Some("svg") => "image/svg+xml",
+                                            Some("bmp") => "image/bmp",
+                                            Some("ico") => "image/x-icon",
+                                            _ => "application/octet-stream",
+                                        };
+                                        let b64 = to_base64(&bytes);
+                                        let data_url = format!("data:{};base64,{}", mime, b64);
+                                        send_to_webview(
+                                            wv,
+                                            &IpcResponse {
+                                                response_type: "image_data",
+                                                path: Some(path_str),
+                                                name: None,
+                                                content: Some(data_url),
+                                                message: None,
+                                                json: None,
+                                            },
+                                        );
+                                    }
+                                }
                             }
                         }
 
@@ -737,5 +926,20 @@ mod tests {
         assert_eq!(&ack, b"OK\n");
 
         server_thread.join().unwrap();
+    }
+
+    #[test]
+    fn test_normalize_file_path() {
+        let p1 = normalize_file_path("C:\\Users\\Wild Boar PC\\test.md");
+        assert_eq!(p1, PathBuf::from("C:\\Users\\Wild Boar PC\\test.md"));
+
+        let p2 = normalize_file_path("/C:/Users/Wild Boar PC/image.png");
+        assert_eq!(p2, PathBuf::from("C:\\Users\\Wild Boar PC\\image.png"));
+
+        let p3 = normalize_file_path("file:///C:/Users/Wild%20Boar%20PC/image.png");
+        assert_eq!(p3, PathBuf::from("C:\\Users\\Wild Boar PC\\image.png"));
+
+        let p4 = normalize_file_path("<C:\\Users\\Wild Boar PC\\doc.md>");
+        assert_eq!(p4, PathBuf::from("C:\\Users\\Wild Boar PC\\doc.md"));
     }
 }

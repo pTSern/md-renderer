@@ -41,6 +41,7 @@
     "hr_color": "#30363d"
   },
   "settings": {
+    "middle_click_close_tab": true,
     "is_copy_to_yank": true,
     "scroll_step_y": 60,
     "scroll_step_x": 60,
