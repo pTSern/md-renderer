@@ -27,8 +27,10 @@
       --titlebar-h: 36px;
       --toolbar-h: 38px;
       --statusbar-h: 26px;
-      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --font-mono: "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+      --font-mono: "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, "Microsoft YaHei", monospace;
+      --preview-font-size: 14.5px;
+      --editor-font-size: 13px;
 
       /* Markdown Custom Theme Colors */
       --md-heading: #58a6ff;
@@ -438,7 +440,7 @@
       background-color: var(--bg-secondary);
       color: var(--text-muted);
       font-family: var(--font-mono);
-      font-size: 12.5px;
+      font-size: var(--editor-font-size, 12.5px);
       line-height: 1.6;
       text-align: right;
       overflow: hidden;
@@ -452,7 +454,7 @@
       background: transparent;
       color: var(--text-primary);
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: var(--editor-font-size, 13px);
       line-height: 1.6;
       border: none;
       outline: none;
@@ -964,7 +966,8 @@
        MARKDOWN BODY STYLES
        ========================================================================= */
     .markdown-body {
-      font-size: 14.5px;
+      font-family: var(--font-ui);
+      font-size: var(--preview-font-size, 14.5px);
       line-height: 1.65;
       color: var(--md-text, var(--text-primary));
       word-wrap: break-word;
@@ -1948,6 +1951,36 @@
       outline: none;
       resize: vertical;
     }
+    .font-sample-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .font-sample-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .font-sample-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+    .font-sample-preview {
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      border: 1px solid var(--border-light);
+      word-break: break-all;
+      color: var(--text-primary);
+      line-height: 1.55;
+    }
     .top-notification-banner {
       position: fixed;
       top: 36px;
@@ -2529,6 +2562,94 @@
               <div class="color-picker-wrapper">
                 <input type="color" class="color-swatch-picker" data-sync="theme.table_border_color" value="#30363d">
                 <input type="text" class="kb-input-box color-hex-box" data-cat="theme" data-key="table_border_color" spellcheck="false" placeholder="#30363d">
+              </div>
+            </div>
+          </div>
+
+          <!-- Typography & Multilingual Font Settings -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>🔤 Typography &amp; Multilingual Fonts (字体与语言设置)</span>
+            </div>
+
+            <!-- UI & Markdown Preview Font -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">UI &amp; Preview Font</span>
+                <span class="kb-row-desc">Font for UI, headings, text, and preview mode (界面与预览字体)</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; width:220px;">
+                <select class="kb-input-box" data-cat="fonts" data-key="ui_font" id="kb-font-ui-select" style="width:100%; text-align:left;">
+                  <option value="System Default">System Default (Auto 自动)</option>
+                  <option value="Microsoft YaHei">Microsoft YaHei (微软雅黑 - Windows)</option>
+                  <option value="PingFang SC">PingFang SC (苹方 - macOS)</option>
+                  <option value="Source Han Sans">Source Han Sans / Noto Sans (思源黑体)</option>
+                  <option value="SimSun">SimSun (宋体)</option>
+                  <option value="SimHei">SimHei (黑体)</option>
+                  <option value="KaiTi">KaiTi (楷体)</option>
+                  <option value="Microsoft JhengHei">Microsoft JhengHei (微軟正黑體)</option>
+                  <option value="Meiryo">Meiryo / Yu Gothic (Japanese 日本語)</option>
+                  <option value="Malgun Gothic">Malgun Gothic (Korean 한국어)</option>
+                  <option value="Segoe UI">Segoe UI (Western Clean)</option>
+                  <option value="Custom Font...">Custom Font... (自定义字体)</option>
+                </select>
+                <input type="text" class="kb-input-box" data-cat="fonts" data-key="custom_ui_font" id="kb-font-ui-custom" spellcheck="false" placeholder="Custom font (e.g. LXGW WenKai)" style="width:100%; text-align:left;">
+              </div>
+            </div>
+
+            <!-- Editor & Code Monospace Font -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Editor &amp; Code Font</span>
+                <span class="kb-row-desc">Monospace font for editor, code blocks, and inline code (代码与编辑器等宽字体)</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; width:220px;">
+                <select class="kb-input-box" data-cat="fonts" data-key="code_font" id="kb-font-code-select" style="width:100%; text-align:left;">
+                  <option value="System Monospace">System Monospace (Auto 自动)</option>
+                  <option value="Consolas">Consolas (Standard Windows)</option>
+                  <option value="Cascadia Code">Cascadia Code / Mono</option>
+                  <option value="Fira Code">Fira Code</option>
+                  <option value="JetBrains Mono">JetBrains Mono</option>
+                  <option value="Source Code Pro">Source Code Pro</option>
+                  <option value="Microsoft YaHei">Microsoft YaHei (微软雅黑 - CJK Monospace)</option>
+                  <option value="SimSun">SimSun (宋体 - CJK Monospace)</option>
+                  <option value="Custom Monospace Font...">Custom Monospace Font... (自定义等宽字体)</option>
+                </select>
+                <input type="text" class="kb-input-box" data-cat="fonts" data-key="custom_code_font" id="kb-font-code-custom" spellcheck="false" placeholder="Custom code font (e.g. Sarasa Term SC)" style="width:100%; text-align:left;">
+              </div>
+            </div>
+
+            <!-- Preview Font Size -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Preview Font Size (px)</span>
+                <span class="kb-row-desc">Text size in reading and preview mode (Default: 14.5px)</span>
+              </div>
+              <input type="number" min="10" max="36" step="0.5" class="kb-input-box" data-cat="fonts" data-key="preview_font_size" placeholder="14.5">
+            </div>
+
+            <!-- Editor Font Size -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Editor Font Size (px)</span>
+                <span class="kb-row-desc">Text size in edit and split mode (Default: 13px)</span>
+              </div>
+              <input type="number" min="10" max="36" step="1" class="kb-input-box" data-cat="fonts" data-key="editor_font_size" placeholder="13">
+            </div>
+
+            <!-- Live Multilingual Font Preview Card -->
+            <div class="font-sample-card">
+              <div class="font-sample-row">
+                <span class="font-sample-label">🔤 Live Preview / Text Sample (实时字体效果):</span>
+                <div class="font-sample-preview" id="kb-font-sample">
+                  The quick brown fox jumps over the lazy dog. 永和九年，岁在癸丑，暮春之初。繁體中文測試。日本語テスト：色は匂へど。한국어 테스트: 다람쥐 헌 쳇바퀴에 타고파.
+                </div>
+              </div>
+              <div class="font-sample-row">
+                <span class="font-sample-label">💻 Code / Monospace Sample:</span>
+                <div class="font-sample-preview" id="kb-font-sample-code">
+                  fn main() { let msg = "Hello, 世界 🚀"; println!("{}", msg); }
+                </div>
               </div>
             </div>
           </div>
@@ -7074,6 +7195,14 @@
           table_border_color: "#30363d",
           hr_color: "#30363d"
         },
+        fonts: {
+          ui_font: "System Default",
+          custom_ui_font: "",
+          code_font: "System Monospace",
+          custom_code_font: "",
+          preview_font_size: 14.5,
+          editor_font_size: 13
+        },
         settings: {
           middle_click_close_tab: true,
           is_copy_to_yank: true,
@@ -7123,6 +7252,14 @@
           text_color: "#c9d1d9",
           table_border_color: "#30363d",
           hr_color: "#30363d"
+        },
+        fonts: {
+          ui_font: "System Default",
+          custom_ui_font: "",
+          code_font: "System Monospace",
+          custom_code_font: "",
+          preview_font_size: 14.5,
+          editor_font_size: 13
         },
         settings: {
           middle_click_close_tab: true,
@@ -7332,6 +7469,7 @@
         PreviewCursor.init(this);
         SearchEngine.init(this);
         this.applyTheme(this.keybindings && this.keybindings.theme ? this.keybindings.theme : this.defaultKeybindings.theme);
+        this.applyFonts(this.keybindings && this.keybindings.fonts ? this.keybindings.fonts : this.defaultKeybindings.fonts);
 
         this.setupEditorEvents();
         this.setupToolbarEvents();
@@ -8226,6 +8364,159 @@
         this.applyTheme(theme);
       },
 
+      applyFonts(fontConfig) {
+        if (!fontConfig) {
+          fontConfig = (this.keybindings && this.keybindings.fonts) || (this.defaultKeybindings && this.defaultKeybindings.fonts) || {};
+        }
+
+        const root = document.documentElement;
+
+        // 1. Resolve UI / Markdown Preview Font Stack
+        const customUi = fontConfig.custom_ui_font ? String(fontConfig.custom_ui_font).trim() : '';
+        const uiSelect = fontConfig.ui_font ? String(fontConfig.ui_font).trim() : 'System Default';
+        const effectiveUi = (uiSelect === 'Custom Font...' || !uiSelect) ? (customUi || 'System Default') : (customUi || uiSelect);
+
+        let uiStack = '';
+        switch (effectiveUi) {
+          case 'Microsoft YaHei':
+          case 'Microsoft YaHei (微软雅黑)':
+            uiStack = '"Microsoft YaHei", "微软雅黑", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            break;
+          case 'PingFang SC':
+          case 'PingFang SC (苹方)':
+            uiStack = '"PingFang SC", "苹方", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
+            break;
+          case 'Source Han Sans':
+          case 'Noto Sans CJK SC':
+          case 'Source Han Sans / Noto Sans':
+            uiStack = '"Noto Sans CJK SC", "Source Han Sans SC", "思源黑体", "Microsoft YaHei", sans-serif';
+            break;
+          case 'SimSun':
+          case 'SimSun (宋体)':
+            uiStack = '"SimSun", "宋体", "Songti SC", serif';
+            break;
+          case 'SimHei':
+          case 'SimHei (黑体)':
+            uiStack = '"SimHei", "黑体", "STHeiti", sans-serif';
+            break;
+          case 'KaiTi':
+          case 'KaiTi (楷体)':
+            uiStack = '"KaiTi", "楷体", "STKaiti", serif';
+            break;
+          case 'Microsoft JhengHei':
+          case 'Microsoft JhengHei (微軟正黑體)':
+            uiStack = '"Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif';
+            break;
+          case 'Meiryo':
+          case 'Yu Gothic':
+          case 'Meiryo / Yu Gothic':
+            uiStack = '"Yu Gothic", "游ゴシック", "Meiryo", "メイリオ", sans-serif';
+            break;
+          case 'Malgun Gothic':
+          case 'Malgun Gothic (Korean)':
+            uiStack = '"Malgun Gothic", "맑은 고딕", sans-serif';
+            break;
+          case 'Segoe UI':
+            uiStack = '"Segoe UI", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+            break;
+          case 'System Default':
+          case 'Auto':
+            uiStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif';
+            break;
+          default:
+            uiStack = `"${effectiveUi}", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+            break;
+        }
+
+        // 2. Resolve Code / Monospace Font Stack
+        const customCode = fontConfig.custom_code_font ? String(fontConfig.custom_code_font).trim() : '';
+        const codeSelect = fontConfig.code_font ? String(fontConfig.code_font).trim() : 'System Monospace';
+        const effectiveCode = (codeSelect.startsWith('Custom') || !codeSelect) ? (customCode || 'System Monospace') : (customCode || codeSelect);
+
+        let codeStack = '';
+        switch (effectiveCode) {
+          case 'Consolas':
+            codeStack = 'Consolas, "Cascadia Code", "Fira Code", "Microsoft YaHei", monospace';
+            break;
+          case 'Cascadia Code':
+          case 'Cascadia Code / Mono':
+            codeStack = '"Cascadia Code", "Cascadia Mono", Consolas, "Microsoft YaHei", monospace';
+            break;
+          case 'Fira Code':
+            codeStack = '"Fira Code", "Cascadia Code", Consolas, "Microsoft YaHei", monospace';
+            break;
+          case 'JetBrains Mono':
+            codeStack = '"JetBrains Mono", Consolas, "Microsoft YaHei", monospace';
+            break;
+          case 'Source Code Pro':
+            codeStack = '"Source Code Pro", Consolas, "Microsoft YaHei", monospace';
+            break;
+          case 'Microsoft YaHei':
+          case 'Microsoft YaHei (微软雅黑)':
+            codeStack = '"Microsoft YaHei", "微软雅黑", Consolas, monospace';
+            break;
+          case 'SimSun':
+          case 'SimSun (宋体)':
+            codeStack = '"SimSun", "宋体", Consolas, monospace';
+            break;
+          case 'System Monospace':
+          case 'Auto':
+            codeStack = '"Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, "Microsoft YaHei", "PingFang SC", monospace';
+            break;
+          default:
+            codeStack = `"${effectiveCode}", "Cascadia Code", Consolas, "Microsoft YaHei", monospace`;
+            break;
+        }
+
+        root.style.setProperty('--font-ui', uiStack);
+        root.style.setProperty('--font-mono', codeStack);
+
+        const previewFontSize = parseFloat(fontConfig.preview_font_size) || 14.5;
+        const editorFontSize = parseFloat(fontConfig.editor_font_size) || 13;
+
+        root.style.setProperty('--preview-font-size', `${previewFontSize}px`);
+        root.style.setProperty('--editor-font-size', `${editorFontSize}px`);
+
+        // Update live preview sample cards in settings modal if elements exist
+        const fontSampleEl = document.getElementById('kb-font-sample');
+        if (fontSampleEl) {
+          fontSampleEl.style.fontFamily = uiStack;
+          fontSampleEl.style.fontSize = `${previewFontSize}px`;
+        }
+        const fontSampleCodeEl = document.getElementById('kb-font-sample-code');
+        if (fontSampleCodeEl) {
+          fontSampleCodeEl.style.fontFamily = codeStack;
+          fontSampleCodeEl.style.fontSize = `${editorFontSize}px`;
+        }
+
+        // Reset VimMode char metrics so cursor aligns accurately with the newly selected font
+        if (typeof VimMode !== 'undefined') {
+          VimMode._charMetrics = null;
+          if (VimMode.cursorEl && (this.mode === 'edit' || this.mode === 'split')) {
+            VimMode.updateCursorPosition();
+          }
+        }
+      },
+
+      applyFontsFromInputs() {
+        const fontConfig = {
+          ui_font: 'System Default',
+          custom_ui_font: '',
+          code_font: 'System Monospace',
+          custom_code_font: '',
+          preview_font_size: 14.5,
+          editor_font_size: 13
+        };
+        const inputs = document.querySelectorAll('.kb-input-box[data-cat="fonts"]');
+        inputs.forEach(input => {
+          const key = input.getAttribute('data-key');
+          if (key) {
+            fontConfig[key] = input.value;
+          }
+        });
+        this.applyFonts(fontConfig);
+      },
+
       updateTocFieldsVisibility() {
         const modeSelect = document.getElementById('kb-toc-mode');
         if (!modeSelect) return;
@@ -8243,10 +8534,13 @@
       loadKeybindingsJson(jsonStr) {
         try {
           const parsed = JSON.parse(jsonStr);
-          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.settings)) {
+          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.fonts || parsed.settings)) {
             this.keybindings = parsed;
             if (this.keybindings.theme) {
               this.applyTheme(this.keybindings.theme);
+            }
+            if (this.keybindings.fonts) {
+              this.applyFonts(this.keybindings.fonts);
             }
             if (typeof TableOfContents !== 'undefined') {
               TableOfContents.applyLayout();
@@ -8257,6 +8551,9 @@
           this.keybindings = JSON.parse(JSON.stringify(this.defaultKeybindings));
           if (this.keybindings.theme) {
             this.applyTheme(this.keybindings.theme);
+          }
+          if (this.keybindings.fonts) {
+            this.applyFonts(this.keybindings.fonts);
           }
           if (typeof TableOfContents !== 'undefined') {
             TableOfContents.applyLayout();
@@ -8368,6 +8665,9 @@
         if (kb.theme) {
           this.applyTheme(kb.theme);
         }
+        if (kb.fonts) {
+          this.applyFonts(kb.fonts);
+        }
         if (this.kbTextareaEl) {
           this.kbTextareaEl.value = JSON.stringify(kb, null, 2);
         }
@@ -8378,6 +8678,7 @@
         if (!kb.preview) kb.preview = {};
         if (!kb.toc) kb.toc = JSON.parse(JSON.stringify(this.defaultKeybindings.toc));
         if (!kb.theme) kb.theme = JSON.parse(JSON.stringify(this.defaultKeybindings.theme));
+        if (!kb.fonts) kb.fonts = JSON.parse(JSON.stringify(this.defaultKeybindings.fonts || {}));
         if (!kb.settings) kb.settings = {};
 
         const inputs = document.querySelectorAll('.kb-input-box');
@@ -8387,7 +8688,7 @@
           const path = cat ? `${cat}.${key}` : key;
           let val = input.value;
           if (input.type === 'number') {
-            const num = parseInt(val, 10);
+            const num = parseFloat(val);
             val = isNaN(num) ? 0 : num;
           } else if (val === 'true') {
             val = true;
@@ -8402,6 +8703,9 @@
         this.keybindings = kb;
         if (kb.theme) {
           this.applyTheme(kb.theme);
+        }
+        if (kb.fonts) {
+          this.applyFonts(kb.fonts);
         }
         if (this.kbTextareaEl) {
           this.kbTextareaEl.value = JSON.stringify(kb, null, 2);
@@ -8438,6 +8742,9 @@
           if (parsed.theme) {
             this.applyTheme(parsed.theme);
           }
+          if (parsed.fonts) {
+            this.applyFonts(parsed.fonts);
+          }
         } catch (_) {
           // If raw json is currently invalid during switch, retain current values
         }
@@ -8462,6 +8769,9 @@
         this.keybindings = kbToSave;
         if (kbToSave && kbToSave.theme) {
           this.applyTheme(kbToSave.theme);
+        }
+        if (kbToSave && kbToSave.fonts) {
+          this.applyFonts(kbToSave.fonts);
         }
         if (typeof TableOfContents !== 'undefined') {
           TableOfContents.applyLayout();
@@ -8768,6 +9078,43 @@
             this.applyThemeFromInputs();
           });
         });
+
+        // Typography & Multilingual Font Live Preview & Inputs Binding
+        const fontInputs = document.querySelectorAll('.kb-input-box[data-cat="fonts"]');
+        fontInputs.forEach(fontInput => {
+          fontInput.addEventListener('input', () => {
+            this.applyFontsFromInputs();
+          });
+          fontInput.addEventListener('change', () => {
+            this.applyFontsFromInputs();
+          });
+        });
+
+        const fontUiSelect = document.getElementById('kb-font-ui-select');
+        const fontUiCustom = document.getElementById('kb-font-ui-custom');
+        if (fontUiSelect && fontUiCustom) {
+          fontUiSelect.addEventListener('change', () => {
+            if (fontUiSelect.value === 'Custom Font...') {
+              fontUiCustom.focus();
+            } else {
+              fontUiCustom.value = '';
+              this.applyFontsFromInputs();
+            }
+          });
+        }
+
+        const fontCodeSelect = document.getElementById('kb-font-code-select');
+        const fontCodeCustom = document.getElementById('kb-font-code-custom');
+        if (fontCodeSelect && fontCodeCustom) {
+          fontCodeSelect.addEventListener('change', () => {
+            if (fontCodeSelect.value.startsWith('Custom')) {
+              fontCodeCustom.focus();
+            } else {
+              fontCodeCustom.value = '';
+              this.applyFontsFromInputs();
+            }
+          });
+        }
 
         // Instant Preview Cursor toggle
         const enableCursorEl = document.getElementById('kb-preview-enable-cursor');

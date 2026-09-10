@@ -40,6 +40,14 @@
     "table_border_color": "#30363d",
     "hr_color": "#30363d"
   },
+  "fonts": {
+    "ui_font": "System Default",
+    "custom_ui_font": "",
+    "code_font": "System Monospace",
+    "custom_code_font": "",
+    "preview_font_size": 14.5,
+    "editor_font_size": 13
+  },
   "settings": {
     "middle_click_close_tab": true,
     "is_copy_to_yank": true,

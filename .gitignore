@@ -35,3 +35,4 @@ $RECYCLE.BIN/
 *.user
 *.userosscache
 *.sln.docstates
+dist/
