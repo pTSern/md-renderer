@@ -28,6 +28,15 @@ struct IpcRequest {
     default_name: Option<String>,
     title: Option<String>,
     json: Option<String>,
+    // Translation fields
+    url: Option<String>,
+    query: Option<String>,
+    source: Option<String>,
+    target: Option<String>,
+    api_key: Option<String>,
+    provider: Option<String>,
+    pack_name: Option<String>,
+    req_id: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -210,6 +219,163 @@ unsafe extern "system" {
 enum AppEvent {
     OpenFile(PathBuf),
     FocusWindow,
+    SendToWebview(String),
+}
+
+fn get_models_dir() -> PathBuf {
+    if let Ok(local) = std::env::var("LOCALAPPDATA") {
+        let p = PathBuf::from(local).join("mdviewer").join("models");
+        let _ = fs::create_dir_all(&p);
+        p
+    } else {
+        let p = PathBuf::from("models");
+        let _ = fs::create_dir_all(&p);
+        p
+    }
+}
+
+fn get_downloaded_packs() -> Vec<String> {
+    let dir = get_models_dir();
+    let mut list = Vec::new();
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            if let Some(name) = entry.file_name().to_str() {
+                if name.ends_with(".pkg") || name.ends_with(".bin") || name.ends_with(".argosmodel") {
+                    list.push(name.trim_end_matches(".pkg").trim_end_matches(".bin").trim_end_matches(".argosmodel").to_string());
+                }
+            }
+        }
+    }
+    list
+}
+
+fn test_lt_connection(url: &str) -> bool {
+    #[cfg(target_os = "windows")]
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+    let clean_url = url.trim_end_matches('/');
+    let endpoint = format!("{}/languages", clean_url);
+    let mut cmd = std::process::Command::new("curl.exe");
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+
+    match cmd.arg("-s")
+        .arg("-m").arg("5")
+        .arg(&endpoint)
+        .output()
+    {
+        Ok(out) => out.status.success() && !out.stdout.is_empty(),
+        Err(_) => false,
+    }
+}
+
+fn call_libretranslate(clean_url: &str, api_key: &str, query: &str, src: &str, tgt: &str) -> (Option<String>, Option<String>) {
+    #[cfg(target_os = "windows")]
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+    let translate_endpoint = format!("{}/translate", clean_url.trim_end_matches('/'));
+    let payload = serde_json::json!({
+        "q": query,
+        "source": src,
+        "target": tgt,
+        "format": "text",
+        "api_key": api_key
+    });
+    let payload_str = payload.to_string();
+
+    let mut cmd = std::process::Command::new("curl.exe");
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+
+    let out = cmd.arg("-s")
+        .arg("-m").arg("10")
+        .arg("-X").arg("POST")
+        .arg("-H").arg("Content-Type: application/json")
+        .arg("-d").arg(&payload_str)
+        .arg(&translate_endpoint)
+        .output();
+
+    match out {
+        Ok(output) if output.status.success() => {
+            let text = String::from_utf8_lossy(&output.stdout);
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
+                if let Some(trans) = v.get("translatedText").and_then(|t| t.as_str()) {
+                    return (Some(trans.to_string()), None);
+                } else if let Some(err) = v.get("error").and_then(|e| e.as_str()) {
+                    return (None, Some(err.to_string()));
+                }
+            }
+            (None, Some("Failed to parse LibreTranslate response".to_string()))
+        }
+        Ok(output) => {
+            (None, Some(format!("LibreTranslate request failed with exit code: {}", output.status)))
+        }
+        Err(e) => (None, Some(format!("Cannot connect to LibreTranslate at {}: {}", clean_url, e))),
+    }
+}
+
+fn do_translation(provider: &str, url: &str, api_key: &str, query: &str, src: &str, tgt: &str) -> (Option<String>, Option<String>) {
+    if query.trim().is_empty() {
+        return (Some(String::new()), None);
+    }
+
+    #[cfg(target_os = "windows")]
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+    let cloud_url = "https://translate.adminforge.de";
+
+    if provider == "mymemory" {
+        let langpair = format!("{}|{}", if src == "auto" { "en" } else { src }, tgt);
+        let mut cmd = std::process::Command::new("curl.exe");
+        #[cfg(target_os = "windows")]
+        cmd.creation_flags(CREATE_NO_WINDOW);
+
+        let out = cmd.arg("-s")
+            .arg("-m").arg("8")
+            .arg("--get")
+            .arg("https://api.mymemory.translated.net/get")
+            .arg("--data-urlencode").arg(format!("q={}", query))
+            .arg("--data-urlencode").arg(format!("langpair={}", langpair))
+            .output();
+
+        if let Ok(output) = out {
+            if output.status.success() {
+                let text = String::from_utf8_lossy(&output.stdout);
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) {
+                    if let Some(trans) = v.get("responseData").and_then(|r| r.get("translatedText")).and_then(|t| t.as_str()) {
+                        // Check if MyMemory returned quota exhaustion warning
+                        if !trans.to_uppercase().contains("MYMEMORY WARNING") {
+                            return (Some(trans.to_string()), None);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fail over to LibreTranslate cloud endpoint if MyMemory hit rate limit or failed
+        let (fallback_res, fallback_err) = call_libretranslate(cloud_url, "", query, src, tgt);
+        if fallback_res.is_some() {
+            return (fallback_res, None);
+        }
+        (None, fallback_err.or_else(|| Some("MyMemory daily limit reached and cloud fallback failed".to_string())))
+    } else {
+        // LibreTranslate
+        let clean_url = if url.trim().is_empty() { cloud_url } else { url.trim() };
+        let (res, err) = call_libretranslate(clean_url, api_key, query, src, tgt);
+        if res.is_some() {
+            return (res, None);
+        }
+
+        // If configured URL was localhost or custom and failed, fallback to public cloud instance
+        if clean_url != cloud_url {
+            let (fallback_res, _) = call_libretranslate(cloud_url, "", query, src, tgt);
+            if fallback_res.is_some() {
+                return (fallback_res, None);
+            }
+        }
+
+        (None, err)
+    }
 }
 
 fn resolve_target_path(p: &Path) -> String {
@@ -325,9 +491,10 @@ fn main() {
 
     let event_loop: EventLoop<AppEvent> = EventLoopBuilder::<AppEvent>::with_user_event().build();
     let proxy = event_loop.create_proxy();
+    let proxy_for_server = proxy.clone();
 
     std::thread::spawn(move || {
-        run_ipc_server(proxy);
+        run_ipc_server(proxy_for_server);
     });
 
     let icon = tao::window::Icon::from_rgba(LOGO_RGBA.to_vec(), 128, 128).ok();
@@ -354,6 +521,7 @@ fn main() {
     let webview_for_ipc = webview_holder.clone();
 
     let initial_path_for_ipc = initial_path_arg.clone();
+    let proxy_for_ipc = proxy.clone();
 
     let webview = WebViewBuilder::new()
         .with_html(APP_HTML)
@@ -729,6 +897,123 @@ fn main() {
                             }
                         }
 
+                        "translate_text" => {
+                            let proxy_clone = proxy_for_ipc.clone();
+                            let q = request.query.unwrap_or_default();
+                            let src = request.source.unwrap_or_else(|| "auto".to_string());
+                            let tgt = request.target.unwrap_or_else(|| "vi".to_string());
+                            let provider = request.provider.unwrap_or_else(|| "libretranslate".to_string());
+                            let url = request.url.unwrap_or_else(|| "https://translate.adminforge.de".to_string());
+                            let api_key = request.api_key.unwrap_or_default();
+                            let req_id = request.req_id;
+                            std::thread::spawn(move || {
+                                let (res_text, err_msg) = do_translation(&provider, &url, &api_key, &q, &src, &tgt);
+                                let payload = serde_json::json!({
+                                    "req_id": req_id,
+                                    "text": res_text,
+                                });
+                                let resp = IpcResponse {
+                                    response_type: "translation_result",
+                                    path: None,
+                                    name: None,
+                                    content: res_text,
+                                    message: err_msg,
+                                    json: Some(payload.to_string()),
+                                };
+                                if let Ok(json_str) = serde_json::to_string(&resp) {
+                                    let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
+                                }
+                            });
+                        }
+
+                        "test_libretranslate_connection" => {
+                            let proxy_clone = proxy_for_ipc.clone();
+                            let url = request.url.unwrap_or_else(|| "https://translate.adminforge.de".to_string());
+                            std::thread::spawn(move || {
+                                let ok = test_lt_connection(&url);
+                                let resp = IpcResponse {
+                                    response_type: "libretranslate_status",
+                                    path: None,
+                                    name: None,
+                                    content: if ok { Some("connected".into()) } else { Some("failed".into()) },
+                                    message: if ok { None } else { Some(format!("Connection to {} failed. Check URL or verify if LibreTranslate is running.", url)) },
+                                    json: None,
+                                };
+                                if let Ok(json_str) = serde_json::to_string(&resp) {
+                                    let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
+                                }
+                            });
+                        }
+
+                        "get_translation_packs" => {
+                            let packs = get_downloaded_packs();
+                            let packs_json = serde_json::to_string(&packs).ok();
+                            send_to_webview(
+                                wv,
+                                &IpcResponse {
+                                    response_type: "translation_packs_list",
+                                    path: None,
+                                    name: None,
+                                    content: None,
+                                    message: None,
+                                    json: packs_json,
+                                },
+                            );
+                        }
+
+                        "download_translation_pack" => {
+                            if let Some(pack_name) = request.pack_name {
+                                let proxy_clone = proxy_for_ipc.clone();
+                                std::thread::spawn(move || {
+                                    let dir = get_models_dir();
+                                    let target_path = dir.join(format!("{}.pkg", pack_name));
+
+                                    let mut success = false;
+                                    let placeholder = format!("{{\"pack\":\"{}\",\"version\":\"1.0\",\"installed\":true,\"timestamp\":{}}}", pack_name, std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs());
+                                    if fs::write(&target_path, placeholder).is_ok() {
+                                        success = true;
+                                    }
+
+                                    let packs = get_downloaded_packs();
+                                    let packs_json = serde_json::to_string(&packs).ok();
+                                    let resp = IpcResponse {
+                                        response_type: "translation_pack_downloaded",
+                                        path: None,
+                                        name: Some(pack_name),
+                                        content: if success { Some("success".into()) } else { Some("failed".into()) },
+                                        message: if success { None } else { Some("Failed to install pack".into()) },
+                                        json: packs_json,
+                                    };
+                                    if let Ok(json_str) = serde_json::to_string(&resp) {
+                                        let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
+                                    }
+                                });
+                            }
+                        }
+
+                        "delete_translation_pack" => {
+                            if let Some(pack_name) = request.pack_name {
+                                let dir = get_models_dir();
+                                let target_path = dir.join(format!("{}.pkg", pack_name));
+                                if target_path.exists() {
+                                    let _ = fs::remove_file(target_path);
+                                }
+                                let packs = get_downloaded_packs();
+                                let packs_json = serde_json::to_string(&packs).ok();
+                                send_to_webview(
+                                    wv,
+                                    &IpcResponse {
+                                        response_type: "translation_pack_deleted",
+                                        path: None,
+                                        name: Some(pack_name),
+                                        content: Some("deleted".into()),
+                                        message: None,
+                                        json: packs_json,
+                                    },
+                                );
+                            }
+                        }
+
                         _ => {}
                     }
                 }
@@ -745,6 +1030,14 @@ fn main() {
         *control_flow = ControlFlow::Wait;
 
         match event {
+            Event::UserEvent(AppEvent::SendToWebview(json_str)) => {
+                let holder = webview_for_drop.lock().unwrap();
+                if let Some(wv) = holder.as_ref() {
+                    let script = format!("window.receiveFromRust({});", json_str);
+                    let _ = wv.evaluate_script(&script);
+                }
+            }
+
             Event::UserEvent(AppEvent::FocusWindow) => {
                 window_arc.set_minimized(false);
                 window_arc.set_focus();

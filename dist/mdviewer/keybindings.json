@@ -48,6 +48,17 @@
     "preview_font_size": 14.5,
     "editor_font_size": 13
   },
+  "translation": {
+    "enabled": true,
+    "provider": "libretranslate",
+    "target_lang": "vi",
+    "source_lang": "auto",
+    "libretranslate_url": "https://translate.adminforge.de",
+    "libretranslate_api_key": "",
+    "popup_width": 440,
+    "show_selection_button": true,
+    "hotkey": "Ctrl+Alt+T"
+  },
   "settings": {
     "middle_click_close_tab": true,
     "is_copy_to_yank": true,

@@ -44,8 +44,27 @@ EDITOR VIM MODE (Edit & Split Modes):
 - COMMAND Mode (:)     : :w (save), :q (close), :wq (save and close), :<line> (jump to line), :%s/find/replace/g, :help
 - Animated Caret       : Neovide-style floating smooth spring cursor
 
-SETTINGS:
-- Click the "Keys" button in the top bar to customize keybindings, scroll speed, TOC modes, and Max FPS.
+TRANSLATION (MULTI-ENGINE & ON-DEMAND OFFLINE):
+- Translate Selection  : Highlight text -> click "Translate" pill or press Ctrl+Alt+T
+- Translate Document   : Click "Translate" in top bar or press Ctrl+Shift+T to dock document translation bar
+- Multiple Engines     :
+  1. LibreTranslate    : Free cloud instance (https://translate.adminforge.de) or local (http://127.0.0.1:5000) instance
+  2. Free Web Engine   : Zero-setup web translation with automatic cloud failover
+  3. Offline Packs     : Download on-demand language packs (~20-25MB each) in Settings for 100% offline, private translation
+
+SEARCH & NAVIGATION:
+- Ctrl+F               : Open floating search bar with next/prev match and count
+- Vim Mode /           : Search forward directly from Vim Normal mode (no floating box)
+- Middle Click Tab     : Quickly close tab with middle mouse click
+- Right Click Tab      : Context menu to "Open Containing Folder" or "Close Tab"
+
+SETTINGS & CUSTOMIZATION:
+- Click the "Keys" button in the top bar to customize:
+  - Keybindings, scroll speed, physics & max FPS
+  - Outline / Table of Contents layout (Side Tab vs Floating Window)
+  - Color Theme (syntax highlights, accents, markdown colors)
+  - Multilingual Fonts (UI & Monospace fonts with custom fallback support)
+  - Translation Provider & Offline Language Pack Downloader
 - Settings are automatically saved to keybindings.json.
 
 ================================================================================

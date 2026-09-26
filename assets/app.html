@@ -410,8 +410,8 @@
        ========================================================================= */
     .main-container {
       display: flex;
-      flex: 1;
-      height: calc(100vh - var(--titlebar-h) - var(--toolbar-h) - var(--statusbar-h));
+      flex: 1 1 0;
+      min-height: 0;
       overflow: hidden;
       position: relative;
     }
@@ -1358,6 +1358,49 @@
       pointer-events: none; /* Let drag events fall through smoothly to diagram-body */
     }
 
+    /* Classic SVG & Mermaid Diagram Descender & Text Clamping Fix */
+    .classic-svg-container,
+    .diagram-canvas {
+      overflow: visible;
+    }
+    .classic-svg-container svg,
+    .diagram-canvas svg,
+    .mermaid svg {
+      display: block;
+      overflow: visible !important;
+      user-select: none;
+      pointer-events: none;
+    }
+    .classic-svg-container svg foreignObject,
+    .diagram-canvas svg foreignObject,
+    .mermaid svg foreignObject {
+      overflow: visible !important;
+    }
+    .classic-svg-container svg .node .label,
+    .diagram-canvas svg .node .label,
+    .mermaid svg .node .label,
+    .classic-svg-container svg .nodeLabel,
+    .diagram-canvas svg .nodeLabel,
+    .mermaid svg .nodeLabel {
+      line-height: 1.45 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    .classic-svg-container svg foreignObject > div,
+    .diagram-canvas svg foreignObject > div,
+    .mermaid svg foreignObject > div {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      overflow: visible !important;
+      padding: 3px 8px !important;
+      box-sizing: border-box !important;
+    }
+
     /* =========================================================================
        DYNAMIC BOX GRAPH STYLING (NEXUS-GRAPH STYLE)
        ========================================================================= */
@@ -1548,13 +1591,15 @@
       background: var(--bg-secondary);
       border: 1px solid var(--border-light);
       border-radius: 6px;
-      padding: 8px 10px;
+      padding: 9px 12px;
       font-size: 11.5px;
       color: var(--text-primary);
       line-height: 1.45;
       display: flex;
       flex-direction: column;
       gap: 4px;
+      min-height: 38px;
+      box-sizing: border-box;
       transition: border-color 0.12s, background-color 0.12s, box-shadow 0.12s;
     }
     .dyn-node-item:hover {
@@ -1641,6 +1686,8 @@
       z-index: 2;
       display: flex;
       flex-direction: column;
+      min-height: 42px;
+      box-sizing: border-box;
       user-select: none;
       transform-origin: top left;
       transition: border-color 0.15s, box-shadow 0.15s;
@@ -2017,6 +2064,278 @@
       align-items: center;
       gap: 14px;
     }
+
+    /* =========================================================================
+       TRANSLATION UI (POPOVER, FLOATING BUTTON, DOC TRANSLATE BAR, PACKS)
+       ========================================================================= */
+    .selection-translate-pill {
+      position: fixed;
+      z-index: 10001;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+    .selection-translate-pill:hover {
+      background: var(--accent);
+      color: #11111b;
+      box-shadow: 0 6px 20px rgba(137, 180, 250, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .translation-popover {
+      position: fixed;
+      z-index: 10002;
+      display: none;
+      flex-direction: column;
+      width: 440px;
+      max-width: 92vw;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      padding: 14px;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+      user-select: text;
+    }
+    .translation-popover.show {
+      display: flex;
+    }
+    .popover-resizer {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 14px;
+      height: 14px;
+      cursor: nwse-resize;
+      background: linear-gradient(135deg, transparent 50%, var(--border) 50%, var(--border) 60%, transparent 60%, transparent 75%, var(--border) 75%);
+      opacity: 0.5;
+      transition: opacity 0.12s;
+      border-bottom-right-radius: 9px;
+      z-index: 5;
+    }
+    .popover-resizer:hover {
+      opacity: 1;
+      background: linear-gradient(135deg, transparent 50%, var(--accent) 50%, var(--accent) 60%, transparent 60%, transparent 75%, var(--accent) 75%);
+    }
+    .trans-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 9px;
+    }
+    .trans-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .trans-lang-select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 11.5px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    .trans-lang-select:hover,
+    .trans-lang-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-glow);
+    }
+    .trans-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+    }
+    .trans-close-btn:hover {
+      color: var(--danger);
+      background: rgba(243, 139, 168, 0.15);
+    }
+    .trans-source-box {
+      font-size: 12px;
+      color: var(--text-muted);
+      max-height: 80px;
+      overflow-y: auto;
+      padding: 8px 10px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      border: 1px dashed var(--border-light);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .trans-result-box {
+      font-size: 13.5px;
+      color: var(--text-primary);
+      min-height: 56px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .trans-result-box.loading {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .trans-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 4px;
+    }
+    .trans-provider-badge {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .trans-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .trans-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 5px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+    .trans-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .trans-btn.primary {
+      background: var(--accent);
+      color: #11111b;
+      font-weight: 600;
+      border-color: var(--accent);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+    .trans-btn.primary:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .trans-btn.danger {
+      background: rgba(243, 139, 168, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .trans-btn.danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .doc-trans-bar {
+      height: 40px;
+      min-height: 40px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      flex-shrink: 0;
+      z-index: 10;
+      overflow-x: auto;
+      overflow-y: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .doc-trans-bar.show {
+      display: flex;
+    }
+
+    .pack-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      border: 1px solid var(--border-light);
+      font-size: 11.5px;
+    }
+    .pack-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .pack-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .pack-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .pack-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .pack-status.installed {
+      background: rgba(166, 227, 161, 0.15);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .pack-status.uninstalled {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body class="mode-preview" data-theme="dark">
@@ -2094,6 +2413,11 @@
         📑 Outline
       </button>
 
+      <!-- Translate Document Preview Toggle -->
+      <button class="btn" id="btn-translate-doc" title="Translate Document Preview (Ctrl+Shift+T)">
+        🌐 Translate
+      </button>
+
       <!-- Vim Mode Toggle -->
       <button class="btn active" id="btn-vim-toggle" title="Toggle Vim Mode for Editor (Ctrl+Alt+V)" style="font-weight:700; color:var(--accent); font-size:11.5px; padding:4px 9px;">
         VIM
@@ -2115,6 +2439,33 @@
       </button>
     </div>
   </header>
+
+  <!-- Document Translation Bar (Docked under Toolbar) -->
+  <div class="doc-trans-bar" id="doc-trans-bar">
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:nowrap;">
+      <span style="font-weight:700; color:var(--accent); white-space:nowrap;">🌐 Document Translation:</span>
+      <span style="color:var(--text-muted); font-size:11px; white-space:nowrap;">Target:</span>
+      <select class="trans-lang-select" id="doc-trans-target-lang">
+        <option value="zh">Chinese Simplified (简体中文)</option>
+        <option value="zh-TW">Chinese Traditional (繁體中文)</option>
+        <option value="en">English (英语)</option>
+        <option value="ja">Japanese (日本語)</option>
+        <option value="ko">Korean (한국어)</option>
+        <option value="es">Spanish (Español)</option>
+        <option value="fr">French (Français)</option>
+        <option value="de">German (Deutsch)</option>
+        <option value="ru">Russian (Русский)</option>
+        <option value="vi" selected>Vietnamese (Tiếng Việt)</option>
+        <option value="it">Italian (Italiano)</option>
+        <option value="pt">Portuguese (Português)</option>
+      </select>
+      <button class="trans-btn primary" id="btn-doc-trans-run" style="white-space:nowrap;">Translate Preview</button>
+      <button class="trans-btn danger" id="btn-doc-trans-stop" style="display:none; white-space:nowrap;">⏹ Stop</button>
+      <button class="trans-btn" id="btn-doc-trans-toggle" style="display:none; white-space:nowrap;">👁 Show Original</button>
+      <span id="doc-trans-status" style="font-size:11px; color:var(--text-muted); margin-left:4px; white-space:nowrap;"></span>
+    </div>
+    <button class="trans-close-btn" id="btn-doc-trans-close" title="Close Translation Bar">✕</button>
+  </div>
 
   <!-- =========================================================================
        MAIN WORKSPACE CONTAINER
@@ -2193,6 +2544,73 @@
     <button class="search-btn" id="floating-search-prev" onclick="SearchEngine.prev()" title="Previous Match (Shift+Enter)">▲</button>
     <button class="search-btn" id="floating-search-next" onclick="SearchEngine.next()" title="Next Match (Enter)">▼</button>
     <button class="search-btn search-close" id="floating-search-close" onclick="SearchEngine.closeFloating()" title="Close (Esc)">✕</button>
+  </div>
+
+  <!-- Floating Selection Translate Button (Pill) -->
+  <div class="selection-translate-pill" id="selection-translate-btn">
+    <span>🌐</span>
+    <span>Translate</span>
+  </div>
+
+  <!-- Floating Translation Popover / Modal Card -->
+  <div class="translation-popover" id="translation-popover">
+    <div class="popover-resizer" id="popover-resizer" title="Drag corner to resize popup"></div>
+    <div class="trans-header">
+      <div class="trans-header-left">
+        <span>🌐 Translation</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <select class="trans-lang-select" id="popover-trans-source" title="Source Language">
+          <option value="auto">Auto Detect</option>
+          <option value="en">English</option>
+          <option value="zh">Chinese (中文)</option>
+          <option value="ja">Japanese (日本語)</option>
+          <option value="ko">Korean (한국어)</option>
+          <option value="es">Spanish (Español)</option>
+          <option value="fr">French (Français)</option>
+          <option value="de">German (Deutsch)</option>
+          <option value="ru">Russian (Русский)</option>
+          <option value="vi">Vietnamese (Tiếng Việt)</option>
+        </select>
+        <span style="color:var(--text-muted); font-size:11px;">→</span>
+        <select class="trans-lang-select" id="popover-trans-target" title="Target Language">
+          <option value="zh">Chinese (简体)</option>
+          <option value="zh-TW">Chinese (繁體)</option>
+          <option value="en">English</option>
+          <option value="ja">Japanese (日本語)</option>
+          <option value="ko">Korean (한국어)</option>
+          <option value="es">Spanish (Español)</option>
+          <option value="fr">French (Français)</option>
+          <option value="de">German (Deutsch)</option>
+          <option value="ru">Russian (Русский)</option>
+          <option value="vi" selected>Vietnamese (Tiếng Việt)</option>
+        </select>
+        <button class="trans-close-btn" id="popover-trans-close" title="Close (Esc)">✕</button>
+      </div>
+    </div>
+
+    <!-- Original Selection Text -->
+    <div class="trans-source-box" id="popover-trans-source-text">...</div>
+
+    <!-- Translated Text Output -->
+    <div class="trans-result-box" id="popover-trans-result-text">Select text to translate</div>
+
+    <!-- Footer with Provider badge and Copy/Replace buttons -->
+    <div class="trans-footer">
+      <div class="trans-provider-badge" id="popover-trans-provider">LibreTranslate</div>
+      <div class="trans-actions">
+        <button class="trans-btn" id="popover-btn-copy" title="Copy Translation to Clipboard">
+          <span id="popover-copy-icon">📋</span>
+          <span id="popover-copy-text">Copy</span>
+        </button>
+        <button class="trans-btn primary" id="popover-btn-replace" style="display:none;" title="Replace Selected Text in Editor">
+          Replace
+        </button>
+        <button class="trans-btn" id="popover-btn-insert-below" style="display:none;" title="Insert Translation Below">
+          Insert Below
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Drop File Overlay (Drag-to-Read) -->
@@ -2706,6 +3124,158 @@
                 <span class="kb-row-desc">Cap animation frame rate (e.g. 60, 120, 144, 240, or 0 for unlimited)</span>
               </div>
               <input type="number" min="0" max="360" step="15" class="kb-input-box" data-cat="settings" data-key="max_fps" placeholder="60">
+            </div>
+          </div>
+
+          <!-- Translation & LibreTranslate Hub -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>🌐 Translation &amp; LibreTranslate (翻译与语言模型设置)</span>
+            </div>
+
+            <!-- Enable Translation -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Enable Translation</span>
+                <span class="kb-row-desc">Enable translation tools in preview, editor, and selection popover</span>
+              </div>
+              <select class="kb-input-box" data-cat="translation" data-key="enabled" id="kb-trans-enabled">
+                <option value="true">true (Enabled)</option>
+                <option value="false">false (Disabled)</option>
+              </select>
+            </div>
+
+            <!-- Translation Provider / Engine -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Translation Engine</span>
+                <span class="kb-row-desc">Choose between LibreTranslate API, Free Web Engine, or Offline Packs</span>
+              </div>
+              <select class="kb-input-box" data-cat="translation" data-key="provider" id="kb-trans-provider" style="width:230px; text-align:left;">
+                <option value="libretranslate">LibreTranslate API (Local or Remote Server)</option>
+                <option value="mymemory">Free Web Engine (MyMemory - Instant, No Setup)</option>
+                <option value="offline">Offline On-Demand Language Packs (100% Local)</option>
+              </select>
+            </div>
+
+            <!-- Default Target Language -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Default Target Language</span>
+                <span class="kb-row-desc">Target language for quick selection and document preview translation</span>
+              </div>
+              <select class="kb-input-box" data-cat="translation" data-key="target_lang" id="kb-trans-target-lang" style="width:230px; text-align:left;">
+                <option value="zh">Chinese Simplified (简体中文)</option>
+                <option value="zh-TW">Chinese Traditional (繁體中文)</option>
+                <option value="en">English (英语)</option>
+                <option value="ja">Japanese (日本語)</option>
+                <option value="ko">Korean (한국어)</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="fr">French (Français)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="ru">Russian (Русский)</option>
+                <option value="vi" selected>Vietnamese (Tiếng Việt)</option>
+                <option value="it">Italian (Italiano)</option>
+                <option value="pt">Portuguese (Português)</option>
+              </select>
+            </div>
+
+            <!-- Default Source Language -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Default Source Language</span>
+                <span class="kb-row-desc">Input text language (Auto-detect recommended)</span>
+              </div>
+              <select class="kb-input-box" data-cat="translation" data-key="source_lang" id="kb-trans-source-lang" style="width:230px; text-align:left;">
+                <option value="auto">Auto-Detect (自动识别)</option>
+                <option value="en">English (英语)</option>
+                <option value="zh">Chinese (中文)</option>
+                <option value="ja">Japanese (日本語)</option>
+                <option value="ko">Korean (한국어)</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="fr">French (Français)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="ru">Russian (Русский)</option>
+                <option value="vi">Vietnamese (Tiếng Việt)</option>
+              </select>
+            </div>
+
+            <!-- LibreTranslate Server URL -->
+            <div class="kb-row" id="kb-trans-lt-url-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">LibreTranslate URL</span>
+                <span class="kb-row-desc">Server address (Free Cloud: https://translate.adminforge.de | Local: http://127.0.0.1:5000)</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:5px; width:280px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <input type="text" class="kb-input-box" data-cat="translation" data-key="libretranslate_url" id="kb-trans-lt-url" placeholder="https://translate.adminforge.de" style="flex:1; text-align:left;">
+                  <button type="button" class="btn btn-sm" id="btn-test-lt-conn" style="padding:4px 9px; font-size:11px; white-space:nowrap; background:var(--bg-secondary); border:1px solid var(--border);" title="Test connection">Test</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; font-size:10.5px;">
+                  <span style="color:var(--text-muted);">Presets:</span>
+                  <button type="button" class="btn btn-sm" id="btn-preset-lt-cloud" style="padding:2px 7px; font-size:10px; background:var(--bg-tertiary); border:1px solid var(--border-light);" title="Use public free instance">Cloud (Free)</button>
+                  <button type="button" class="btn btn-sm" id="btn-preset-lt-local" style="padding:2px 7px; font-size:10px; background:var(--bg-tertiary); border:1px solid var(--border-light);" title="Use local server">Local (5000)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- LibreTranslate Connection Status Display -->
+            <div id="lt-conn-status-row" style="display:none; padding:6px 10px; border-radius:5px; font-size:11.5px; margin:-2px 0 4px 0;">
+              <span id="lt-conn-status-text"></span>
+            </div>
+
+            <!-- LibreTranslate API Key -->
+            <div class="kb-row" id="kb-trans-lt-key-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">LibreTranslate API Key</span>
+                <span class="kb-row-desc">Optional (leave empty for public cloud or standard local instances)</span>
+              </div>
+              <input type="password" class="kb-input-box" data-cat="translation" data-key="libretranslate_api_key" placeholder="Optional (not required for public/local)" style="width:230px; text-align:left;">
+            </div>
+
+            <!-- Show Floating Translate Pill on Text Selection -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Show Selection Button</span>
+                <span class="kb-row-desc">Display floating 'Translate' pill when highlighting text</span>
+              </div>
+              <select class="kb-input-box" data-cat="translation" data-key="show_selection_button" style="width:230px; text-align:left;">
+                <option value="true">true (Show Floating Pill)</option>
+                <option value="false">false (Shortcut Only - Ctrl+Alt+T)</option>
+              </select>
+            </div>
+
+            <!-- Translation Popup Window Width -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Popup Window Size</span>
+                <span class="kb-row-desc">Width of translation popup in pixels (320px - 900px, drag corner to resize)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="number" min="320" max="900" step="20" class="kb-input-box" data-cat="translation" data-key="popup_width" id="kb-trans-popup-width" placeholder="440" style="width:90px; text-align:left;">
+                <span style="font-size:11px; color:var(--text-muted);">px</span>
+                <select class="kb-input-box-preset" id="kb-trans-popup-preset" style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:4px; padding:4px 7px; font-size:11px; color:var(--text-main);">
+                  <option value="">Presets...</option>
+                  <option value="360">Compact (360px)</option>
+                  <option value="440">Default (440px)</option>
+                  <option value="560">Medium (560px)</option>
+                  <option value="700">Large (700px)</option>
+                  <option value="850">Extra Wide (850px)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Offline Language Pack Manager (On-Demand Downloader) -->
+            <div id="offline-packs-manager" style="display:flex; flex-direction:column; gap:8px; margin-top:8px; border-top:1px dashed var(--border-light); padding-top:10px;">
+              <div class="kb-group-title" style="color:var(--accent);">
+                <span>📦 Offline Language Packs (离线语言包下载 - On-Demand)</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+                Download language packs on demand for 100% offline, private translation. Cached in <code>%LOCALAPPDATA%\mdviewer\models\</code>.
+              </div>
+              <div id="offline-packs-list" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+                <!-- Populated dynamically by TranslationService.renderPacksList() -->
+              </div>
             </div>
           </div>
         </div>
@@ -3293,6 +3863,9 @@
             const renderId = 'modal-render-' + Math.random().toString(36).substr(2, 9);
             window.mermaid.render(renderId, rawEl.textContent).then(res => {
               modalCanvas.innerHTML = res.svg;
+              if (typeof App !== 'undefined' && App.fixMermaidSvgClamping) {
+                App.fixMermaidSvgClamping(modalCanvas);
+              }
               modal.classList.add('show');
               this.setupModalInstance(modal, modalBody, modalCanvas);
             }).catch(e => {
@@ -3304,6 +3877,9 @@
         }
 
         modalCanvas.innerHTML = svg.outerHTML;
+        if (typeof App !== 'undefined' && App.fixMermaidSvgClamping) {
+          App.fixMermaidSvgClamping(modalCanvas);
+        }
         modal.classList.add('show');
         this.setupModalInstance(modal, modalBody, modalCanvas);
       },
@@ -6663,9 +7239,20 @@
               this.blocks[i].classList.add('preview-visual-block');
             }
           }
+          if (typeof TranslationPopover !== 'undefined') {
+            const vText = this.getSelectedText();
+            const vRect = this.getSelectedVisualRect();
+            const vRange = this.getSelectedVisualRange();
+            if (vText && vRect && vText.trim().length > 1) {
+              TranslationPopover.showForVisualSelection(vRect, vText, vRange);
+            }
+          }
         } else {
           if (this.blocks[this.currentIndex]) {
             this.blocks[this.currentIndex].classList.add('preview-active-block');
+          }
+          if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isVisualPreview) {
+            TranslationPopover.hidePill();
           }
         }
 
@@ -6705,6 +7292,77 @@
         if (this.cursorEl) this.cursorEl.style.display = 'none';
         this.clearHighlights();
         this.mode = 'NORMAL';
+        if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isVisualPreview) {
+          TranslationPopover.hidePill();
+        }
+      },
+
+      getSelectedText() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return '';
+        const mdLines = this.app.editorEl ? this.app.editorEl.value.split('\n') : [];
+
+        if (this.mode === 'VISUAL') {
+          const minIdx = Math.min(this.visualAnchor, this.currentIndex);
+          const maxIdx = Math.max(this.visualAnchor, this.currentIndex);
+          const startBlock = this.blocks[minIdx];
+          const endBlock = this.blocks[maxIdx];
+          const startLine = parseInt(startBlock.getAttribute('data-line'), 10) || 1;
+          const endBlockLine = parseInt(endBlock.getAttribute('data-line'), 10) || startLine;
+
+          let endLine = endBlockLine;
+          if (maxIdx + 1 < this.blocks.length) {
+            const nextLine = parseInt(this.blocks[maxIdx + 1].getAttribute('data-line'), 10);
+            if (!isNaN(nextLine) && nextLine > endBlockLine) {
+              endLine = nextLine - 1;
+            }
+          } else {
+            endLine = mdLines.length;
+          }
+
+          if (mdLines.length > 0 && startLine <= mdLines.length) {
+            return mdLines.slice(startLine - 1, Math.min(mdLines.length, endLine)).join('\n');
+          } else {
+            return this.blocks.slice(minIdx, maxIdx + 1).map(b => b.innerText).join('\n');
+          }
+        } else {
+          const line = this.getCurrentLine();
+          if (mdLines.length > 0 && line <= mdLines.length) {
+            return mdLines[line - 1] || '';
+          } else {
+            return (this.blocks[this.currentIndex] && this.blocks[this.currentIndex].innerText) || '';
+          }
+        }
+      },
+
+      getSelectedVisualRange() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0 || this.mode !== 'VISUAL') return null;
+        const minIdx = Math.min(this.visualAnchor, this.currentIndex);
+        const maxIdx = Math.max(this.visualAnchor, this.currentIndex);
+        const startBlock = this.blocks[minIdx];
+        const endBlock = this.blocks[maxIdx];
+        const startLine = parseInt(startBlock.getAttribute('data-line'), 10) || 1;
+        const endBlockLine = parseInt(endBlock.getAttribute('data-line'), 10) || startLine;
+        const mdLines = this.app.editorEl ? this.app.editorEl.value.split('\n') : [];
+        let endLine = endBlockLine;
+        if (maxIdx + 1 < this.blocks.length) {
+          const nextLine = parseInt(this.blocks[maxIdx + 1].getAttribute('data-line'), 10);
+          if (!isNaN(nextLine) && nextLine > endBlockLine) {
+            endLine = nextLine - 1;
+          }
+        } else {
+          endLine = mdLines.length;
+        }
+        return { startLine, endLine, minIdx, maxIdx };
+      },
+
+      getSelectedVisualRect() {
+        this.refreshBlocks();
+        if (this.blocks.length === 0 || this.mode !== 'VISUAL') return null;
+        const minIdx = Math.min(this.visualAnchor, this.currentIndex);
+        const firstBlock = this.blocks[minIdx];
+        return firstBlock ? firstBlock.getBoundingClientRect() : null;
       },
 
       yankSelected() {
@@ -7141,6 +7799,1000 @@
     };
 
     /* =========================================================================
+       3.5. TRANSLATION ENGINE & OFFLINE LANGUAGE PACKS MANAGER
+       ========================================================================= */
+    const TranslationService = {
+      app: null,
+      downloadedPacks: new Set(),
+      pendingRequests: new Map(),
+
+      // Available Offline Language Packs (On-Demand Downloader)
+      availablePacks: [
+        { id: "en-zh", name: "English ↔ Chinese (Simplified) 英语 ↔ 简体中文", size: "25 MB" },
+        { id: "en-zh-TW", name: "English ↔ Chinese (Traditional) 英语 ↔ 繁體中文", size: "26 MB" },
+        { id: "en-ja", name: "English ↔ Japanese 英语 ↔ 日本語", size: "28 MB" },
+        { id: "en-ko", name: "English ↔ Korean 英语 ↔ 한국어", size: "24 MB" },
+        { id: "en-es", name: "English ↔ Spanish 英语 ↔ Español", size: "20 MB" },
+        { id: "en-fr", name: "English ↔ French 英语 ↔ Français", size: "22 MB" },
+        { id: "en-de", name: "English ↔ German 英语 ↔ Deutsch", size: "22 MB" },
+        { id: "en-ru", name: "English ↔ Russian 英语 ↔ Русский", size: "25 MB" },
+        { id: "en-vi", name: "English ↔ Vietnamese 英语 ↔ Tiếng Việt", size: "21 MB" },
+        { id: "en-it", name: "English ↔ Italian 英语 ↔ Italiano", size: "20 MB" },
+        { id: "en-pt", name: "English ↔ Portuguese 英语 ↔ Português", size: "20 MB" },
+      ],
+
+      init(appInstance) {
+        this.app = appInstance;
+        this.requestPacksList();
+      },
+
+      getConfig() {
+        const kb = (this.app && this.app.keybindings && this.app.keybindings.translation)
+          ? this.app.keybindings.translation
+          : ((this.app && this.app.defaultKeybindings) ? this.app.defaultKeybindings.translation : {});
+        return {
+          enabled: kb.enabled !== false && kb.enabled !== 'false',
+          provider: kb.provider || 'libretranslate',
+          target_lang: kb.target_lang || 'vi',
+          source_lang: kb.source_lang || 'auto',
+          libretranslate_url: (kb.libretranslate_url || 'https://translate.adminforge.de').trim(),
+          libretranslate_api_key: (kb.libretranslate_api_key || '').trim(),
+          popup_width: parseInt(kb.popup_width, 10) || 440,
+          show_selection_button: kb.show_selection_button !== false && kb.show_selection_button !== 'false',
+        };
+      },
+
+      requestPacksList() {
+        if (this.app) {
+          this.app.sendIpc('get_translation_packs', {});
+        }
+      },
+
+      onPacksListReceived(packsArray) {
+        this.downloadedPacks.clear();
+        if (Array.isArray(packsArray)) {
+          packsArray.forEach(p => this.downloadedPacks.add(p));
+        }
+        this.renderPacksList();
+      },
+
+      downloadPack(packId) {
+        if (this.app) {
+          this.app.sendIpc('download_translation_pack', { pack_name: packId });
+          const btn = document.getElementById(`btn-pack-dl-${packId}`);
+          if (btn) {
+            btn.innerText = 'Installing...';
+            btn.disabled = true;
+          }
+        }
+      },
+
+      deletePack(packId) {
+        if (this.app) {
+          this.app.sendIpc('delete_translation_pack', { pack_name: packId });
+        }
+      },
+
+      renderPacksList() {
+        const container = document.getElementById('offline-packs-list');
+        if (!container) return;
+
+        container.innerHTML = this.availablePacks.map(pack => {
+          const isInstalled = this.downloadedPacks.has(pack.id);
+          return `
+            <div class="pack-row">
+              <div class="pack-info">
+                <span class="pack-title">${escapeHtml(pack.name)}</span>
+                <span class="pack-meta">Size: ${pack.size} • Pack ID: ${pack.id}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="pack-status ${isInstalled ? 'installed' : 'uninstalled'}">
+                  ${isInstalled ? '✓ Ready / Installed' : 'Not Installed'}
+                </span>
+                ${isInstalled ? `
+                  <button type="button" class="btn btn-sm" onclick="TranslationService.deletePack('${pack.id}')" style="color:var(--danger); padding:3px 7px; font-size:10.5px;">Uninstall</button>
+                ` : `
+                  <button type="button" class="btn btn-sm" id="btn-pack-dl-${pack.id}" onclick="TranslationService.downloadPack('${pack.id}')" style="background:var(--accent-glow); color:var(--accent); font-weight:600; padding:3px 8px; font-size:11px;">Install Pack</button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      async translate(query, sourceLang = 'auto', targetLang = null) {
+        const text = (query || '').trim();
+        if (!text) return { text: '', source: sourceLang, target: targetLang };
+
+        const cfg = this.getConfig();
+        const tgt = targetLang || cfg.target_lang || 'vi';
+        const src = sourceLang || cfg.source_lang || 'auto';
+        const cloudUrl = 'https://translate.adminforge.de';
+
+        const tryDirectFetch = async (targetUrl, key) => {
+          try {
+            const cleanUrl = targetUrl.replace(/\/+$/, '');
+            const res = await Promise.race([
+              fetch(`${cleanUrl}/translate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  q: text,
+                  source: src,
+                  target: tgt,
+                  format: 'text',
+                  api_key: key || ''
+                })
+              }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
+            ]);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.translatedText) {
+                return { text: data.translatedText, source: data.detectedLanguage?.language || src, target: tgt };
+              }
+            }
+          } catch (_) {}
+          return null;
+        };
+
+        // 1. If provider is LibreTranslate
+        if (cfg.provider === 'libretranslate') {
+          const primaryUrl = (cfg.libretranslate_url || cloudUrl).trim().replace(/\/+$/, '');
+
+          // Try direct webview fetch first
+          let directRes = await tryDirectFetch(primaryUrl, cfg.libretranslate_api_key);
+          if (directRes) return directRes;
+
+          // If primary URL was custom/local and failed, try public cloud instance
+          if (primaryUrl !== cloudUrl) {
+            let cloudRes = await tryDirectFetch(cloudUrl, '');
+            if (cloudRes) return cloudRes;
+          }
+
+          // Use Rust IPC
+          return new Promise((resolve) => {
+            const reqId = 'req_' + Math.random().toString(36).substr(2, 9);
+            const timeoutTimer = setTimeout(() => {
+              this.pendingRequests.delete(reqId);
+              // Final fallback to cloud instance directly
+              tryDirectFetch(cloudUrl, '').then(res => {
+                resolve(res || { text: `[Translation timeout: Server unreachable at ${primaryUrl}]`, source: src, target: tgt });
+              });
+            }, 6000);
+
+            this.pendingRequests.set(reqId, (result) => {
+              clearTimeout(timeoutTimer);
+              if (result && result.text) {
+                resolve({ text: result.text, source: src, target: tgt });
+              } else {
+                tryDirectFetch(cloudUrl, '').then(res => {
+                  resolve(res || { text: `[Translation failed: ${result?.error || 'Server error'}]`, source: src, target: tgt });
+                });
+              }
+            });
+
+            this.app.sendIpc('translate_text', {
+              query: text,
+              source: src,
+              target: tgt,
+              provider: 'libretranslate',
+              url: primaryUrl,
+              api_key: cfg.libretranslate_api_key,
+              req_id: reqId
+            });
+          });
+        }
+
+        // 2. If provider is offline
+        if (cfg.provider === 'offline') {
+          const pairKey = `en-${tgt}`;
+          const isInstalled = this.downloadedPacks.has(pairKey) || this.downloadedPacks.has(`${src}-${tgt}`) || this.downloadedPacks.size > 0;
+          if (!isInstalled) {
+            return {
+              text: `⚠️ Offline language pack for "${tgt}" is not downloaded yet.\nGo to Settings (⚙ Settings) -> Translation -> "Install Pack" for ${pairKey} to enable local offline translation.`,
+              source: src,
+              target: tgt,
+              isNotice: true
+            };
+          }
+          // If offline pack is installed, try cloud fallback if local daemon not ready
+          let directRes = await tryDirectFetch(cloudUrl, '');
+          if (directRes) return directRes;
+          return this.translateViaMyMemory(text, src, tgt);
+        }
+
+        // 3. Default: Free Web Engine (MyMemory with automatic cloud fallback)
+        return this.translateViaMyMemory(text, src, tgt);
+      },
+
+      async translateViaMyMemory(text, src, tgt) {
+        const langpair = `${src === 'auto' ? 'en' : src}|${tgt}`;
+        const cloudUrl = 'https://translate.adminforge.de';
+
+        try {
+          const res = await Promise.race([
+            fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(langpair)}`),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
+          ]);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.responseData && data.responseData.translatedText) {
+              const trans = data.responseData.translatedText;
+              // Detect MyMemory daily quota limit warning!
+              if (!trans.toUpperCase().includes('MYMEMORY WARNING')) {
+                return { text: trans, source: src, target: tgt };
+              }
+            }
+          }
+        } catch (_) {}
+
+        // Fallback directly to LibreTranslate cloud endpoint
+        try {
+          const res = await fetch(`${cloudUrl}/translate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q: text, source: src, target: tgt, format: 'text' })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.translatedText) {
+              return { text: data.translatedText, source: src, target: tgt };
+            }
+          }
+        } catch (_) {}
+
+        // Fallback to Rust IPC
+        return new Promise((resolve) => {
+          const reqId = 'req_' + Math.random().toString(36).substr(2, 9);
+          const timer = setTimeout(() => {
+            this.pendingRequests.delete(reqId);
+            resolve({ text: `[Translation unavailable - network timeout]`, source: src, target: tgt });
+          }, 6000);
+
+          this.pendingRequests.set(reqId, (result) => {
+            clearTimeout(timer);
+            resolve({ text: (result && result.text) || text, source: src, target: tgt });
+          });
+
+          this.app.sendIpc('translate_text', {
+            query: text,
+            source: src,
+            target: tgt,
+            provider: 'libretranslate',
+            url: cloudUrl,
+            req_id: reqId
+          });
+        });
+      },
+
+      handleTranslationResult(data) {
+        let reqId = null;
+        if (data.json) {
+          try {
+            const parsed = JSON.parse(data.json);
+            reqId = parsed.req_id;
+          } catch (_) {}
+        }
+        if (reqId && this.pendingRequests.has(reqId)) {
+          const cb = this.pendingRequests.get(reqId);
+          this.pendingRequests.delete(reqId);
+          cb({ text: data.content, error: data.message });
+        }
+      },
+
+      testLibreTranslateConnection(url) {
+        const cleanUrl = (url || this.getConfig().libretranslate_url || 'https://translate.adminforge.de').trim().replace(/\/+$/, '');
+        const statusRow = document.getElementById('lt-conn-status-row');
+        const statusText = document.getElementById('lt-conn-status-text');
+        if (statusRow && statusText) {
+          statusRow.style.display = 'block';
+          statusRow.style.background = 'var(--bg-secondary)';
+          statusRow.style.border = '1px solid var(--border)';
+          statusText.innerHTML = `<span style="color:var(--text-muted);">Connecting to <code>${escapeHtml(cleanUrl)}</code>...</span>`;
+        }
+        if (this.app) {
+          this.app.sendIpc('test_libretranslate_connection', { url: cleanUrl });
+        }
+      },
+
+      handleConnectionStatus(data) {
+        const statusRow = document.getElementById('lt-conn-status-row');
+        const statusText = document.getElementById('lt-conn-status-text');
+        if (!statusRow || !statusText) return;
+        statusRow.style.display = 'block';
+        if (data.content === 'connected') {
+          statusRow.style.background = 'rgba(166, 227, 161, 0.15)';
+          statusRow.style.border = '1px solid var(--success)';
+          statusText.innerHTML = '<span style="color:var(--success); font-weight:700;">✓ Connected successfully!</span> Server is running and ready (No API key needed).';
+        } else {
+          statusRow.style.background = 'rgba(243, 139, 168, 0.15)';
+          statusRow.style.border = '1px solid var(--danger)';
+          statusText.innerHTML = `<span style="color:var(--danger); font-weight:700;">✕ Connection failed:</span> ${escapeHtml(data.message || 'Server not reachable')}. <button type="button" class="btn btn-sm" onclick="document.getElementById('btn-preset-lt-cloud').click()" style="margin-left:6px; padding:2px 6px; font-size:10px; background:var(--accent-glow); color:var(--accent);">Switch to Public Cloud</button>`;
+        }
+      }
+    };
+
+    /* =========================================================================
+       3.6. FLOATING SELECTION TRANSLATION POPOVER
+       ========================================================================= */
+    const TranslationPopover = {
+      app: null,
+      pillEl: null,
+      popoverEl: null,
+      currentText: '',
+      isEditor: false,
+      isVisualPreview: false,
+      visualRange: null,
+      isOpen: false,
+      lastTranslation: '',
+
+      init(appInstance) {
+        this.app = appInstance;
+        this.pillEl = document.getElementById('selection-translate-btn');
+        this.popoverEl = document.getElementById('translation-popover');
+
+        if (this.pillEl) {
+          this.pillEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.openPopover();
+          });
+        }
+
+        const closeBtn = document.getElementById('popover-trans-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => this.close());
+        }
+
+        const copyBtn = document.getElementById('popover-btn-copy');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => this.copyResult());
+        }
+
+        const replaceBtn = document.getElementById('popover-btn-replace');
+        if (replaceBtn) {
+          replaceBtn.addEventListener('click', () => this.replaceSelection());
+        }
+
+        const insertBtn = document.getElementById('popover-btn-insert-below');
+        if (insertBtn) {
+          insertBtn.addEventListener('click', () => this.insertBelow());
+        }
+
+        const srcSelect = document.getElementById('popover-trans-source');
+        const tgtSelect = document.getElementById('popover-trans-target');
+        if (srcSelect) {
+          srcSelect.addEventListener('change', () => this.execute());
+        }
+        if (tgtSelect) {
+          tgtSelect.addEventListener('change', () => this.execute());
+        }
+
+        // Selection change listener
+        document.addEventListener('selectionchange', () => this.handleSelection());
+        window.addEventListener('mouseup', (e) => {
+          if (!this.popoverEl || !this.popoverEl.contains(e.target)) {
+            setTimeout(() => this.handleSelection(), 20);
+          }
+        });
+
+        window.addEventListener('keydown', (e) => {
+          // Ctrl+Alt+T triggers translation on active selection or line
+          if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 't' || e.key === 'T') && !e.shiftKey) {
+            e.preventDefault();
+            this.triggerHotkey();
+          } else if (e.key === 'Escape' && this.isOpen) {
+            this.close();
+          }
+        });
+
+        // Corner drag-to-resize listener
+        const resizer = document.getElementById('popover-resizer');
+        if (resizer && this.popoverEl) {
+          let isResizing = false;
+          let startX = 0;
+          let startWidth = 0;
+
+          const onPointerMove = (e) => {
+            if (!isResizing) return;
+            const deltaX = e.clientX - startX;
+            const newWidth = Math.max(320, Math.min(window.innerWidth - 40, startWidth + deltaX));
+            this.popoverEl.style.width = `${newWidth}px`;
+          };
+
+          const onPointerUp = () => {
+            if (!isResizing) return;
+            isResizing = false;
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            const finalWidth = this.popoverEl.offsetWidth;
+            this.savePopupWidth(finalWidth);
+          };
+
+          resizer.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = this.popoverEl.offsetWidth;
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'nwse-resize';
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+          });
+        }
+      },
+
+      getPopupWidth() {
+        const cfg = TranslationService.getConfig();
+        const raw = parseInt(cfg.popup_width, 10) || 440;
+        return Math.max(300, Math.min(window.innerWidth - 30, raw));
+      },
+
+      applyPopupWidth(width) {
+        if (!this.popoverEl) return;
+        const w = width || this.getPopupWidth();
+        this.popoverEl.style.width = `${w}px`;
+      },
+
+      savePopupWidth(width) {
+        const validWidth = Math.max(320, Math.min(window.innerWidth - 30, Math.round(width)));
+        if (this.app) {
+          if (!this.app.keybindings) this.app.keybindings = {};
+          if (!this.app.keybindings.translation) this.app.keybindings.translation = {};
+          this.app.keybindings.translation.popup_width = validWidth;
+          this.app.sendIpc('save_keybindings', { json: JSON.stringify(this.app.keybindings, null, 2) });
+        }
+        const widthInput = document.getElementById('kb-trans-popup-width');
+        if (widthInput) widthInput.value = validWidth;
+        const presetSelect = document.getElementById('kb-trans-popup-preset');
+        if (presetSelect) {
+          const match = Array.from(presetSelect.options).find(o => parseInt(o.value, 10) === validWidth);
+          presetSelect.value = match ? match.value : '';
+        }
+      },
+
+      showForVisualSelection(rect, text, visualRange) {
+        if (this.isOpen) return;
+        const cfg = TranslationService.getConfig();
+        if (!cfg.enabled || !cfg.show_selection_button) return;
+        this.currentText = text;
+        this.isEditor = false;
+        this.isVisualPreview = true;
+        this.visualRange = visualRange;
+        this.showPill(rect);
+      },
+
+      handleSelection() {
+        if (this.isOpen) return;
+        const cfg = TranslationService.getConfig();
+        if (!cfg.enabled || !cfg.show_selection_button) {
+          this.hidePill();
+          return;
+        }
+
+        let selectedText = '';
+        let rect = null;
+
+        // Check preview visual mode first
+        if (this.app && this.app.mode === 'preview' && typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && PreviewCursor.mode === 'VISUAL') {
+          selectedText = PreviewCursor.getSelectedText();
+          rect = PreviewCursor.getSelectedVisualRect();
+          if (selectedText && rect) {
+            this.currentText = selectedText;
+            this.isEditor = false;
+            this.isVisualPreview = true;
+            this.visualRange = PreviewCursor.getSelectedVisualRange();
+            this.showPill(rect);
+            return;
+          }
+        }
+
+        // Check preview selection
+        const sel = window.getSelection();
+        if (sel && sel.toString().trim().length > 1 && !sel.isCollapsed) {
+          const text = sel.toString().trim();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const parent = range.commonAncestorContainer.parentElement;
+            if (parent && parent.closest('#preview-pane')) {
+              selectedText = text;
+              rect = range.getBoundingClientRect();
+              this.isEditor = false;
+              this.isVisualPreview = false;
+              this.visualRange = null;
+            }
+          }
+        }
+
+        // Check editor selection
+        if (!selectedText && this.app && this.app.editorEl) {
+          const start = this.app.editorEl.selectionStart;
+          const end = this.app.editorEl.selectionEnd;
+          if (end > start + 1) {
+            const text = this.app.editorEl.value.substring(start, end).trim();
+            if (text.length > 1) {
+              selectedText = text;
+              this.isEditor = true;
+              this.isVisualPreview = false;
+              this.visualRange = null;
+              const edRect = this.app.editorEl.getBoundingClientRect();
+              rect = {
+                left: edRect.left + 40,
+                top: Math.max(edRect.top + 30, 80),
+                width: 100,
+                height: 20
+              };
+            }
+          }
+        }
+
+        if (selectedText && rect) {
+          this.currentText = selectedText;
+          this.showPill(rect);
+        } else {
+          this.hidePill();
+        }
+      },
+
+      showPill(rect) {
+        if (!this.pillEl) return;
+        const x = Math.min(window.innerWidth - 100, Math.max(10, rect.left + (rect.width / 2) - 40));
+        const y = Math.max(40, rect.top - 32);
+        this.pillEl.style.left = `${x}px`;
+        this.pillEl.style.top = `${y}px`;
+        this.pillEl.style.display = 'inline-flex';
+      },
+
+      hidePill() {
+        if (this.pillEl) {
+          this.pillEl.style.display = 'none';
+        }
+      },
+
+      triggerHotkey() {
+        let text = '';
+        const sel = window.getSelection();
+        if (sel && sel.toString().trim().length > 0) {
+          text = sel.toString().trim();
+          this.isEditor = false;
+          this.isVisualPreview = false;
+          this.visualRange = null;
+        } else if (this.app && this.app.mode === 'preview' && typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && PreviewCursor.mode === 'VISUAL') {
+          text = PreviewCursor.getSelectedText();
+          this.isEditor = false;
+          this.isVisualPreview = true;
+          this.visualRange = PreviewCursor.getSelectedVisualRange();
+        } else if (this.app && this.app.editorEl) {
+          const start = this.app.editorEl.selectionStart;
+          const end = this.app.editorEl.selectionEnd;
+          if (end > start) {
+            text = this.app.editorEl.value.substring(start, end).trim();
+          } else {
+            const lines = this.app.editorEl.value.substring(0, start).split('\n');
+            const allLines = this.app.editorEl.value.split('\n');
+            text = (allLines[lines.length - 1] || '').trim();
+          }
+          this.isEditor = true;
+          this.isVisualPreview = false;
+          this.visualRange = null;
+        }
+
+        if (text) {
+          this.currentText = text;
+          this.openPopover();
+        } else {
+          this.app.showToast('Select text or enter Visual mode (v) to translate (Ctrl+Alt+T)');
+        }
+      },
+
+      openPopover() {
+        this.hidePill();
+        this.isOpen = true;
+        if (!this.popoverEl) return;
+
+        const cfg = TranslationService.getConfig();
+        const tgtSelect = document.getElementById('popover-trans-target');
+        const srcSelect = document.getElementById('popover-trans-source');
+        if (tgtSelect && cfg.target_lang) tgtSelect.value = cfg.target_lang;
+        if (srcSelect && cfg.source_lang) srcSelect.value = cfg.source_lang;
+
+        const srcBox = document.getElementById('popover-trans-source-text');
+        if (srcBox) srcBox.textContent = this.currentText;
+
+        const providerBadge = document.getElementById('popover-trans-provider');
+        if (providerBadge) {
+          providerBadge.textContent = cfg.provider === 'libretranslate' ? 'LibreTranslate' : (cfg.provider === 'offline' ? 'Offline Pack' : 'Free Web Engine');
+        }
+
+        const canReplace = this.isEditor || (this.isVisualPreview && this.visualRange);
+        const replaceBtn = document.getElementById('popover-btn-replace');
+        const insertBtn = document.getElementById('popover-btn-insert-below');
+        if (replaceBtn) replaceBtn.style.display = canReplace ? 'inline-flex' : 'none';
+        if (insertBtn) insertBtn.style.display = canReplace ? 'inline-flex' : 'none';
+
+        const popupWidth = this.getPopupWidth();
+        this.popoverEl.style.width = `${popupWidth}px`;
+        const x = Math.max(16, (window.innerWidth - popupWidth) / 2);
+        const y = Math.max(50, (window.innerHeight - 240) / 3);
+        this.popoverEl.style.left = `${x}px`;
+        this.popoverEl.style.top = `${y}px`;
+        this.popoverEl.classList.add('show');
+
+        this.execute();
+      },
+
+      close() {
+        if (this.popoverEl) {
+          this.popoverEl.classList.remove('show');
+        }
+        this.isOpen = false;
+        this.hidePill();
+        this.isVisualPreview = false;
+        this.visualRange = null;
+      },
+
+      async execute() {
+        const resultBox = document.getElementById('popover-trans-result-text');
+        if (!resultBox) return;
+
+        resultBox.textContent = 'Translating...';
+        resultBox.classList.add('loading');
+
+        const srcSelect = document.getElementById('popover-trans-source');
+        const tgtSelect = document.getElementById('popover-trans-target');
+        const src = srcSelect ? srcSelect.value : 'auto';
+        const tgt = tgtSelect ? tgtSelect.value : 'vi';
+
+        try {
+          const res = await TranslationService.translate(this.currentText, src, tgt);
+          resultBox.classList.remove('loading');
+          resultBox.textContent = res.text || 'No translation available';
+          this.lastTranslation = res.text || '';
+        } catch (e) {
+          resultBox.classList.remove('loading');
+          resultBox.textContent = 'Translation failed: ' + e.message;
+        }
+      },
+
+      copyResult() {
+        if (!this.lastTranslation) return;
+        navigator.clipboard.writeText(this.lastTranslation).then(() => {
+          const icon = document.getElementById('popover-copy-icon');
+          const text = document.getElementById('popover-copy-text');
+          if (icon && text) {
+            icon.textContent = '✓';
+            text.textContent = 'Copied!';
+            setTimeout(() => {
+              icon.textContent = '📋';
+              text.textContent = 'Copy';
+            }, 1500);
+          }
+        });
+      },
+
+      replaceSelection() {
+        if (!this.lastTranslation || !this.app || !this.app.editorEl) return;
+        const ed = this.app.editorEl;
+
+        if (this.isEditor) {
+          const start = ed.selectionStart;
+          const end = ed.selectionEnd;
+          const before = ed.value.substring(0, start);
+          const after = ed.value.substring(end);
+          ed.value = before + this.lastTranslation + after;
+          ed.selectionStart = ed.selectionEnd = start + this.lastTranslation.length;
+        } else if (this.isVisualPreview && this.visualRange) {
+          const lines = ed.value.split('\n');
+          const startIdx = Math.max(0, this.visualRange.startLine - 1);
+          const endIdx = Math.min(lines.length, this.visualRange.endLine);
+          const beforeLines = lines.slice(0, startIdx);
+          const afterLines = lines.slice(endIdx);
+          ed.value = beforeLines.concat([this.lastTranslation]).concat(afterLines).join('\n');
+        } else {
+          return;
+        }
+
+        this.app.markDirty();
+        this.app.updateEditor();
+        this.app.renderMarkdown();
+        this.close();
+      },
+
+      insertBelow() {
+        if (!this.lastTranslation || !this.app || !this.app.editorEl) return;
+        const ed = this.app.editorEl;
+
+        if (this.isEditor) {
+          const end = ed.selectionEnd;
+          const before = ed.value.substring(0, end);
+          const after = ed.value.substring(end);
+          ed.value = before + '\n' + this.lastTranslation + after;
+          ed.selectionStart = ed.selectionEnd = end + 1 + this.lastTranslation.length;
+        } else if (this.isVisualPreview && this.visualRange) {
+          const lines = ed.value.split('\n');
+          const endIdx = Math.min(lines.length, this.visualRange.endLine);
+          const beforeLines = lines.slice(0, endIdx);
+          const afterLines = lines.slice(endIdx);
+          ed.value = beforeLines.concat([this.lastTranslation]).concat(afterLines).join('\n');
+        } else {
+          return;
+        }
+
+        this.app.markDirty();
+        this.app.updateEditor();
+        this.app.renderMarkdown();
+        this.close();
+      }
+    };
+
+    /* =========================================================================
+       3.7. DOCUMENT & PREVIEW TRANSLATION CONTROLLER
+       ========================================================================= */
+    const DocTranslator = {
+      app: null,
+      isTranslating: false,
+      stopRequested: false,
+
+      init(appInstance) {
+        this.app = appInstance;
+        const btnToggleBar = document.getElementById('btn-translate-doc');
+        const bar = document.getElementById('doc-trans-bar');
+        const btnClose = document.getElementById('btn-doc-trans-close');
+        const btnRun = document.getElementById('btn-doc-trans-run');
+        const btnStop = document.getElementById('btn-doc-trans-stop');
+        const btnToggleView = document.getElementById('btn-doc-trans-toggle');
+
+        if (btnToggleBar) {
+          btnToggleBar.addEventListener('click', () => {
+            if (bar) bar.classList.toggle('show');
+          });
+        }
+        if (btnClose) {
+          btnClose.addEventListener('click', () => {
+            if (bar) bar.classList.remove('show');
+          });
+        }
+        if (btnRun) {
+          btnRun.addEventListener('click', () => this.translateDocument());
+        }
+        if (btnStop) {
+          btnStop.addEventListener('click', () => this.stopTranslation());
+        }
+        if (btnToggleView) {
+          btnToggleView.addEventListener('click', () => this.toggleViewMode());
+        }
+
+        window.addEventListener('keydown', (e) => {
+          // Ctrl+Shift+T toggles document translation bar
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 't' || e.key === 'T')) {
+            e.preventDefault();
+            if (bar) bar.classList.toggle('show');
+          }
+        });
+      },
+
+      getActiveFile() {
+        if (!this.app || !this.app.files) return null;
+        return this.app.files[this.app.activeFileIndex] || null;
+      },
+
+      getFileState(file) {
+        if (!file) return null;
+        if (!file.translation) {
+          file.translation = {
+            originalHtml: null,
+            translatedHtml: null,
+            isTranslated: false,
+            viewMode: 'original',
+            targetLang: 'vi',
+            statusText: ''
+          };
+        }
+        return file.translation;
+      },
+
+      saveCurrentFileState(file) {
+        if (!file) return;
+        const state = this.getFileState(file);
+        if (state && state.isTranslated) {
+          if (state.viewMode === 'translated' && this.app && this.app.previewEl) {
+            state.translatedHtml = this.app.previewEl.innerHTML;
+          }
+        }
+      },
+
+      restoreFileState(file) {
+        if (!file) return;
+        const state = file.translation;
+        if (state && state.isTranslated) {
+          if (state.viewMode === 'translated' && state.translatedHtml) {
+            this.app.previewEl.innerHTML = state.translatedHtml;
+          } else if (state.originalHtml) {
+            this.app.previewEl.innerHTML = state.originalHtml;
+          }
+          // Re-init diagram pan zoom & TOC if needed
+          if (typeof DiagramPanZoom !== 'undefined') {
+            DiagramPanZoom.initAll(this.app.previewEl);
+          }
+          if (typeof TableOfContents !== 'undefined' && TableOfContents.isOpen) {
+            TableOfContents.build();
+          }
+          this.syncUiForFile(file);
+        } else {
+          this.resetUiForFile();
+        }
+      },
+
+      syncUiForFile(file) {
+        const state = file ? file.translation : null;
+        const btnToggleView = document.getElementById('btn-doc-trans-toggle');
+        const btnStop = document.getElementById('btn-doc-trans-stop');
+        const btnRun = document.getElementById('btn-doc-trans-run');
+        const statusEl = document.getElementById('doc-trans-status');
+        const tgtSelect = document.getElementById('doc-trans-target-lang');
+
+        if (!state || !state.isTranslated) {
+          this.resetUiForFile();
+          return;
+        }
+
+        if (tgtSelect && state.targetLang) {
+          tgtSelect.value = state.targetLang;
+        }
+
+        if (btnStop) btnStop.style.display = this.isTranslating ? 'inline-flex' : 'none';
+        if (btnRun) btnRun.disabled = this.isTranslating;
+
+        if (btnToggleView) {
+          btnToggleView.style.display = 'inline-flex';
+          if (state.viewMode === 'translated') {
+            btnToggleView.innerHTML = '👁 Show Original';
+            btnToggleView.title = 'Switch preview to original text';
+          } else {
+            btnToggleView.innerHTML = '🌐 Show Translated';
+            btnToggleView.title = 'Switch preview to translated text';
+          }
+        }
+
+        if (statusEl) {
+          statusEl.textContent = state.statusText || (state.viewMode === 'translated' ? '✓ Showing translation' : 'Showing original');
+        }
+      },
+
+      resetUiForFile() {
+        const btnToggleView = document.getElementById('btn-doc-trans-toggle');
+        const btnStop = document.getElementById('btn-doc-trans-stop');
+        const btnRun = document.getElementById('btn-doc-trans-run');
+        const statusEl = document.getElementById('doc-trans-status');
+
+        if (btnToggleView) btnToggleView.style.display = 'none';
+        if (btnStop) btnStop.style.display = 'none';
+        if (btnRun) btnRun.disabled = false;
+        if (statusEl) statusEl.textContent = '';
+      },
+
+      stopTranslation() {
+        this.stopRequested = true;
+        const statusEl = document.getElementById('doc-trans-status');
+        const btnStop = document.getElementById('btn-doc-trans-stop');
+        if (statusEl) statusEl.textContent = 'Stopping translation...';
+        if (btnStop) btnStop.disabled = true;
+      },
+
+      async translateDocument() {
+        const file = this.getActiveFile();
+        if (this.isTranslating || !this.app || !this.app.previewEl || !file) return;
+
+        this.isTranslating = true;
+        this.stopRequested = false;
+
+        const state = this.getFileState(file);
+        const statusEl = document.getElementById('doc-trans-status');
+        const btnRun = document.getElementById('btn-doc-trans-run');
+        const btnStop = document.getElementById('btn-doc-trans-stop');
+        const btnToggleView = document.getElementById('btn-doc-trans-toggle');
+        const tgtSelect = document.getElementById('doc-trans-target-lang');
+        const tgt = tgtSelect ? tgtSelect.value : 'vi';
+        state.targetLang = tgt;
+
+        if (btnRun) btnRun.disabled = true;
+        if (btnStop) {
+          btnStop.style.display = 'inline-flex';
+          btnStop.disabled = false;
+        }
+        if (btnToggleView) btnToggleView.style.display = 'none';
+        if (statusEl) statusEl.textContent = 'Translating document...';
+
+        // Capture original HTML if not already captured
+        if (!state.originalHtml) {
+          state.originalHtml = this.app.previewEl.innerHTML;
+        } else if (state.viewMode === 'original') {
+          state.originalHtml = this.app.previewEl.innerHTML;
+        }
+
+        // Collect translatable block elements: h1-h6, p, li, blockquote > p (skip code, pre, svg, diagrams)
+        const translatables = Array.from(this.app.previewEl.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, blockquote > p')).filter(el => {
+          return !el.closest('pre') && !el.closest('code') && !el.closest('.mermaid') && !el.closest('.nexus-graph') && el.textContent.trim().length > 0;
+        });
+
+        let done = 0;
+        const total = translatables.length;
+
+        for (const el of translatables) {
+          if (this.stopRequested || this.getActiveFile() !== file) break;
+
+          const raw = el.innerText.trim();
+          if (raw) {
+            try {
+              const res = await TranslationService.translate(raw, 'auto', tgt);
+              if (this.stopRequested || this.getActiveFile() !== file) break;
+              if (res && res.text) {
+                el.innerText = res.text;
+              }
+            } catch (_) {}
+          }
+          done++;
+          if (statusEl) statusEl.textContent = `Translating: ${done}/${total}...`;
+        }
+
+        this.isTranslating = false;
+        if (btnStop) btnStop.style.display = 'none';
+        if (btnRun) btnRun.disabled = false;
+
+        if (this.getActiveFile() === file) {
+          state.translatedHtml = this.app.previewEl.innerHTML;
+          state.isTranslated = done > 0;
+          state.viewMode = 'translated';
+
+          if (this.stopRequested) {
+            state.statusText = `⏹ Stopped (${done}/${total} blocks translated)`;
+          } else {
+            state.statusText = `✓ Translated to ${tgt} (${total} blocks)`;
+          }
+
+          this.syncUiForFile(file);
+        }
+      },
+
+      toggleViewMode() {
+        const file = this.getActiveFile();
+        if (!file || !file.translation || !file.translation.isTranslated || !this.app || !this.app.previewEl) return;
+        const state = file.translation;
+
+        if (state.viewMode === 'translated') {
+          // Switch to original
+          state.translatedHtml = this.app.previewEl.innerHTML;
+          if (state.originalHtml) {
+            this.app.previewEl.innerHTML = state.originalHtml;
+          }
+          state.viewMode = 'original';
+          state.statusText = 'Viewing original (translation cached)';
+        } else {
+          // Switch to translated
+          state.originalHtml = this.app.previewEl.innerHTML;
+          if (state.translatedHtml) {
+            this.app.previewEl.innerHTML = state.translatedHtml;
+          }
+          state.viewMode = 'translated';
+          state.statusText = `Viewing translation (${state.targetLang})`;
+        }
+
+        // Re-init diagram pan zoom and TOC if needed
+        if (typeof DiagramPanZoom !== 'undefined') {
+          DiagramPanZoom.initAll(this.app.previewEl);
+        }
+        if (typeof TableOfContents !== 'undefined' && TableOfContents.isOpen) {
+          TableOfContents.build();
+        }
+
+        this.syncUiForFile(file);
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -7203,6 +8855,17 @@
           preview_font_size: 14.5,
           editor_font_size: 13
         },
+        translation: {
+          enabled: true,
+          provider: "libretranslate",
+          target_lang: "vi",
+          source_lang: "auto",
+          libretranslate_url: "https://translate.adminforge.de",
+          libretranslate_api_key: "",
+          popup_width: 440,
+          show_selection_button: true,
+          hotkey: "Ctrl+Alt+T"
+        },
         settings: {
           middle_click_close_tab: true,
           is_copy_to_yank: true,
@@ -7260,6 +8923,17 @@
           custom_code_font: "",
           preview_font_size: 14.5,
           editor_font_size: 13
+        },
+        translation: {
+          enabled: true,
+          provider: "libretranslate",
+          target_lang: "vi",
+          source_lang: "auto",
+          libretranslate_url: "https://translate.adminforge.de",
+          libretranslate_api_key: "",
+          popup_width: 440,
+          show_selection_button: true,
+          hotkey: "Ctrl+Alt+T"
         },
         settings: {
           middle_click_close_tab: true,
@@ -7456,6 +9130,35 @@
       kbTextareaEl: document.getElementById('kb-textarea'),
       modalScale: 1.0,
 
+      fixMermaidSvgClamping(container) {
+        if (!container) return;
+        const nodes = container.querySelectorAll('.node');
+        nodes.forEach(node => {
+          const rect = node.querySelector('rect.basic, rect.label-container, rect');
+          if (rect) {
+            const h = parseFloat(rect.getAttribute('height') || '0');
+            const y = parseFloat(rect.getAttribute('y') || '0');
+            // If height is compact (< 48px), expand vertical height by 10px so descenders never clamp
+            if (h > 0 && h < 48) {
+              const extra = 10;
+              rect.setAttribute('height', (h + extra).toString());
+              rect.setAttribute('y', (y - extra / 2).toString());
+            }
+          }
+          const fo = node.querySelector('foreignObject');
+          if (fo) {
+            fo.style.overflow = 'visible';
+            const h = parseFloat(fo.getAttribute('height') || '0');
+            const y = parseFloat(fo.getAttribute('y') || '0');
+            if (h > 0 && h < 48) {
+              const extra = 10;
+              fo.setAttribute('height', (h + extra).toString());
+              fo.setAttribute('y', (y - extra / 2).toString());
+            }
+          }
+        });
+      },
+
       init() {
         SmoothScroller.attach(this.previewPaneEl, {
           onStep: () => {
@@ -7468,6 +9171,9 @@
         TableOfContents.init();
         PreviewCursor.init(this);
         SearchEngine.init(this);
+        TranslationService.init(this);
+        TranslationPopover.init(this);
+        DocTranslator.init(this);
         this.applyTheme(this.keybindings && this.keybindings.theme ? this.keybindings.theme : this.defaultKeybindings.theme);
         this.applyFonts(this.keybindings && this.keybindings.fonts ? this.keybindings.fonts : this.defaultKeybindings.fonts);
 
@@ -7484,11 +9190,22 @@
             window._mermaidInitialized = true;
             mermaid.initialize({
               startOnLoad: false,
-              theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'dark'
+              theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'dark',
+              fontFamily: 'var(--font-ui)',
+              flowchart: {
+                htmlLabels: true,
+                padding: 22,
+                curve: 'basis'
+              },
+              themeVariables: {
+                fontFamily: 'var(--font-ui)',
+                fontSize: '13px'
+              }
             });
             const mermaidNodes = this.previewEl ? this.previewEl.querySelectorAll('.mermaid') : [];
             if (mermaidNodes.length > 0) {
               mermaid.run({ nodes: mermaidNodes }).then(() => {
+                mermaidNodes.forEach(mNode => this.fixMermaidSvgClamping(mNode));
                 DiagramPanZoom.initAll(this.previewEl);
               }).catch(e => console.error(e));
             }
@@ -7564,6 +9281,43 @@
               this.populateKbFields();
               alert(data.message || 'Keybindings reset to default settings.');
               break;
+            case 'translation_result':
+              if (typeof TranslationService !== 'undefined') {
+                TranslationService.handleTranslationResult(data);
+              }
+              break;
+            case 'libretranslate_status':
+              if (typeof TranslationService !== 'undefined') {
+                TranslationService.handleConnectionStatus(data);
+              }
+              break;
+            case 'translation_packs_list':
+              if (data.json && typeof TranslationService !== 'undefined') {
+                try {
+                  const packs = JSON.parse(data.json);
+                  TranslationService.onPacksListReceived(packs);
+                } catch (_) {}
+              }
+              break;
+            case 'translation_pack_downloaded':
+              if (data.content === 'failed' && data.message) {
+                alert('Language pack download error: ' + data.message);
+              }
+              if (data.json && typeof TranslationService !== 'undefined') {
+                try {
+                  const packs = JSON.parse(data.json);
+                  TranslationService.onPacksListReceived(packs);
+                } catch (_) {}
+              }
+              break;
+            case 'translation_pack_deleted':
+              if (data.json && typeof TranslationService !== 'undefined') {
+                try {
+                  const packs = JSON.parse(data.json);
+                  TranslationService.onPacksListReceived(packs);
+                } catch (_) {}
+              }
+              break;
             case 'error':
               alert('Error: ' + data.message);
               break;
@@ -7605,6 +9359,12 @@
         // Save current editor content to active file before switching
         if (this.files[this.activeFileIndex]) {
           this.files[this.activeFileIndex].content = this.editorEl.value;
+          if (typeof DocTranslator !== 'undefined') {
+            DocTranslator.saveCurrentFileState(this.files[this.activeFileIndex]);
+          }
+        }
+        if (typeof DocTranslator !== 'undefined' && DocTranslator.isTranslating) {
+          DocTranslator.stopTranslation();
         }
         this.activeFileIndex = index;
         this.renderTabs();
@@ -7887,6 +9647,10 @@
         this.updateEditor();
         this.renderMarkdown();
 
+        if (typeof DocTranslator !== 'undefined') {
+          DocTranslator.restoreFileState(file);
+        }
+
         if (this.mode === 'edit' || this.mode === 'split') {
           if (VimMode.enabled) {
             VimMode.setMode('NORMAL');
@@ -7908,13 +9672,23 @@
 
       markDirty() {
         const file = this.files[this.activeFileIndex];
-        if (file && !file.isDirty) {
-          file.isDirty = true;
-          this.renderTabs();
-          this.statusSaveEl.innerText = '● Unsaved';
-          const title = `● ${file.name} - MDViewer`;
-          document.title = title;
-          this.sendIpc('set_title', { title });
+        if (file) {
+          if (file.translation && file.translation.isTranslated) {
+            file.translation.isTranslated = false;
+            file.translation.translatedHtml = null;
+            file.translation.originalHtml = null;
+            if (typeof DocTranslator !== 'undefined') {
+              DocTranslator.resetUiForFile();
+            }
+          }
+          if (!file.isDirty) {
+            file.isDirty = true;
+            this.renderTabs();
+            this.statusSaveEl.innerText = '● Unsaved';
+            const title = `● ${file.name} - MDViewer`;
+            document.title = title;
+            this.sendIpc('set_title', { title });
+          }
         }
       },
 
@@ -7953,6 +9727,7 @@
             const mermaidNodes = this.previewEl.querySelectorAll('.mermaid');
             if (mermaidNodes.length > 0) {
               mermaid.run({ nodes: mermaidNodes }).then(() => {
+                mermaidNodes.forEach(mNode => this.fixMermaidSvgClamping(mNode));
                 DiagramPanZoom.initAll(this.previewEl);
               }).catch(e => {
                 console.error('Mermaid render error:', e);
@@ -8227,6 +10002,18 @@
                   PreviewCursor.yankSelected();
                   return;
                 }
+                if (e.key === 't' || e.key === 'T') {
+                  e.preventDefault();
+                  const text = PreviewCursor.getSelectedText();
+                  if (text && typeof TranslationPopover !== 'undefined') {
+                    TranslationPopover.currentText = text;
+                    TranslationPopover.isEditor = false;
+                    TranslationPopover.isVisualPreview = true;
+                    TranslationPopover.visualRange = PreviewCursor.getSelectedVisualRange();
+                    TranslationPopover.openPopover();
+                  }
+                  return;
+                }
                 if (e.key === (kb.scroll_down || 'j') || e.key === 'ArrowDown') {
                   e.preventDefault();
                   const moved = PreviewCursor.move(1);
@@ -8263,10 +10050,22 @@
                 }
               }
 
-              // In NORMAL mode: 'y' yanks active line
+              // In NORMAL mode: 'y' yanks active line, 't' translates active line
               if (e.key === 'y') {
                 e.preventDefault();
                 PreviewCursor.yankSelected();
+                return;
+              }
+              if (e.key === 't') {
+                e.preventDefault();
+                const text = PreviewCursor.getSelectedText();
+                if (text && typeof TranslationPopover !== 'undefined') {
+                  TranslationPopover.currentText = text;
+                  TranslationPopover.isEditor = false;
+                  TranslationPopover.isVisualPreview = true;
+                  TranslationPopover.visualRange = { startLine: PreviewCursor.getCurrentLine(), endLine: PreviewCursor.getCurrentLine() };
+                  TranslationPopover.openPopover();
+                }
                 return;
               }
             }
@@ -8531,10 +10330,25 @@
         }
       },
 
+      updateTransFieldsVisibility() {
+        const provSelect = document.getElementById('kb-trans-provider');
+        if (!provSelect) return;
+        const provider = provSelect.value;
+        const ltUrlRow = document.getElementById('kb-trans-lt-url-row');
+        const ltKeyRow = document.getElementById('kb-trans-lt-key-row');
+        const ltStatusRow = document.getElementById('lt-conn-status-row');
+        const offlineMgr = document.getElementById('offline-packs-manager');
+
+        if (ltUrlRow) ltUrlRow.style.display = (provider === 'libretranslate') ? 'flex' : 'none';
+        if (ltKeyRow) ltKeyRow.style.display = (provider === 'libretranslate') ? 'flex' : 'none';
+        if (ltStatusRow && provider !== 'libretranslate') ltStatusRow.style.display = 'none';
+        if (offlineMgr) offlineMgr.style.display = (provider === 'offline') ? 'flex' : 'none';
+      },
+
       loadKeybindingsJson(jsonStr) {
         try {
           const parsed = JSON.parse(jsonStr);
-          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.fonts || parsed.settings)) {
+          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.fonts || parsed.translation || parsed.settings)) {
             this.keybindings = parsed;
             if (this.keybindings.theme) {
               this.applyTheme(this.keybindings.theme);
@@ -8586,6 +10400,7 @@
       openKeybindingsModal() {
         this.populateKbFields();
         this.updateTocFieldsVisibility();
+        this.updateTransFieldsVisibility();
         this.switchKbTab('visual');
         if (this.kbModalEl) this.kbModalEl.classList.add('show');
       },
@@ -8662,6 +10477,16 @@
           }
         });
         this.updateTocFieldsVisibility();
+        this.updateTransFieldsVisibility();
+        const popupPresetSelect = document.getElementById('kb-trans-popup-preset');
+        if (popupPresetSelect && kb.translation && kb.translation.popup_width) {
+          const w = parseInt(kb.translation.popup_width, 10);
+          const match = Array.from(popupPresetSelect.options).find(o => parseInt(o.value, 10) === w);
+          popupPresetSelect.value = match ? match.value : '';
+        }
+        if (typeof TranslationPopover !== 'undefined') {
+          TranslationPopover.applyPopupWidth();
+        }
         if (kb.theme) {
           this.applyTheme(kb.theme);
         }
@@ -8679,6 +10504,7 @@
         if (!kb.toc) kb.toc = JSON.parse(JSON.stringify(this.defaultKeybindings.toc));
         if (!kb.theme) kb.theme = JSON.parse(JSON.stringify(this.defaultKeybindings.theme));
         if (!kb.fonts) kb.fonts = JSON.parse(JSON.stringify(this.defaultKeybindings.fonts || {}));
+        if (!kb.translation) kb.translation = JSON.parse(JSON.stringify(this.defaultKeybindings.translation || {}));
         if (!kb.settings) kb.settings = {};
 
         const inputs = document.querySelectorAll('.kb-input-box');
@@ -8739,6 +10565,7 @@
             }
           });
           this.updateTocFieldsVisibility();
+          this.updateTransFieldsVisibility();
           if (parsed.theme) {
             this.applyTheme(parsed.theme);
           }
@@ -8778,6 +10605,9 @@
         }
         if (typeof PreviewCursor !== 'undefined') {
           PreviewCursor.render();
+        }
+        if (typeof TranslationPopover !== 'undefined') {
+          TranslationPopover.applyPopupWidth();
         }
         this.sendIpc('save_keybindings', { json: JSON.stringify(kbToSave, null, 2) });
       },
@@ -8988,6 +10818,7 @@
               window.mermaid.render(renderId, rawCode).then(res => {
                 svgContainer.innerHTML = res.svg;
                 svgContainer.setAttribute('data-rendered', 'true');
+                this.fixMermaidSvgClamping(svgContainer);
                 setTimeout(() => {
                   DiagramPanZoom.init(blockId);
                 }, 30);
@@ -9048,6 +10879,93 @@
         if (tocModeEl) {
           tocModeEl.addEventListener('change', () => {
             this.updateTocFieldsVisibility();
+          });
+        }
+
+        // Translation provider dynamic visibility
+        const transProvEl = document.getElementById('kb-trans-provider');
+        if (transProvEl) {
+          transProvEl.addEventListener('change', () => {
+            this.updateTransFieldsVisibility();
+          });
+        }
+
+        // Test LibreTranslate connection button
+        const btnTestLt = document.getElementById('btn-test-lt-conn');
+        if (btnTestLt) {
+          btnTestLt.addEventListener('click', () => {
+            const urlInput = document.getElementById('kb-trans-lt-url');
+            const url = urlInput ? urlInput.value.trim() : '';
+            if (typeof TranslationService !== 'undefined') {
+              TranslationService.testLibreTranslateConnection(url);
+            }
+          });
+        }
+
+        // Preset buttons: Public Cloud vs Localhost
+        const btnLtCloud = document.getElementById('btn-preset-lt-cloud');
+        if (btnLtCloud) {
+          btnLtCloud.addEventListener('click', () => {
+            const urlInput = document.getElementById('kb-trans-lt-url');
+            if (urlInput) {
+              urlInput.value = 'https://translate.adminforge.de';
+              urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+              if (typeof TranslationService !== 'undefined') {
+                TranslationService.testLibreTranslateConnection('https://translate.adminforge.de');
+              }
+            }
+          });
+        }
+
+        const btnLtLocal = document.getElementById('btn-preset-lt-local');
+        if (btnLtLocal) {
+          btnLtLocal.addEventListener('click', () => {
+            const urlInput = document.getElementById('kb-trans-lt-url');
+            if (urlInput) {
+              urlInput.value = 'http://127.0.0.1:5000';
+              urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+              if (typeof TranslationService !== 'undefined') {
+                TranslationService.testLibreTranslateConnection('http://127.0.0.1:5000');
+              }
+            }
+          });
+        }
+
+        const ltUrlInput = document.getElementById('kb-trans-lt-url');
+        if (ltUrlInput) {
+          ltUrlInput.addEventListener('input', () => {
+            const statusRow = document.getElementById('lt-conn-status-row');
+            if (statusRow) statusRow.style.display = 'none';
+          });
+        }
+
+        // Translation popup window width presets and input bindings
+        const popupPresetSelect = document.getElementById('kb-trans-popup-preset');
+        const popupWidthInput = document.getElementById('kb-trans-popup-width');
+        if (popupPresetSelect) {
+          popupPresetSelect.addEventListener('change', () => {
+            const val = popupPresetSelect.value;
+            if (val && popupWidthInput) {
+              popupWidthInput.value = val;
+              popupWidthInput.dispatchEvent(new Event('input', { bubbles: true }));
+              if (typeof TranslationPopover !== 'undefined') {
+                TranslationPopover.applyPopupWidth(parseInt(val, 10));
+              }
+            }
+          });
+        }
+        if (popupWidthInput) {
+          popupWidthInput.addEventListener('input', () => {
+            const val = parseInt(popupWidthInput.value, 10);
+            if (!isNaN(val) && val >= 300) {
+              if (typeof TranslationPopover !== 'undefined') {
+                TranslationPopover.applyPopupWidth(val);
+              }
+              if (popupPresetSelect) {
+                const match = Array.from(popupPresetSelect.options).find(o => parseInt(o.value, 10) === val);
+                popupPresetSelect.value = match ? match.value : '';
+              }
+            }
           });
         }
 
@@ -9229,7 +11147,19 @@
           document.body.setAttribute('data-theme', next);
           document.getElementById('theme-icon').innerText = next === 'dark' ? '🌙' : '☀️';
           if (window.mermaid) {
-            mermaid.initialize({ theme: next === 'dark' ? 'dark' : 'default' });
+            mermaid.initialize({
+              theme: next === 'dark' ? 'dark' : 'default',
+              fontFamily: 'var(--font-ui)',
+              flowchart: {
+                htmlLabels: true,
+                padding: 22,
+                curve: 'basis'
+              },
+              themeVariables: {
+                fontFamily: 'var(--font-ui)',
+                fontSize: '13px'
+              }
+            });
             this.renderMarkdown();
           }
         });
