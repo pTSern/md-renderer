@@ -180,10 +180,66 @@ fn validate_or_fallback_keybindings(read_res: Result<String, std::io::Error>) ->
     }
 }
 
+fn get_user_config_path() -> PathBuf {
+    if let Ok(appdata) = std::env::var("APPDATA") {
+        let dir = PathBuf::from(appdata).join("mdviewer");
+        let _ = fs::create_dir_all(&dir);
+        dir.join("keybindings.json")
+    } else if let Ok(local) = std::env::var("LOCALAPPDATA") {
+        let dir = PathBuf::from(local).join("mdviewer");
+        let _ = fs::create_dir_all(&dir);
+        dir.join("keybindings.json")
+    } else {
+        PathBuf::from("keybindings.json")
+    }
+}
+
+fn get_exe_dir_config_path() -> Option<PathBuf> {
+    if let Ok(mut exe_dir) = std::env::current_exe() {
+        exe_dir.pop();
+        return Some(exe_dir.join("keybindings.json"));
+    }
+    None
+}
+
+fn get_keybindings_path() -> PathBuf {
+    let user_path = get_user_config_path();
+    if user_path.exists() {
+        return user_path;
+    }
+
+    // Seed user config from exe directory if available
+    if let Some(exe_cfg) = get_exe_dir_config_path() {
+        if exe_cfg.exists() {
+            if let Ok(content) = fs::read_to_string(&exe_cfg) {
+                if serde_json::from_str::<serde_json::Value>(&content).is_ok() {
+                    let _ = fs::write(&user_path, &content);
+                    return user_path;
+                }
+            }
+        }
+    }
+
+    // Seed user config from CWD if available
+    let cwd_cfg = Path::new("keybindings.json");
+    if cwd_cfg.exists() {
+        if let Ok(content) = fs::read_to_string(cwd_cfg) {
+            if serde_json::from_str::<serde_json::Value>(&content).is_ok() {
+                let _ = fs::write(&user_path, &content);
+                return user_path;
+            }
+        }
+    }
+
+    // Seed user config with DEFAULT_KEYBINDINGS
+    let _ = fs::write(&user_path, DEFAULT_KEYBINDINGS);
+    user_path
+}
+
 fn get_keybindings_content() -> (String, Option<String>) {
-    let keybindings_path = Path::new("keybindings.json");
+    let keybindings_path = get_keybindings_path();
     if keybindings_path.exists() {
-        validate_or_fallback_keybindings(fs::read_to_string(keybindings_path))
+        validate_or_fallback_keybindings(fs::read_to_string(&keybindings_path))
     } else {
         (DEFAULT_KEYBINDINGS.to_string(), None)
     }
@@ -790,8 +846,9 @@ fn main() {
                             if let Some(json_content) = request.json {
                                 match serde_json::from_str::<serde_json::Value>(&json_content) {
                                     Ok(_) => {
-                                        if let Err(e) = fs::write("keybindings.json", &json_content) {
-                                            eprintln!("[ERROR] Failed to save keybindings.json: {}", e);
+                                        let user_cfg = get_user_config_path();
+                                        if let Err(e) = fs::write(&user_cfg, &json_content) {
+                                            eprintln!("[ERROR] Failed to save keybindings to {:?}: {}", user_cfg, e);
                                             send_to_webview(
                                                 wv,
                                                 &IpcResponse {
@@ -804,6 +861,15 @@ fn main() {
                                                 },
                                             );
                                         } else {
+                                            // Best-effort secondary sync to exe directory and cwd if available
+                                            if let Some(exe_cfg) = get_exe_dir_config_path() {
+                                                let _ = fs::write(exe_cfg, &json_content);
+                                            }
+                                            let cwd_cfg = Path::new("keybindings.json");
+                                            if cwd_cfg.exists() {
+                                                let _ = fs::write(cwd_cfg, &json_content);
+                                            }
+
                                             send_to_webview(
                                                 wv,
                                                 &IpcResponse {
@@ -835,8 +901,16 @@ fn main() {
                         }
 
                         "reset_default_keybindings" => {
-                            if let Err(e) = fs::write("keybindings.json", DEFAULT_KEYBINDINGS) {
-                                eprintln!("[ERROR] Failed to write default keybindings: {}", e);
+                            let user_cfg = get_user_config_path();
+                            if let Err(e) = fs::write(&user_cfg, DEFAULT_KEYBINDINGS) {
+                                eprintln!("[ERROR] Failed to write default keybindings to {:?}: {}", user_cfg, e);
+                            }
+                            if let Some(exe_cfg) = get_exe_dir_config_path() {
+                                let _ = fs::write(exe_cfg, DEFAULT_KEYBINDINGS);
+                            }
+                            let cwd_cfg = Path::new("keybindings.json");
+                            if cwd_cfg.exists() {
+                                let _ = fs::write(cwd_cfg, DEFAULT_KEYBINDINGS);
                             }
                             send_to_webview(
                                 wv,

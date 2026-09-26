@@ -2585,7 +2585,6 @@
           <option value="ru">Russian (Русский)</option>
           <option value="vi" selected>Vietnamese (Tiếng Việt)</option>
         </select>
-        <button class="trans-close-btn" id="popover-trans-close" title="Close (Esc)">✕</button>
       </div>
     </div>
 
@@ -8139,10 +8138,14 @@
           });
         }
 
-        const closeBtn = document.getElementById('popover-trans-close');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', () => this.close());
-        }
+        // Close translation popover on clicking outside
+        window.addEventListener('pointerdown', (e) => {
+          if (this.isOpen && this.popoverEl && !this.popoverEl.contains(e.target)) {
+            if (this.pillEl && this.pillEl.contains(e.target)) return;
+            if (Date.now() - (this.openedAt || 0) < 120) return;
+            this.close();
+          }
+        });
 
         const copyBtn = document.getElementById('popover-btn-copy');
         if (copyBtn) {
@@ -8391,6 +8394,7 @@
       openPopover() {
         this.hidePill();
         this.isOpen = true;
+        this.openedAt = Date.now();
         if (!this.popoverEl) return;
 
         const cfg = TranslationService.getConfig();
