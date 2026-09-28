@@ -59,6 +59,27 @@
     "show_selection_button": true,
     "hotkey": "Ctrl+Alt+T"
   },
+  "ai_agent": {
+    "enabled": true,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "api_key_source": "env",
+    "api_key_env": "GEMINI_API_KEY",
+    "api_key_direct": "",
+    "custom_endpoint": "http://localhost:11434/v1",
+    "mode": "side_tab",
+    "side_tab": {
+      "position": "right",
+      "width_percent": 28
+    },
+    "floating_window": {
+      "position": "center",
+      "width_percent": 45,
+      "height_percent": 70
+    },
+    "open_on_startup": false,
+    "default_scope": "current_file"
+  },
   "settings": {
     "middle_click_close_tab": true,
     "is_copy_to_yank": true,

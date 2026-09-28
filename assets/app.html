@@ -963,6 +963,381 @@
     }
 
     /* =========================================================================
+       AI AGENT SIDEBAR & FLOATING POPUP STYLES
+       ========================================================================= */
+    body.mode-edit .agent-sidebar:not(.agent-mode-floating) {
+      display: none !important;
+    }
+    .agent-sidebar {
+      background: var(--bg-secondary);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      height: 100%;
+      overflow: hidden;
+      user-select: text;
+      z-index: 6;
+      position: relative;
+    }
+    .agent-sidebar:focus {
+      outline: none;
+    }
+    .agent-sidebar.agent-mode-side.pos-left {
+      order: -2;
+      border-right: 1px solid var(--border);
+      border-left: none;
+    }
+    .agent-sidebar.agent-mode-side.pos-right {
+      order: 11;
+      border-left: 1px solid var(--border);
+      border-right: none;
+    }
+    .agent-sidebar.agent-mode-floating {
+      position: fixed !important;
+      z-index: 1002 !important;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 10px !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+      max-width: 95vw !important;
+      max-height: 92vh !important;
+    }
+    .agent-floating-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 1001;
+    }
+    .agent-header {
+      height: 38px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--bg-card);
+      user-select: none;
+    }
+    .agent-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .agent-model-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      padding: 1px 6px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .agent-model-badge:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .agent-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .agent-icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, color 0.1s;
+    }
+    .agent-icon-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    .agent-top-bar {
+      padding: 6px 10px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .agent-select {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 11px;
+      padding: 2px 6px;
+      outline: none;
+    }
+    .agent-select:focus {
+      border-color: var(--accent);
+    }
+    .agent-messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .agent-empty-state {
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin: auto 0;
+    }
+    .agent-empty-icon {
+      font-size: 32px;
+      opacity: 0.8;
+    }
+    .agent-empty-text {
+      font-size: 12px;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+    .agent-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    .agent-chip {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      font-size: 10.5px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-mono);
+    }
+    .agent-chip:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .agent-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 95%;
+    }
+    .agent-msg.user {
+      align-self: flex-end;
+    }
+    .agent-msg.assistant {
+      align-self: flex-start;
+      width: 100%;
+    }
+    .agent-msg-bubble {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .agent-msg.user .agent-msg-bubble {
+      background: var(--accent);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+      white-space: pre-wrap;
+    }
+    .agent-msg.assistant .agent-msg-bubble {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-bottom-left-radius: 2px;
+      color: var(--text-primary);
+    }
+    .agent-msg.assistant .agent-msg-bubble .markdown-body {
+      font-size: 12px !important;
+      line-height: 1.5 !important;
+    }
+    .agent-msg.assistant .agent-msg-bubble .markdown-body h1,
+    .agent-msg.assistant .agent-msg-bubble .markdown-body h2,
+    .agent-msg.assistant .agent-msg-bubble .markdown-body h3 {
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .agent-msg.assistant .agent-msg-bubble .markdown-body p {
+      margin-bottom: 8px;
+    }
+    .agent-msg.assistant .agent-msg-bubble .markdown-body pre {
+      margin: 6px 0;
+      padding: 8px;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      font-size: 11px;
+    }
+    .agent-msg-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+      font-size: 10px;
+    }
+    .agent-msg-action-btn {
+      background: transparent;
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10.5px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .agent-msg-action-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .agent-input-container {
+      padding: 8px 10px 10px 10px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .agent-quick-cmds {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .agent-quick-cmd-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      border-radius: 10px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .agent-quick-cmd-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .agent-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 6px;
+    }
+    .agent-input-row:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .agent-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      line-height: 1.4;
+      min-height: 24px;
+      max-height: 140px;
+      padding: 2px 4px;
+    }
+    .agent-send-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 4px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+    .agent-send-btn:hover {
+      opacity: 0.9;
+    }
+    .agent-send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .agent-loading-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(137, 180, 250, 0.1);
+      border-radius: 4px;
+      align-self: flex-start;
+      margin-bottom: 4px;
+    }
+    .agent-spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(137, 180, 250, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: agent-spin 0.8s linear infinite;
+    }
+    @keyframes agent-spin {
+      to { transform: rotate(360deg); }
+    }
+    .agent-sidebar-resizer-left {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 5px;
+      cursor: ew-resize;
+      z-index: 10;
+    }
+    .agent-sidebar-resizer-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 5px;
+      cursor: ew-resize;
+      z-index: 10;
+    }
+
+    /* =========================================================================
        MARKDOWN BODY STYLES
        ========================================================================= */
     .markdown-body {
@@ -2418,6 +2793,11 @@
         🌐 Translate
       </button>
 
+      <!-- AI Agent Assistant Toggle -->
+      <button class="btn" id="btn-agent" title="AI Agent Assistant (Ctrl+Alt+A)">
+        🤖 AI Agent
+      </button>
+
       <!-- Vim Mode Toggle -->
       <button class="btn active" id="btn-vim-toggle" title="Toggle Vim Mode for Editor (Ctrl+Alt+V)" style="font-weight:700; color:var(--accent); font-size:11.5px; padding:4px 9px;">
         VIM
@@ -2506,6 +2886,65 @@
         <input type="text" id="toc-search-input" placeholder="Filter headings (↓/↑ or j/k to nav)..." spellcheck="false" autocomplete="off">
       </div>
       <div class="toc-list" id="toc-list" tabindex="0"></div>
+    </aside>
+
+    <!-- AI Agent Backdrop (for Floating Window Mode) -->
+    <div class="agent-floating-backdrop" id="agent-floating-backdrop" style="display:none;" onclick="AiAgent.close()"></div>
+
+    <!-- AI Agent Sidebar / Floating Window -->
+    <aside class="agent-sidebar" id="agent-sidebar" style="display:none;" tabindex="0">
+      <!-- Resizer handles for Side Tab Mode -->
+      <div class="agent-sidebar-resizer-left" id="agent-resizer-left" style="display:none;" title="Drag to resize sidebar width"></div>
+      <div class="agent-sidebar-resizer-right" id="agent-resizer-right" style="display:none;" title="Drag to resize sidebar width"></div>
+
+      <div class="agent-header">
+        <div class="agent-title">
+          <span>🤖 AI Assistant</span>
+          <span class="agent-model-badge" id="agent-model-badge" title="Click to open AI Agent Settings">gemini-2.5-flash</span>
+        </div>
+        <div class="agent-actions-group">
+          <button class="agent-icon-btn" id="btn-agent-new-chat" title="New Chat Session (+ New Chat)">＋</button>
+          <button class="agent-icon-btn" id="btn-agent-clear" title="Clear Messages in Current Chat">🗑️</button>
+          <button class="agent-icon-btn" id="btn-agent-settings" title="AI Agent Settings">⚙️</button>
+          <button class="agent-icon-btn" id="btn-agent-close" title="Close AI Assistant (Ctrl+Alt+A / Esc)">✕</button>
+        </div>
+      </div>
+
+      <div class="agent-top-bar">
+        <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:0;">
+          <span style="color:var(--text-muted); font-size:10px; flex-shrink:0;">Context:</span>
+          <select class="agent-select" id="agent-context-scope" title="Context Scope for AI">
+            <option value="current_file">📄 Current File</option>
+            <option value="all_open_files">📚 All Open Files</option>
+            <option value="no_context">💬 General (No Files)</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px; max-width:55%;">
+          <select class="agent-select" id="agent-session-select" style="max-width:130px;" title="Switch Chat Session"></select>
+        </div>
+      </div>
+
+      <div class="agent-messages-container" id="agent-messages">
+        <!-- Chat bubbles rendered dynamically -->
+      </div>
+
+      <div class="agent-loading-indicator" id="agent-loading" style="display:none;">
+        <div class="agent-spinner"></div>
+        <span id="agent-loading-text">AI is thinking...</span>
+      </div>
+
+      <div class="agent-input-container">
+        <div class="agent-quick-cmds">
+          <button class="agent-quick-cmd-btn" onclick="AiAgent.insertCommand('/summary')">/summary</button>
+          <button class="agent-quick-cmd-btn" onclick="AiAgent.insertCommand('/generate ')">/generate</button>
+          <button class="agent-quick-cmd-btn" onclick="AiAgent.insertCommand('/proofread')">/proofread</button>
+          <button class="agent-quick-cmd-btn" onclick="AiAgent.insertCommand('/explain')">/explain</button>
+        </div>
+        <div class="agent-input-row">
+          <textarea class="agent-textarea" id="agent-prompt-input" rows="1" placeholder="Ask AI, or type /summary... (Enter to send, Shift+Enter for newline)"></textarea>
+          <button class="agent-send-btn" id="btn-agent-send" title="Send message (Enter)">➤</button>
+        </div>
+      </div>
     </aside>
 
     <section class="preview-pane" id="preview-pane">
@@ -3275,6 +3714,172 @@
               <div id="offline-packs-list" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
                 <!-- Populated dynamically by TranslationService.renderPacksList() -->
               </div>
+            </div>
+          </div>
+
+          <!-- AI Agent Assistant Group -->
+          <div class="kb-group">
+            <div class="kb-group-title">
+              <span>🤖 AI Agent Assistant (智能助手与模型设置)</span>
+            </div>
+
+            <!-- Enable AI Agent -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Enable AI Agent</span>
+                <span class="kb-row-desc">Enable AI Agent toolbar button, sidebar/floating popup, and commands</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="enabled" id="kb-ai-enabled">
+                <option value="true">true (Enabled)</option>
+                <option value="false">false (Disabled)</option>
+              </select>
+            </div>
+
+            <!-- AI Provider -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">AI Provider</span>
+                <span class="kb-row-desc">Select AI platform or local engine</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="provider" id="kb-ai-provider" style="width:230px; text-align:left;">
+                <option value="gemini">Google Gemini (Recommended - Free &amp; Fast)</option>
+                <option value="openai">OpenAI (ChatGPT / GPT-4o)</option>
+                <option value="claude">Anthropic Claude</option>
+                <option value="deepseek">DeepSeek AI</option>
+                <option value="ollama">Ollama (100% Local)</option>
+                <option value="custom">Custom (OpenAI-compatible Endpoint)</option>
+              </select>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Model Name</span>
+                <span class="kb-row-desc">Default: gemini-2.5-flash (Fast &amp; high quality)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; width:260px;">
+                <input type="text" class="kb-input-box" data-cat="ai_agent" data-key="model" id="kb-ai-model" placeholder="gemini-2.5-flash" style="flex:1; text-align:left;">
+                <select id="kb-ai-model-presets" style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:4px; padding:4px 6px; font-size:11px; color:var(--text-main);">
+                  <option value="">Presets...</option>
+                  <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                  <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                  <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                  <option value="gpt-4o">gpt-4o</option>
+                  <option value="gpt-4o-mini">gpt-4o-mini</option>
+                  <option value="claude-3-5-sonnet-20241022">claude-3-5-sonnet</option>
+                  <option value="deepseek-chat">deepseek-chat</option>
+                  <option value="llama3.2">llama3.2 (Ollama)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- API Key Source Selection -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">API Key Source</span>
+                <span class="kb-row-desc">Read from Windows Environment Variable ($env:VAR) or enter directly</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="api_key_source" id="kb-ai-key-source" style="width:230px; text-align:left;">
+                <option value="env">System Environment Variable ($env)</option>
+                <option value="direct">Direct Key Input (Stored in AppData)</option>
+              </select>
+            </div>
+
+            <!-- Environment Variable Row -->
+            <div class="kb-row" id="kb-ai-env-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Environment Variable</span>
+                <span class="kb-row-desc">System variable holding your API key (e.g. GEMINI_API_KEY)</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:5px; width:280px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <input type="text" class="kb-input-box" data-cat="ai_agent" data-key="api_key_env" id="kb-ai-key-env" placeholder="GEMINI_API_KEY" style="flex:1; text-align:left;">
+                  <button type="button" class="btn btn-sm" id="btn-test-ai-env" style="padding:4px 9px; font-size:11px; white-space:nowrap; background:var(--bg-secondary); border:1px solid var(--border);" title="Test if environment variable exists">Test</button>
+                </div>
+                <div id="ai-env-status" style="display:none; font-size:10.5px; padding:3px 6px; border-radius:4px;"></div>
+              </div>
+            </div>
+
+            <!-- Direct Key Row -->
+            <div class="kb-row" id="kb-ai-direct-row" style="display:none;">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Direct API Key</span>
+                <span class="kb-row-desc">API Key stored securely in %APPDATA%\mdviewer\keybindings.json</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; width:280px;">
+                <input type="password" class="kb-input-box" data-cat="ai_agent" data-key="api_key_direct" id="kb-ai-key-direct" placeholder="AIzaSy... or sk-..." style="flex:1; text-align:left;">
+                <button type="button" class="btn btn-sm" id="btn-toggle-ai-key-visibility" style="padding:4px 8px; font-size:11px; background:var(--bg-secondary); border:1px solid var(--border);" title="Toggle show/hide">👁️</button>
+              </div>
+            </div>
+
+            <!-- Custom Endpoint (for Ollama or custom reverse-proxy) -->
+            <div class="kb-row" id="kb-ai-endpoint-row" style="display:none;">
+              <div class="kb-row-info">
+                <span class="kb-row-label">API Base / Endpoint</span>
+                <span class="kb-row-desc">Custom URL (e.g. http://localhost:11434/v1 for Ollama)</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="ai_agent" data-key="custom_endpoint" id="kb-ai-custom-endpoint" placeholder="http://localhost:11434/v1" style="width:280px; text-align:left;">
+            </div>
+
+            <!-- Display Mode -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Display Mode</span>
+                <span class="kb-row-desc">Side Tab (docked next to editor/TOC) or Floating Window (draggable)</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="mode" id="kb-ai-mode" style="width:230px; text-align:left;">
+                <option value="side_tab">Side Tab (Docked)</option>
+                <option value="floating_window">Floating Window (Popup)</option>
+              </select>
+            </div>
+
+            <!-- Side Tab Position -->
+            <div class="kb-row" id="kb-ai-pos-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Side Tab Position</span>
+                <span class="kb-row-desc">Dock AI Agent on Right or Left (co-exists flexibly with TOC)</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="side_tab.position" id="kb-ai-side-pos" style="width:230px; text-align:left;">
+                <option value="right">Right Side</option>
+                <option value="left">Left Side</option>
+              </select>
+            </div>
+
+            <!-- Side Tab Width % -->
+            <div class="kb-row" id="kb-ai-width-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Side Tab Width</span>
+                <span class="kb-row-desc">Width percentage of window (15% - 50%)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="number" min="15" max="50" class="kb-input-box" data-cat="ai_agent" data-key="side_tab.width_percent" placeholder="28" style="width:80px; text-align:left;">
+                <span style="font-size:11px; color:var(--text-muted);">%</span>
+              </div>
+            </div>
+
+            <!-- Default Scope -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Default Context Scope</span>
+                <span class="kb-row-desc">Document context included when sending prompts</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="default_scope" style="width:230px; text-align:left;">
+                <option value="current_file">📄 Current File (Active Document)</option>
+                <option value="all_open_files">📚 All Open Files (All Tabs)</option>
+                <option value="no_context">💬 General Chat (No File Context)</option>
+              </select>
+            </div>
+
+            <!-- Open on Startup -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Open on Startup</span>
+                <span class="kb-row-desc">Automatically open AI Assistant when MDViewer starts</span>
+              </div>
+              <select class="kb-input-box" data-cat="ai_agent" data-key="open_on_startup" style="width:230px; text-align:left;">
+                <option value="false">false (Manual Toggle Only)</option>
+                <option value="true">true (Auto-Open)</option>
+              </select>
             </div>
           </div>
         </div>
@@ -8797,6 +9402,737 @@
     };
 
     /* =========================================================================
+       AI AGENT CONTROLLER & CONVERSATION PERSISTENCE
+       ========================================================================= */
+    const AiAgent = {
+      app: null,
+      isOpen: false,
+      isGenerating: false,
+      currentReqId: null,
+      sessions: [],
+      activeSessionId: null,
+
+      getConfig() {
+        const kb = (this.app && this.app.keybindings && this.app.keybindings.ai_agent)
+          ? this.app.keybindings.ai_agent
+          : ((this.app && this.app.defaultKeybindings && this.app.defaultKeybindings.ai_agent) ? this.app.defaultKeybindings.ai_agent : {});
+        return {
+          enabled: kb.enabled !== false,
+          provider: kb.provider || 'gemini',
+          model: kb.model || 'gemini-2.5-flash',
+          api_key_source: kb.api_key_source || 'env',
+          api_key_env: kb.api_key_env || 'GEMINI_API_KEY',
+          api_key_direct: kb.api_key_direct || '',
+          custom_endpoint: kb.custom_endpoint || 'http://localhost:11434/v1',
+          mode: kb.mode || 'side_tab',
+          side_tab: Object.assign({ position: 'right', width_percent: 28 }, kb.side_tab || {}),
+          floating_window: Object.assign({ position: 'center', width_percent: 45, height_percent: 70 }, kb.floating_window || {}),
+          open_on_startup: !!kb.open_on_startup,
+          default_scope: kb.default_scope || 'current_file'
+        };
+      },
+
+      init(appInstance) {
+        this.app = appInstance;
+        const btnAgent = document.getElementById('btn-agent');
+        const btnClose = document.getElementById('btn-agent-close');
+        const btnNewChat = document.getElementById('btn-agent-new-chat');
+        const btnClear = document.getElementById('btn-agent-clear');
+        const btnSettings = document.getElementById('btn-agent-settings');
+        const btnSend = document.getElementById('btn-agent-send');
+        const promptInput = document.getElementById('agent-prompt-input');
+        const sessionSelect = document.getElementById('agent-session-select');
+        const scopeSelect = document.getElementById('agent-context-scope');
+        const modelBadge = document.getElementById('agent-model-badge');
+
+        if (btnAgent) {
+          btnAgent.addEventListener('click', () => this.toggle());
+        }
+        if (btnClose) {
+          btnClose.addEventListener('click', () => this.close());
+        }
+        if (btnNewChat) {
+          btnNewChat.addEventListener('click', () => this.newSession());
+        }
+        if (btnClear) {
+          btnClear.addEventListener('click', () => this.clearCurrentSession());
+        }
+        if (btnSettings) {
+          btnSettings.addEventListener('click', () => this.openSettings());
+        }
+        if (modelBadge) {
+          modelBadge.addEventListener('click', () => this.openSettings());
+        }
+        if (btnSend) {
+          btnSend.addEventListener('click', () => this.sendPrompt());
+        }
+        if (sessionSelect) {
+          sessionSelect.addEventListener('change', (e) => this.switchSession(e.target.value));
+        }
+        if (scopeSelect) {
+          scopeSelect.addEventListener('change', (e) => {
+            const s = this.getActiveSession();
+            if (s) {
+              s.scope = e.target.value;
+              this.saveChats();
+            }
+          });
+        }
+        if (promptInput) {
+          promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              this.sendPrompt();
+            } else if (e.key === 'Escape') {
+              if (this.isOpen) {
+                e.preventDefault();
+                this.close();
+              }
+            }
+          });
+          promptInput.addEventListener('input', () => {
+            promptInput.style.height = 'auto';
+            promptInput.style.height = Math.min(140, Math.max(24, promptInput.scrollHeight)) + 'px';
+          });
+        }
+
+        this.setupResizers();
+
+        // Load persisted chats from backend
+        this.app.sendIpc('get_ai_chats', {});
+
+        const cfg = this.getConfig();
+        if (cfg.open_on_startup) {
+          setTimeout(() => {
+            if (this.hasValidConfig(false)) {
+              this.open();
+            }
+          }, 350);
+        }
+      },
+
+      setupResizers() {
+        const sidebar = document.getElementById('agent-sidebar');
+        const resizerL = document.getElementById('agent-resizer-left');
+        const resizerR = document.getElementById('agent-resizer-right');
+        if (!sidebar || !resizerL || !resizerR) return;
+
+        let isResizing = false;
+        let startX = 0;
+        let startW = 0;
+
+        const onMouseDown = (e, isLeft) => {
+          isResizing = true;
+          startX = e.clientX;
+          startW = sidebar.getBoundingClientRect().width;
+          document.body.style.cursor = 'ew-resize';
+          document.body.style.userSelect = 'none';
+
+          const onMouseMove = (moveEvt) => {
+            if (!isResizing) return;
+            const deltaX = isLeft ? (startX - moveEvt.clientX) : (moveEvt.clientX - startX);
+            const newW = Math.max(220, Math.min(window.innerWidth * 0.65, startW + deltaX));
+            sidebar.style.width = `${newW}px`;
+          };
+
+          const onMouseUp = () => {
+            isResizing = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+          };
+
+          window.addEventListener('mousemove', onMouseMove);
+          window.addEventListener('mouseup', onMouseUp);
+        };
+
+        resizerL.addEventListener('mousedown', (e) => onMouseDown(e, true));
+        resizerR.addEventListener('mousedown', (e) => onMouseDown(e, false));
+      },
+
+      openSettings() {
+        if (this.app) {
+          this.app.openKeybindingsModal();
+          setTimeout(() => {
+            const el = document.getElementById('kb-ai-provider');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 150);
+        }
+      },
+
+      hasValidConfig(showPrompt = true) {
+        const cfg = this.getConfig();
+        const isLocal = cfg.provider === 'ollama' || (cfg.model && cfg.model.toLowerCase().includes('ollama')) || (cfg.custom_endpoint && cfg.custom_endpoint.includes('localhost'));
+        if (isLocal) return true;
+
+        if (cfg.api_key_source === 'direct') {
+          if (!cfg.api_key_direct || !cfg.api_key_direct.trim()) {
+            if (showPrompt) {
+              if (confirm('AI Agent requires an API Key.\n\nWould you like to open Settings to enter your API key or configure your environment variable now?')) {
+                this.openSettings();
+              }
+            }
+            return false;
+          }
+          return true;
+        } else {
+          if (!cfg.api_key_env || !cfg.api_key_env.trim()) {
+            if (showPrompt) {
+              if (confirm('AI Agent environment variable is not configured.\n\nWould you like to open Settings to configure your environment variable now?')) {
+                this.openSettings();
+              }
+            }
+            return false;
+          }
+          return true;
+        }
+      },
+
+      applyConfig() {
+        this.applyLayout();
+        const cfg = this.getConfig();
+        const modelBadge = document.getElementById('agent-model-badge');
+        if (modelBadge) {
+          modelBadge.innerText = cfg.model || 'gemini-2.5-flash';
+        }
+      },
+
+      applyLayout() {
+        const sidebar = document.getElementById('agent-sidebar');
+        const backdrop = document.getElementById('agent-floating-backdrop');
+        const resizerL = document.getElementById('agent-resizer-left');
+        const resizerR = document.getElementById('agent-resizer-right');
+        if (!sidebar) return;
+
+        const cfg = this.getConfig();
+        const mode = cfg.mode;
+        sidebar.classList.remove('agent-mode-side', 'agent-mode-floating', 'pos-left', 'pos-right', 'pos-center');
+
+        const modelBadge = document.getElementById('agent-model-badge');
+        if (modelBadge) modelBadge.innerText = cfg.model || 'gemini-2.5-flash';
+
+        if (mode === 'floating_window') {
+          sidebar.classList.add('agent-mode-floating');
+          const floatCfg = cfg.floating_window;
+          const w = Math.min(95, Math.max(25, floatCfg.width_percent || 45));
+          const h = Math.min(95, Math.max(25, floatCfg.height_percent || 70));
+          const pos = floatCfg.position || 'center';
+
+          sidebar.style.width = `${w}%`;
+          sidebar.style.height = `${h}%`;
+          sidebar.style.order = '';
+
+          if (pos === 'top') {
+            sidebar.style.left = '50%';
+            sidebar.style.top = 'calc(var(--titlebar-h) + var(--toolbar-h) + 20px)';
+            sidebar.style.bottom = 'auto';
+            sidebar.style.transform = 'translateX(-50%)';
+          } else if (pos === 'bottom') {
+            sidebar.style.left = '50%';
+            sidebar.style.top = 'auto';
+            sidebar.style.bottom = 'calc(var(--statusbar-h) + 20px)';
+            sidebar.style.transform = 'translateX(-50%)';
+          } else {
+            sidebar.classList.add('pos-center');
+            sidebar.style.left = '50%';
+            sidebar.style.top = '50%';
+            sidebar.style.bottom = 'auto';
+            sidebar.style.transform = 'translate(-50%, -50%)';
+          }
+
+          if (resizerL) resizerL.style.display = 'none';
+          if (resizerR) resizerR.style.display = 'none';
+
+          if (backdrop) {
+            backdrop.style.display = this.isOpen ? 'block' : 'none';
+          }
+        } else {
+          // Side Tab mode
+          sidebar.classList.add('agent-mode-side');
+          const sideCfg = cfg.side_tab;
+          const w = Math.min(60, Math.max(15, sideCfg.width_percent || 28));
+          const pos = sideCfg.position || 'right';
+
+          sidebar.style.width = `${w}%`;
+          sidebar.style.height = '100%';
+          sidebar.style.position = '';
+          sidebar.style.left = '';
+          sidebar.style.top = '';
+          sidebar.style.bottom = '';
+          sidebar.style.transform = '';
+
+          if (pos === 'left') {
+            sidebar.classList.add('pos-left');
+            sidebar.style.order = '-2';
+            if (resizerL) resizerL.style.display = 'none';
+            if (resizerR) resizerR.style.display = 'block';
+          } else {
+            sidebar.classList.add('pos-right');
+            sidebar.style.order = '11';
+            if (resizerL) resizerL.style.display = 'block';
+            if (resizerR) resizerR.style.display = 'none';
+          }
+
+          if (backdrop) {
+            backdrop.style.display = 'none';
+          }
+        }
+      },
+
+      toggle() {
+        if (this.isOpen) this.close();
+        else this.open();
+      },
+
+      open() {
+        if (!this.hasValidConfig(true)) return;
+
+        this.isOpen = true;
+        const cfg = this.getConfig();
+        if (cfg.mode === 'side_tab' && this.app && this.app.mode === 'edit') {
+          this.app.setMode('split');
+        }
+
+        this.applyLayout();
+        const sidebar = document.getElementById('agent-sidebar');
+        const btn = document.getElementById('btn-agent');
+        if (sidebar) sidebar.style.display = 'flex';
+        if (btn) btn.classList.add('active');
+
+        this.renderSessionSelect();
+        this.renderMessages();
+
+        const promptInput = document.getElementById('agent-prompt-input');
+        if (promptInput) {
+          setTimeout(() => promptInput.focus(), 60);
+        }
+      },
+
+      close() {
+        this.isOpen = false;
+        const sidebar = document.getElementById('agent-sidebar');
+        const backdrop = document.getElementById('agent-floating-backdrop');
+        const btn = document.getElementById('btn-agent');
+        if (sidebar) sidebar.style.display = 'none';
+        if (backdrop) backdrop.style.display = 'none';
+        if (btn) btn.classList.remove('active');
+      },
+
+      onChatsDataReceived(jsonStr) {
+        try {
+          const data = JSON.parse(jsonStr || '[]');
+          if (Array.isArray(data) && data.length > 0) {
+            this.sessions = data;
+            this.activeSessionId = this.sessions[0].id;
+          } else {
+            this.initDefaultSession();
+          }
+        } catch (_) {
+          this.initDefaultSession();
+        }
+        this.renderSessionSelect();
+        this.renderMessages();
+      },
+
+      initDefaultSession() {
+        const cfg = this.getConfig();
+        const defaultSession = {
+          id: 'chat_' + Date.now(),
+          title: 'Chat 1',
+          scope: cfg.default_scope || 'current_file',
+          messages: []
+        };
+        this.sessions = [defaultSession];
+        this.activeSessionId = defaultSession.id;
+      },
+
+      getActiveSession() {
+        let s = this.sessions.find(x => x.id === this.activeSessionId);
+        if (!s) {
+          if (this.sessions.length === 0) {
+            this.initDefaultSession();
+          }
+          s = this.sessions[0];
+          this.activeSessionId = s.id;
+        }
+        return s;
+      },
+
+      saveChats() {
+        if (this.app) {
+          this.app.sendIpc('save_ai_chats', { json: JSON.stringify(this.sessions, null, 2) });
+        }
+      },
+
+      newSession() {
+        const cfg = this.getConfig();
+        const num = this.sessions.length + 1;
+        const s = {
+          id: 'chat_' + Date.now(),
+          title: `Chat ${num}`,
+          scope: cfg.default_scope || 'current_file',
+          messages: []
+        };
+        this.sessions.unshift(s);
+        this.activeSessionId = s.id;
+        this.renderSessionSelect();
+        this.renderMessages();
+        this.saveChats();
+        const promptInput = document.getElementById('agent-prompt-input');
+        if (promptInput) promptInput.focus();
+      },
+
+      switchSession(sessionId) {
+        this.activeSessionId = sessionId;
+        const s = this.getActiveSession();
+        const scopeSelect = document.getElementById('agent-context-scope');
+        if (scopeSelect && s) {
+          scopeSelect.value = s.scope || 'current_file';
+        }
+        this.renderMessages();
+      },
+
+      clearCurrentSession() {
+        const s = this.getActiveSession();
+        if (!s) return;
+        if (s.messages.length === 0) return;
+        if (confirm(`Clear all messages in "${s.title}"?`)) {
+          s.messages = [];
+          this.renderMessages();
+          this.saveChats();
+        }
+      },
+
+      renderSessionSelect() {
+        const select = document.getElementById('agent-session-select');
+        if (!select) return;
+        select.innerHTML = '';
+        this.sessions.forEach((s) => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          const count = s.messages ? s.messages.length : 0;
+          opt.innerText = `${s.title} (${count})`;
+          if (s.id === this.activeSessionId) opt.selected = true;
+          select.appendChild(opt);
+        });
+      },
+
+      renderMessages() {
+        const container = document.getElementById('agent-messages');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const s = this.getActiveSession();
+        if (!s || !s.messages || s.messages.length === 0) {
+          container.innerHTML = `
+            <div class="agent-empty-state">
+              <div class="agent-empty-icon">🤖</div>
+              <div style="font-weight:600; font-size:13px; color:var(--text-primary);">How can I help you today?</div>
+              <div class="agent-empty-text">I can summarize your document, generate content, proofread markdown, or answer technical questions.</div>
+              <div class="agent-chips">
+                <span class="agent-chip" onclick="AiAgent.insertCommand('/summary')">📑 /summary</span>
+                <span class="agent-chip" onclick="AiAgent.insertCommand('/generate ')">✍️ /generate</span>
+                <span class="agent-chip" onclick="AiAgent.insertCommand('/proofread')">🔍 /proofread</span>
+                <span class="agent-chip" onclick="AiAgent.insertCommand('/explain')">💡 /explain</span>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        s.messages.forEach((msg, idx) => {
+          const msgEl = document.createElement('div');
+          msgEl.className = `agent-msg ${msg.role}`;
+
+          const bubble = document.createElement('div');
+          bubble.className = 'agent-msg-bubble';
+
+          if (msg.role === 'user') {
+            bubble.innerText = msg.content;
+          } else {
+            // Render assistant markdown with SimpleMarkdown
+            const renderedHtml = (typeof SimpleMarkdown !== 'undefined')
+              ? SimpleMarkdown.render(msg.content)
+              : msg.content.replace(/\n/g, '<br>');
+            bubble.innerHTML = `<div class="markdown-body">${renderedHtml}</div>`;
+          }
+
+          msgEl.appendChild(bubble);
+
+          // Actions toolbar for assistant messages
+          if (msg.role === 'assistant') {
+            const actions = document.createElement('div');
+            actions.className = 'agent-msg-actions';
+            actions.innerHTML = `
+              <button class="agent-msg-action-btn" title="Copy text to clipboard" onclick="AiAgent.copyMessage(${idx})">📋 Copy</button>
+              <button class="agent-msg-action-btn" title="Replace entire active document" onclick="AiAgent.replaceDoc(${idx})">📝 Replace Doc</button>
+              <button class="agent-msg-action-btn" title="Insert at cursor or end of file" onclick="AiAgent.insertDoc(${idx})">📥 Insert</button>
+              <button class="agent-msg-action-btn" title="Open response in new document tab" onclick="AiAgent.openNewTab(${idx})">📑 New Tab</button>
+            `;
+            msgEl.appendChild(actions);
+          }
+
+          container.appendChild(msgEl);
+        });
+
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+      },
+
+      insertCommand(cmd) {
+        const input = document.getElementById('agent-prompt-input');
+        if (input) {
+          input.value = cmd;
+          input.focus();
+          input.style.height = 'auto';
+          input.style.height = Math.min(140, Math.max(24, input.scrollHeight)) + 'px';
+        }
+      },
+
+      copyMessage(index) {
+        const s = this.getActiveSession();
+        if (s && s.messages[index]) {
+          navigator.clipboard.writeText(s.messages[index].content).then(() => {
+            if (this.app) this.app.showToast('Copied to clipboard');
+          });
+        }
+      },
+
+      replaceDoc(index) {
+        const s = this.getActiveSession();
+        if (!s || !s.messages[index]) return;
+        const text = s.messages[index].content;
+        if (!confirm('Replace current document content with AI response?')) return;
+        if (this.app && this.app.files) {
+          const file = this.app.files[this.app.activeFileIndex];
+          if (file) {
+            file.content = text;
+            file.isDirty = true;
+            this.app.editorEl.value = text;
+            this.app.renderMarkdown();
+            this.app.renderTabs();
+            this.app.showToast('Document replaced');
+          }
+        }
+      },
+
+      insertDoc(index) {
+        const s = this.getActiveSession();
+        if (!s || !s.messages[index]) return;
+        const text = s.messages[index].content;
+        if (this.app && this.app.files) {
+          const file = this.app.files[this.app.activeFileIndex];
+          if (file) {
+            const ed = this.app.editorEl;
+            const start = ed.selectionStart || ed.value.length;
+            const end = ed.selectionEnd || ed.value.length;
+            const cur = ed.value;
+            const updated = cur.substring(0, start) + '\n\n' + text + '\n\n' + cur.substring(end);
+            file.content = updated;
+            file.isDirty = true;
+            ed.value = updated;
+            this.app.renderMarkdown();
+            this.app.renderTabs();
+            this.app.showToast('Inserted into document');
+          }
+        }
+      },
+
+      openNewTab(index) {
+        const s = this.getActiveSession();
+        if (!s || !s.messages[index]) return;
+        const text = s.messages[index].content;
+        if (this.app) {
+          this.app.openNewFile(null, 'AI_Generated.md', text);
+          this.app.showToast('Opened in new tab');
+        }
+      },
+
+      buildContextPrompt(scope) {
+        if (scope === 'no_context' || !this.app) return '';
+        if (scope === 'all_open_files') {
+          let docs = [];
+          this.app.files.forEach((f, i) => {
+            const isCur = i === this.app.activeFileIndex ? ' (Active Document)' : '';
+            docs.push(`### File: ${f.name}${isCur}\n\`\`\`markdown\n${f.content || ''}\n\`\`\``);
+          });
+          return `Here are the currently open Markdown documents in the workspace:\n\n${docs.join('\n\n')}\n\n`;
+        } else {
+          // current_file
+          const file = this.app.files[this.app.activeFileIndex];
+          if (!file) return '';
+          return `Here is the current Markdown document (${file.name}):\n\n\`\`\`markdown\n${file.content || ''}\n\`\`\``;
+        }
+      },
+
+      sendPrompt() {
+        if (this.isGenerating) return;
+        const input = document.getElementById('agent-prompt-input');
+        if (!input) return;
+        const rawText = input.value.trim();
+        if (!rawText) return;
+
+        input.value = '';
+        input.style.height = '24px';
+
+        const s = this.getActiveSession();
+        if (!s) return;
+
+        if (s.messages.length === 0) {
+          s.title = rawText.length > 22 ? rawText.substring(0, 22) + '...' : rawText;
+          this.renderSessionSelect();
+        }
+
+        s.messages.push({
+          role: 'user',
+          content: rawText,
+          timestamp: Date.now()
+        });
+        this.renderMessages();
+        this.saveChats();
+
+        let effectiveUserPrompt = rawText;
+        if (rawText.startsWith('/summary')) {
+          const extra = rawText.substring(8).trim();
+          effectiveUserPrompt = extra
+            ? `Please provide a clear and structured summary of the document, focusing on: ${extra}`
+            : `Please provide a comprehensive summary of this markdown document, including key points, outline, and notable takeaways.`;
+        } else if (rawText.startsWith('/proofread')) {
+          effectiveUserPrompt = `Please proofread this document, identify typos and grammar issues, suggest improvements, and output the revised version.`;
+        } else if (rawText.startsWith('/explain')) {
+          const topic = rawText.substring(8).trim();
+          effectiveUserPrompt = topic
+            ? `Please explain the following concept based on the document: ${topic}`
+            : `Please explain the key architecture, concepts, and ideas presented in this document.`;
+        } else if (rawText.startsWith('/generate')) {
+          const prompt = rawText.substring(9).trim();
+          effectiveUserPrompt = `Please generate high-quality, clean markdown content according to these requirements: ${prompt || 'Continue writing or expanding the document with relevant sections'}`;
+        }
+
+        const scope = s.scope || 'current_file';
+        const contextStr = this.buildContextPrompt(scope);
+
+        const systemPrompt = "You are an intelligent, helpful AI assistant built directly into MDViewer, a lightweight and powerful Markdown viewer and editor. You produce clear, well-structured, formatted Markdown responses. When generating code, diagrams (Mermaid), or documents, use appropriate markdown fences.";
+
+        const messagesPayload = [];
+        messagesPayload.push({
+          role: 'system',
+          content: systemPrompt + (contextStr ? `\n\n${contextStr}` : '')
+        });
+
+        s.messages.forEach((m, idx) => {
+          if (idx === s.messages.length - 1) {
+            messagesPayload.push({
+              role: 'user',
+              content: effectiveUserPrompt
+            });
+          } else {
+            messagesPayload.push({
+              role: m.role,
+              content: m.content
+            });
+          }
+        });
+
+        const cfg = this.getConfig();
+        const reqId = 'req_' + Date.now();
+        this.currentReqId = reqId;
+        this.isGenerating = true;
+
+        const loadingEl = document.getElementById('agent-loading');
+        if (loadingEl) loadingEl.style.display = 'flex';
+        const sendBtn = document.getElementById('btn-agent-send');
+        if (sendBtn) sendBtn.disabled = true;
+
+        this.app.sendIpc('ai_chat', {
+          model: cfg.model,
+          api_key_source: cfg.api_key_source,
+          api_key_env: cfg.api_key_env,
+          api_key_direct: cfg.api_key_direct,
+          api_base: (cfg.provider === 'ollama' || cfg.provider === 'custom') ? cfg.custom_endpoint : null,
+          messages_json: JSON.stringify(messagesPayload),
+          temperature: 0.7,
+          req_id: reqId
+        });
+      },
+
+      onChatResponse(data) {
+        this.isGenerating = false;
+        const loadingEl = document.getElementById('agent-loading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        const sendBtn = document.getElementById('btn-agent-send');
+        if (sendBtn) sendBtn.disabled = false;
+
+        let payload = {};
+        if (data.json) {
+          try { payload = JSON.parse(data.json); } catch (_) {}
+        }
+
+        const s = this.getActiveSession();
+        if (!s) return;
+
+        if (payload.error || data.message) {
+          const errText = payload.error || data.message || 'Unknown AI error';
+          s.messages.push({
+            role: 'assistant',
+            content: `⚠️ **AI Request Error:**\n\n${errText}`,
+            timestamp: Date.now()
+          });
+        } else if (payload.text || data.content) {
+          s.messages.push({
+            role: 'assistant',
+            content: payload.text || data.content,
+            timestamp: Date.now()
+          });
+        }
+
+        this.renderSessionSelect();
+        this.renderMessages();
+        this.saveChats();
+      },
+
+      testEnvVar() {
+        const input = document.getElementById('kb-ai-key-env');
+        const varName = input ? input.value.trim() : 'GEMINI_API_KEY';
+        const statusEl = document.getElementById('ai-env-status');
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.background = 'var(--bg-tertiary)';
+          statusEl.style.color = 'var(--text-muted)';
+          statusEl.innerText = `Checking $env:${varName}...`;
+        }
+        if (this.app) {
+          this.app.sendIpc('test_ai_env_var', { var_name: varName });
+        }
+      },
+
+      onEnvVarResult(data) {
+        const statusEl = document.getElementById('ai-env-status');
+        if (!statusEl) return;
+        let payload = {};
+        if (data.json) {
+          try { payload = JSON.parse(data.json); } catch (_) {}
+        }
+
+        statusEl.style.display = 'block';
+        if (payload.status === 'ok') {
+          statusEl.style.background = 'rgba(46, 160, 67, 0.15)';
+          statusEl.style.color = '#3fb950';
+          statusEl.innerText = `✓ Found: ${payload.var_name} (${payload.preview})`;
+        } else if (payload.status === 'empty') {
+          statusEl.style.background = 'rgba(210, 153, 34, 0.15)';
+          statusEl.style.color = '#d29922';
+          statusEl.innerText = `⚠️ Found but empty: ${payload.var_name}`;
+        } else {
+          statusEl.style.background = 'rgba(248, 81, 73, 0.15)';
+          statusEl.style.color = '#f85149';
+          statusEl.innerText = `✕ Not found: ${payload.var_name}`;
+        }
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -8870,6 +10206,27 @@
           show_selection_button: true,
           hotkey: "Ctrl+Alt+T"
         },
+        ai_agent: {
+          enabled: true,
+          provider: "gemini",
+          model: "gemini-2.5-flash",
+          api_key_source: "env",
+          api_key_env: "GEMINI_API_KEY",
+          api_key_direct: "",
+          custom_endpoint: "http://localhost:11434/v1",
+          mode: "side_tab",
+          side_tab: {
+            position: "right",
+            width_percent: 28
+          },
+          floating_window: {
+            position: "center",
+            width_percent: 45,
+            height_percent: 70
+          },
+          open_on_startup: false,
+          default_scope: "current_file"
+        },
         settings: {
           middle_click_close_tab: true,
           is_copy_to_yank: true,
@@ -8938,6 +10295,27 @@
           popup_width: 440,
           show_selection_button: true,
           hotkey: "Ctrl+Alt+T"
+        },
+        ai_agent: {
+          enabled: true,
+          provider: "gemini",
+          model: "gemini-2.5-flash",
+          api_key_source: "env",
+          api_key_env: "GEMINI_API_KEY",
+          api_key_direct: "",
+          custom_endpoint: "http://localhost:11434/v1",
+          mode: "side_tab",
+          side_tab: {
+            position: "right",
+            width_percent: 28
+          },
+          floating_window: {
+            position: "center",
+            width_percent: 45,
+            height_percent: 70
+          },
+          open_on_startup: false,
+          default_scope: "current_file"
         },
         settings: {
           middle_click_close_tab: true,
@@ -9178,6 +10556,7 @@
         TranslationService.init(this);
         TranslationPopover.init(this);
         DocTranslator.init(this);
+        AiAgent.init(this);
         this.applyTheme(this.keybindings && this.keybindings.theme ? this.keybindings.theme : this.defaultKeybindings.theme);
         this.applyFonts(this.keybindings && this.keybindings.fonts ? this.keybindings.fonts : this.defaultKeybindings.fonts);
 
@@ -9320,6 +10699,24 @@
                   const packs = JSON.parse(data.json);
                   TranslationService.onPacksListReceived(packs);
                 } catch (_) {}
+              }
+              break;
+            case 'ai_chats_data':
+              if (typeof AiAgent !== 'undefined') {
+                AiAgent.onChatsDataReceived(data.json);
+              }
+              break;
+            case 'ai_chats_saved':
+              // saved acknowledgment
+              break;
+            case 'ai_env_var_result':
+              if (typeof AiAgent !== 'undefined') {
+                AiAgent.onEnvVarResult(data);
+              }
+              break;
+            case 'ai_chat_response':
+              if (typeof AiAgent !== 'undefined') {
+                AiAgent.onChatResponse(data);
               }
               break;
             case 'error':
@@ -9812,6 +11209,15 @@
           if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'v' || e.key === 'V')) {
             e.preventDefault();
             VimMode.toggle();
+            return;
+          }
+
+          // Global shortcut: Ctrl+Alt+A toggles AI Agent assistant
+          if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
+            e.preventDefault();
+            if (typeof AiAgent !== 'undefined') {
+              AiAgent.toggle();
+            }
             return;
           }
 
@@ -10349,10 +11755,40 @@
         if (offlineMgr) offlineMgr.style.display = (provider === 'offline') ? 'flex' : 'none';
       },
 
+      updateAiFieldsVisibility() {
+        const provSelect = document.getElementById('kb-ai-provider');
+        const sourceSelect = document.getElementById('kb-ai-key-source');
+        const modeSelect = document.getElementById('kb-ai-mode');
+        if (!provSelect) return;
+
+        const provider = provSelect.value;
+        const source = sourceSelect ? sourceSelect.value : 'env';
+        const mode = modeSelect ? modeSelect.value : 'side_tab';
+
+        const envRow = document.getElementById('kb-ai-env-row');
+        const directRow = document.getElementById('kb-ai-direct-row');
+        const endpointRow = document.getElementById('kb-ai-endpoint-row');
+        const posRow = document.getElementById('kb-ai-pos-row');
+        const widthRow = document.getElementById('kb-ai-width-row');
+
+        // Key source
+        if (envRow) envRow.style.display = (source === 'env') ? 'flex' : 'none';
+        if (directRow) directRow.style.display = (source === 'direct') ? 'flex' : 'none';
+
+        // Custom endpoint
+        if (endpointRow) {
+          endpointRow.style.display = (provider === 'ollama' || provider === 'custom') ? 'flex' : 'none';
+        }
+
+        // Side tab vs floating
+        if (posRow) posRow.style.display = (mode === 'side_tab') ? 'flex' : 'none';
+        if (widthRow) widthRow.style.display = (mode === 'side_tab') ? 'flex' : 'none';
+      },
+
       loadKeybindingsJson(jsonStr) {
         try {
           const parsed = JSON.parse(jsonStr);
-          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.fonts || parsed.translation || parsed.settings)) {
+          if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.fonts || parsed.translation || parsed.ai_agent || parsed.settings)) {
             this.keybindings = parsed;
             if (this.keybindings.theme) {
               this.applyTheme(this.keybindings.theme);
@@ -10362,6 +11798,9 @@
             }
             if (typeof TableOfContents !== 'undefined') {
               TableOfContents.applyLayout();
+            }
+            if (typeof AiAgent !== 'undefined') {
+              AiAgent.applyConfig();
             }
           }
         } catch (e) {
@@ -10375,6 +11814,9 @@
           }
           if (typeof TableOfContents !== 'undefined') {
             TableOfContents.applyLayout();
+          }
+          if (typeof AiAgent !== 'undefined') {
+            AiAgent.applyConfig();
           }
         }
       },
@@ -10405,6 +11847,7 @@
         this.populateKbFields();
         this.updateTocFieldsVisibility();
         this.updateTransFieldsVisibility();
+        this.updateAiFieldsVisibility();
         this.switchKbTab('visual');
         if (this.kbModalEl) this.kbModalEl.classList.add('show');
       },
@@ -10482,6 +11925,7 @@
         });
         this.updateTocFieldsVisibility();
         this.updateTransFieldsVisibility();
+        this.updateAiFieldsVisibility();
         const popupPresetSelect = document.getElementById('kb-trans-popup-preset');
         if (popupPresetSelect && kb.translation && kb.translation.popup_width) {
           const w = parseInt(kb.translation.popup_width, 10);
@@ -10490,6 +11934,9 @@
         }
         if (typeof TranslationPopover !== 'undefined') {
           TranslationPopover.applyPopupWidth();
+        }
+        if (typeof AiAgent !== 'undefined') {
+          AiAgent.applyConfig();
         }
         if (kb.theme) {
           this.applyTheme(kb.theme);
@@ -10509,6 +11956,7 @@
         if (!kb.theme) kb.theme = JSON.parse(JSON.stringify(this.defaultKeybindings.theme));
         if (!kb.fonts) kb.fonts = JSON.parse(JSON.stringify(this.defaultKeybindings.fonts || {}));
         if (!kb.translation) kb.translation = JSON.parse(JSON.stringify(this.defaultKeybindings.translation || {}));
+        if (!kb.ai_agent) kb.ai_agent = JSON.parse(JSON.stringify(this.defaultKeybindings.ai_agent || {}));
         if (!kb.settings) kb.settings = {};
 
         const inputs = document.querySelectorAll('.kb-input-box');
@@ -10570,11 +12018,15 @@
           });
           this.updateTocFieldsVisibility();
           this.updateTransFieldsVisibility();
+          this.updateAiFieldsVisibility();
           if (parsed.theme) {
             this.applyTheme(parsed.theme);
           }
           if (parsed.fonts) {
             this.applyFonts(parsed.fonts);
+          }
+          if (typeof AiAgent !== 'undefined') {
+            AiAgent.applyConfig();
           }
         } catch (_) {
           // If raw json is currently invalid during switch, retain current values
@@ -10612,6 +12064,9 @@
         }
         if (typeof TranslationPopover !== 'undefined') {
           TranslationPopover.applyPopupWidth();
+        }
+        if (typeof AiAgent !== 'undefined') {
+          AiAgent.applyConfig();
         }
         this.sendIpc('save_keybindings', { json: JSON.stringify(kbToSave, null, 2) });
       },
@@ -10969,6 +12424,69 @@
                 const match = Array.from(popupPresetSelect.options).find(o => parseInt(o.value, 10) === val);
                 popupPresetSelect.value = match ? match.value : '';
               }
+            }
+          });
+        }
+
+        // AI Agent dynamic fields visibility & controls
+        const aiProvEl = document.getElementById('kb-ai-provider');
+        if (aiProvEl) {
+          aiProvEl.addEventListener('change', () => {
+            const modelInput = document.getElementById('kb-ai-model');
+            const prov = aiProvEl.value;
+            if (modelInput) {
+              if (prov === 'gemini') modelInput.value = 'gemini-2.5-flash';
+              else if (prov === 'openai') modelInput.value = 'gpt-4o';
+              else if (prov === 'claude') modelInput.value = 'claude-3-5-sonnet-20241022';
+              else if (prov === 'deepseek') modelInput.value = 'deepseek-chat';
+              else if (prov === 'ollama') modelInput.value = 'llama3.2';
+              modelInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            this.updateAiFieldsVisibility();
+          });
+        }
+
+        const aiKeySourceEl = document.getElementById('kb-ai-key-source');
+        if (aiKeySourceEl) {
+          aiKeySourceEl.addEventListener('change', () => {
+            this.updateAiFieldsVisibility();
+          });
+        }
+
+        const aiModeEl = document.getElementById('kb-ai-mode');
+        if (aiModeEl) {
+          aiModeEl.addEventListener('change', () => {
+            this.updateAiFieldsVisibility();
+          });
+        }
+
+        const aiPresetsSelect = document.getElementById('kb-ai-model-presets');
+        if (aiPresetsSelect) {
+          aiPresetsSelect.addEventListener('change', () => {
+            const val = aiPresetsSelect.value;
+            const modelInput = document.getElementById('kb-ai-model');
+            if (val && modelInput) {
+              modelInput.value = val;
+              modelInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          });
+        }
+
+        const btnTestAiEnv = document.getElementById('btn-test-ai-env');
+        if (btnTestAiEnv) {
+          btnTestAiEnv.addEventListener('click', () => {
+            if (typeof AiAgent !== 'undefined') {
+              AiAgent.testEnvVar();
+            }
+          });
+        }
+
+        const btnToggleAiKey = document.getElementById('btn-toggle-ai-key-visibility');
+        if (btnToggleAiKey) {
+          btnToggleAiKey.addEventListener('click', () => {
+            const keyInput = document.getElementById('kb-ai-key-direct');
+            if (keyInput) {
+              keyInput.type = (keyInput.type === 'password') ? 'text' : 'password';
             }
           });
         }

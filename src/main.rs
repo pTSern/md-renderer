@@ -37,6 +37,15 @@ struct IpcRequest {
     provider: Option<String>,
     pack_name: Option<String>,
     req_id: Option<String>,
+    // AI Agent fields
+    model: Option<String>,
+    api_key_source: Option<String>,
+    api_key_env: Option<String>,
+    api_key_direct: Option<String>,
+    api_base: Option<String>,
+    var_name: Option<String>,
+    messages_json: Option<String>,
+    temperature: Option<f64>,
 }
 
 #[derive(Debug, Serialize)]
@@ -431,6 +440,312 @@ fn do_translation(provider: &str, url: &str, api_key: &str, query: &str, src: &s
         }
 
         (None, err)
+    }
+}
+
+fn get_chats_dir() -> PathBuf {
+    if let Ok(appdata) = std::env::var("APPDATA") {
+        let dir = PathBuf::from(appdata).join("mdviewer").join("chats");
+        let _ = fs::create_dir_all(&dir);
+        dir
+    } else if let Ok(local) = std::env::var("LOCALAPPDATA") {
+        let dir = PathBuf::from(local).join("mdviewer").join("chats");
+        let _ = fs::create_dir_all(&dir);
+        dir
+    } else {
+        let dir = PathBuf::from("chats");
+        let _ = fs::create_dir_all(&dir);
+        dir
+    }
+}
+
+fn execute_curl_post(url: &str, headers: &[(&str, &str)], body_json: &str, timeout_secs: u32) -> Result<String, String> {
+    #[cfg(target_os = "windows")]
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+    let mut cmd = std::process::Command::new("curl.exe");
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+
+    cmd.arg("-s")
+        .arg("-m").arg(timeout_secs.to_string())
+        .arg("-X").arg("POST");
+
+    for (k, v) in headers {
+        cmd.arg("-H").arg(format!("{}: {}", k, v));
+    }
+
+    cmd.arg("--data-binary").arg("@-")
+        .arg(url)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+
+    let mut child = cmd.spawn().map_err(|e| format!("Failed to spawn curl: {}", e))?;
+
+    if let Some(mut stdin) = child.stdin.take() {
+        use std::io::Write;
+        let _ = stdin.write_all(body_json.as_bytes());
+    }
+
+    let output = child.wait_with_output().map_err(|e| format!("Failed to wait on curl: {}", e))?;
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+
+    if output.status.success() {
+        Ok(stdout)
+    } else {
+        Err(if !stderr.is_empty() { stderr } else if !stdout.is_empty() { stdout } else { format!("curl exited with code {:?}", output.status.code()) })
+    }
+}
+
+fn resolve_api_key(
+    source: Option<&str>,
+    env_var: Option<&str>,
+    direct: Option<&str>,
+    model: &str,
+    api_base: Option<&str>,
+) -> (String, Option<String>) {
+    let is_local = model.to_lowercase().contains("ollama")
+        || api_base.map(|b| b.contains("localhost") || b.contains("127.0.0.1")).unwrap_or(false);
+
+    let src = source.unwrap_or("env");
+    if src == "direct" {
+        let key = direct.unwrap_or("").trim().to_string();
+        if key.is_empty() {
+            if is_local {
+                ("ollama".to_string(), None)
+            } else {
+                (String::new(), Some("Direct API key is empty. Please enter your API key in Settings -> AI Agent.".to_string()))
+            }
+        } else {
+            (key, None)
+        }
+    } else {
+        let var = env_var.unwrap_or("GEMINI_API_KEY").trim();
+        if var.is_empty() {
+            if is_local {
+                return ("ollama".to_string(), None);
+            }
+            return (String::new(), Some("Environment variable name is empty.".to_string()));
+        }
+        match std::env::var(var) {
+            Ok(val) => {
+                let trimmed = val.trim().to_string();
+                if trimmed.is_empty() {
+                    if is_local {
+                        ("ollama".to_string(), None)
+                    } else {
+                        (String::new(), Some(format!("Environment variable '{}' is set but empty.", var)))
+                    }
+                } else {
+                    (trimmed, None)
+                }
+            }
+            Err(_) => {
+                if is_local {
+                    ("ollama".to_string(), None)
+                } else {
+                    (String::new(), Some(format!("Environment variable '{}' not found. Please set it in Windows Environment Variables or enter key directly in Settings.", var)))
+                }
+            }
+        }
+    }
+}
+
+fn call_ai_agent(
+    model: &str,
+    api_key: &str,
+    api_base: Option<&str>,
+    messages_json: &str,
+    temperature: Option<f64>,
+) -> (Option<String>, Option<String>) {
+    let parsed_messages: Vec<serde_json::Value> = match serde_json::from_str(messages_json) {
+        Ok(v) => v,
+        Err(e) => return (None, Some(format!("Invalid messages JSON: {}", e))),
+    };
+
+    let temp = temperature.unwrap_or(0.7);
+
+    if model.to_lowercase().contains("gemini") {
+        let custom_base = api_base.unwrap_or("https://generativelanguage.googleapis.com");
+        let endpoint = format!("{}/v1beta/models/{}:generateContent?key={}", custom_base.trim_end_matches('/'), model, api_key);
+
+        let mut contents: Vec<serde_json::Value> = Vec::new();
+        let mut system_text = String::new();
+
+        for msg in &parsed_messages {
+            let role = msg.get("role").and_then(|r| r.as_str()).unwrap_or("user");
+            let content = msg.get("content").and_then(|c| c.as_str()).unwrap_or("");
+            if role == "system" {
+                if !system_text.is_empty() { system_text.push_str("\n\n"); }
+                system_text.push_str(content);
+            } else {
+                let g_role = if role == "assistant" { "model" } else { "user" };
+                if let Some(last) = contents.last_mut() {
+                    if last.get("role").and_then(|r| r.as_str()) == Some(g_role) {
+                        if let Some(parts) = last.get_mut("parts").and_then(|p| p.as_array_mut()) {
+                            if let Some(first_part) = parts.first_mut() {
+                                if let Some(prev_text) = first_part.get("text").and_then(|t| t.as_str()) {
+                                    let combined = format!("{}\n\n{}", prev_text, content);
+                                    first_part["text"] = serde_json::Value::String(combined);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                contents.push(serde_json::json!({
+                    "role": g_role,
+                    "parts": [{ "text": content }]
+                }));
+            }
+        }
+
+        let mut payload = serde_json::json!({
+            "contents": contents,
+            "generationConfig": {
+                "temperature": temp
+            }
+        });
+
+        if !system_text.is_empty() {
+            payload["systemInstruction"] = serde_json::json!({
+                "parts": [{ "text": system_text }]
+            });
+        }
+
+        let payload_str = payload.to_string();
+        let headers = [("Content-Type", "application/json")];
+
+        match execute_curl_post(&endpoint, &headers, &payload_str, 60) {
+            Ok(res) => {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&res) {
+                    if let Some(err) = v.get("error").and_then(|e| e.get("message")).and_then(|m| m.as_str()) {
+                        return (None, Some(format!("Gemini API Error: {}", err)));
+                    }
+                    if let Some(candidates) = v.get("candidates").and_then(|c| c.as_array()) {
+                        if let Some(first) = candidates.first() {
+                            if let Some(parts) = first.get("content").and_then(|c| c.get("parts")).and_then(|p| p.as_array()) {
+                                let mut full_text = String::new();
+                                for p in parts {
+                                    if let Some(t) = p.get("text").and_then(|t| t.as_str()) {
+                                        full_text.push_str(t);
+                                    }
+                                }
+                                if !full_text.is_empty() {
+                                    return (Some(full_text), None);
+                                }
+                            }
+                        }
+                    }
+                }
+                (None, Some(format!("Unexpected response format from Gemini: {}", res)))
+            }
+            Err(e) => (None, Some(e)),
+        }
+    } else if model.to_lowercase().contains("claude") {
+        let endpoint = "https://api.anthropic.com/v1/messages";
+        let mut system_text = String::new();
+        let mut messages = Vec::new();
+
+        for msg in &parsed_messages {
+            let role = msg.get("role").and_then(|r| r.as_str()).unwrap_or("user");
+            let content = msg.get("content").and_then(|c| c.as_str()).unwrap_or("");
+            if role == "system" {
+                if !system_text.is_empty() { system_text.push_str("\n\n"); }
+                system_text.push_str(content);
+            } else {
+                let c_role = if role == "assistant" { "assistant" } else { "user" };
+                messages.push(serde_json::json!({
+                    "role": c_role,
+                    "content": content
+                }));
+            }
+        }
+
+        let mut payload = serde_json::json!({
+            "model": model,
+            "max_tokens": 4096,
+            "messages": messages,
+            "temperature": temp
+        });
+        if !system_text.is_empty() {
+            payload["system"] = serde_json::Value::String(system_text);
+        }
+
+        let payload_str = payload.to_string();
+        let headers = [
+            ("Content-Type", "application/json"),
+            ("x-api-key", api_key),
+            ("anthropic-version", "2023-06-01")
+        ];
+
+        match execute_curl_post(endpoint, &headers, &payload_str, 60) {
+            Ok(res) => {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&res) {
+                    if let Some(err) = v.get("error").and_then(|e| e.get("message")).and_then(|m| m.as_str()) {
+                        return (None, Some(format!("Claude API Error: {}", err)));
+                    }
+                    if let Some(content_arr) = v.get("content").and_then(|c| c.as_array()) {
+                        for item in content_arr {
+                            if item.get("type").and_then(|t| t.as_str()) == Some("text") {
+                                if let Some(text) = item.get("text").and_then(|t| t.as_str()) {
+                                    return (Some(text.to_string()), None);
+                                }
+                            }
+                        }
+                    }
+                }
+                (None, Some(format!("Unexpected response format from Claude: {}", res)))
+            }
+            Err(e) => (None, Some(e)),
+        }
+    } else {
+        // OpenAI / DeepSeek / Ollama / Custom compatible endpoint
+        let default_base = if model.to_lowercase().contains("deepseek") {
+            "https://api.deepseek.com/v1"
+        } else {
+            "https://api.openai.com/v1"
+        };
+        let base = api_base.unwrap_or(default_base).trim_end_matches('/');
+        let endpoint = if base.ends_with("/chat/completions") {
+            base.to_string()
+        } else {
+            format!("{}/chat/completions", base)
+        };
+
+        let payload = serde_json::json!({
+            "model": model,
+            "messages": parsed_messages,
+            "temperature": temp
+        });
+
+        let payload_str = payload.to_string();
+        let auth_header = format!("Bearer {}", api_key);
+        let headers = [
+            ("Content-Type", "application/json"),
+            ("Authorization", &auth_header),
+        ];
+
+        match execute_curl_post(&endpoint, &headers, &payload_str, 60) {
+            Ok(res) => {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&res) {
+                    if let Some(err) = v.get("error").and_then(|e| e.get("message")).and_then(|m| m.as_str()) {
+                        return (None, Some(format!("AI API Error: {}", err)));
+                    }
+                    if let Some(choices) = v.get("choices").and_then(|c| c.as_array()) {
+                        if let Some(first) = choices.first() {
+                            if let Some(text) = first.get("message").and_then(|m| m.get("content")).and_then(|c| c.as_str()) {
+                                return (Some(text.to_string()), None);
+                            }
+                        }
+                    }
+                }
+                (None, Some(format!("Unexpected response format from API: {}", res)))
+            }
+            Err(e) => (None, Some(e)),
+        }
     }
 }
 
@@ -1086,6 +1401,150 @@ fn main() {
                                     },
                                 );
                             }
+                        }
+
+                        "get_ai_chats" => {
+                            let chats_file = get_chats_dir().join("sessions.json");
+                            let content = if chats_file.exists() {
+                                fs::read_to_string(&chats_file).unwrap_or_else(|_| "[]".to_string())
+                            } else {
+                                "[]".to_string()
+                            };
+                            send_to_webview(
+                                wv,
+                                &IpcResponse {
+                                    response_type: "ai_chats_data",
+                                    path: None,
+                                    name: None,
+                                    content: None,
+                                    message: None,
+                                    json: Some(content),
+                                },
+                            );
+                        }
+
+                        "save_ai_chats" => {
+                            if let Some(json_content) = request.json {
+                                let chats_file = get_chats_dir().join("sessions.json");
+                                let res = fs::write(&chats_file, &json_content);
+                                send_to_webview(
+                                    wv,
+                                    &IpcResponse {
+                                        response_type: "ai_chats_saved",
+                                        path: None,
+                                        name: None,
+                                        content: if res.is_ok() { Some("ok".to_string()) } else { Some("error".to_string()) },
+                                        message: res.err().map(|e| e.to_string()),
+                                        json: None,
+                                    },
+                                );
+                            }
+                        }
+
+                        "test_ai_env_var" => {
+                            let var_name = request.var_name.unwrap_or_else(|| "GEMINI_API_KEY".to_string());
+                            let (status, msg, preview) = match std::env::var(&var_name) {
+                                Ok(val) => {
+                                    let trimmed = val.trim();
+                                    if trimmed.is_empty() {
+                                        ("empty", format!("Variable '{}' exists but is empty.", var_name), "".to_string())
+                                    } else {
+                                        let masked = if trimmed.len() > 8 {
+                                            format!("{}...{}", &trimmed[..4], &trimmed[trimmed.len()-4..])
+                                        } else {
+                                            "***".to_string()
+                                        };
+                                        ("ok", format!("Variable '{}' is set (length: {}, value: {})", var_name, trimmed.len(), masked), masked)
+                                    }
+                                }
+                                Err(_) => {
+                                    ("not_found", format!("Variable '{}' not found in system environment.", var_name), "".to_string())
+                                }
+                            };
+                            let payload = serde_json::json!({
+                                "var_name": var_name,
+                                "status": status,
+                                "preview": preview,
+                                "message": msg,
+                            });
+                            send_to_webview(
+                                wv,
+                                &IpcResponse {
+                                    response_type: "ai_env_var_result",
+                                    path: None,
+                                    name: None,
+                                    content: Some(status.to_string()),
+                                    message: Some(msg),
+                                    json: Some(payload.to_string()),
+                                },
+                            );
+                        }
+
+                        "ai_chat" => {
+                            let proxy_clone = proxy_for_ipc.clone();
+                            let model = request.model.unwrap_or_else(|| "gemini-2.5-flash".to_string());
+                            let api_key_source = request.api_key_source;
+                            let api_key_env = request.api_key_env;
+                            let api_key_direct = request.api_key_direct;
+                            let api_base = request.api_base;
+                            let messages_json = request.messages_json.unwrap_or_else(|| "[]".to_string());
+                            let temperature = request.temperature;
+                            let req_id = request.req_id.unwrap_or_default();
+
+                            std::thread::spawn(move || {
+                                let (key, key_err) = resolve_api_key(
+                                    api_key_source.as_deref(),
+                                    api_key_env.as_deref(),
+                                    api_key_direct.as_deref(),
+                                    &model,
+                                    api_base.as_deref(),
+                                );
+
+                                if let Some(err_msg) = key_err {
+                                    let payload = serde_json::json!({
+                                        "req_id": req_id,
+                                        "error": err_msg,
+                                        "text": null,
+                                    });
+                                    let resp = IpcResponse {
+                                        response_type: "ai_chat_response",
+                                        path: None,
+                                        name: None,
+                                        content: None,
+                                        message: Some(err_msg),
+                                        json: Some(payload.to_string()),
+                                    };
+                                    if let Ok(json_str) = serde_json::to_string(&resp) {
+                                        let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
+                                    }
+                                    return;
+                                }
+
+                                let (res_text, res_err) = call_ai_agent(
+                                    &model,
+                                    &key,
+                                    api_base.as_deref(),
+                                    &messages_json,
+                                    temperature,
+                                );
+
+                                let payload = serde_json::json!({
+                                    "req_id": req_id,
+                                    "text": res_text,
+                                    "error": res_err,
+                                });
+                                let resp = IpcResponse {
+                                    response_type: "ai_chat_response",
+                                    path: None,
+                                    name: None,
+                                    content: res_text,
+                                    message: res_err,
+                                    json: Some(payload.to_string()),
+                                };
+                                if let Ok(json_str) = serde_json::to_string(&resp) {
+                                    let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
+                                }
+                            });
                         }
 
                         _ => {}
