@@ -139,41 +139,77 @@ jobs:
         with:
           gradle-version: '8.4'
 
+      - name: Validate Android project structure
+        working-directory: android
+        shell: bash
+        run: |
+          echo "Checking Android project layout..."
+          ls -la
+          if [ ! -d app ]; then
+            echo "ERROR: android/app is missing."
+            exit 1
+          fi
+          if [ ! -f settings.gradle ] && [ ! -f settings.gradle.kts ]; then
+            echo "WARNING: android/settings.gradle(.kts) missing; the Android project may not be configured."
+          fi
+
       - name: Synchronize Web Assets to Android Project
+        shell: bash
         run: |
           mkdir -p android/app/src/main/assets
-          cp assets/app.html android/app/src/main/assets/
-          cp assets/sample.md android/app/src/main/assets/
-          cp keybindings.json android/app/src/main/assets/
-          cp logo.png android/app/src/main/assets/ || true
-          ls -la android/app/src/main/assets/
+          cp -f assets/app.html android/app/src/main/assets/ || true
+          cp -f assets/sample.md android/app/src/main/assets/ || true
+          cp -f keybindings.json android/app/src/main/assets/ || true
+          cp -f logo.png android/app/src/main/assets/ || true
+          ls -la android/app/src/main/assets/ || true
 
       - name: Build Android APK
         working-directory: android
+        shell: bash
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
 
       - name: Package Android Artifact
+        shell: bash
         run: |
           mkdir -p artifacts
-          echo "=== Searching for generated APK files ==="
-          find android/app/build/outputs/apk/ -type f -name "*.apk" || true
-          
-          # Prioritize release APK, fallback to debug APK
-          APK_FILE=$(find android/app/build/outputs/apk/ -type f -name "*release*.apk" | head -n 1)
-          if [ -z "$APK_FILE" ]; then
-            APK_FILE=$(find android/app/build/outputs/apk/ -type f -name "*.apk" | head -n 1)
-          fi
-          
-          if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
-            echo "Packaging APK: $APK_FILE -> artifacts/mdviewer-android.apk"
-            cp "$APK_FILE" artifacts/mdviewer-android.apk
+          echo "=== Searching for generated APK/AAB files ==="
+          find android -type f \( -name "*.apk" -o -name "*.aab" \) -print || true
+
+          # Prefer release APK, then release AAB, then any APK, then any AAB
+          APK_FILE=$(find android -type f -name "*release*.apk" | head -n 1)
+          AAB_FILE=$(find android -type f -name "*release*.aab" | head -n 1)
+
+          if [ -z "$APK_FILE" ] && [ -n "$AAB_FILE" ]; then
+            ARTIFACT="$AAB_FILE"
+            OUTNAME="mdviewer-android.aab"
+          elif [ -n "$APK_FILE" ]; then
+            ARTIFACT="$APK_FILE"
+            OUTNAME="mdviewer-android.apk"
           else
-            echo "ERROR: No APK file found in android/app/build/outputs/apk/"
+            # fallback to any apk or aab
+            ARTIFACT=$(find android -type f -name "*.apk" | head -n 1)
+            if [ -n "$ARTIFACT" ]; then
+              OUTNAME="mdviewer-android.apk"
+            else
+              ARTIFACT=$(find android -type f -name "*.aab" | head -n 1)
+              OUTNAME="mdviewer-android.aab"
+            fi
+          fi
+
+          if [ -n "$ARTIFACT" ] && [ -f "$ARTIFACT" ]; then
+            echo "Packaging artifact: $ARTIFACT -> artifacts/$OUTNAME"
+            cp "$ARTIFACT" "artifacts/$OUTNAME"
+            if [ "$OUTNAME" != "mdviewer-android.apk" ]; then
+              cp "$ARTIFACT" "artifacts/mdviewer-android.apk"
+            fi
+          else
+            echo "ERROR: No APK or AAB found under android/."
             find android -maxdepth 5 || true
             exit 1
           fi
+
           ls -la artifacts/
 
       - name: Upload Android Artifact
