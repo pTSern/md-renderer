@@ -1725,6 +1725,11 @@
     .mermaid {
       display: inline-block;
       user-select: none;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      font-family: inherit;
     }
 
     .mermaid svg, .packet-diagram {
@@ -1750,30 +1755,6 @@
     .diagram-canvas svg foreignObject,
     .mermaid svg foreignObject {
       overflow: visible !important;
-    }
-    .classic-svg-container svg .node .label,
-    .diagram-canvas svg .node .label,
-    .mermaid svg .node .label,
-    .classic-svg-container svg .nodeLabel,
-    .diagram-canvas svg .nodeLabel,
-    .mermaid svg .nodeLabel {
-      line-height: 1.45 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      text-align: center !important;
-    }
-    .classic-svg-container svg foreignObject > div,
-    .diagram-canvas svg foreignObject > div,
-    .mermaid svg foreignObject > div {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      height: 100% !important;
-      min-height: 100% !important;
-      overflow: visible !important;
-      padding: 3px 8px !important;
-      box-sizing: border-box !important;
     }
 
     /* =========================================================================
@@ -5715,7 +5696,8 @@
               </div>
               <div class="diagram-body" id="body-${blockId}">
                 <div class="diagram-canvas" id="canvas-${blockId}">
-                  <div class="mermaid" id="${mermaidId}">${code}</div>
+                  <pre class="mermaid" id="${mermaidId}">${escapeHtml(code)}</pre>
+                  <pre class="mermaid-raw-code" style="display:none;">${escapeHtml(code)}</pre>
                 </div>
               </div>
               <div class="diagram-resize-handle" title="Drag corner to resize box"></div>
@@ -10514,15 +10496,23 @@
 
       fixMermaidSvgClamping(container) {
         if (!container) return;
-        const nodes = container.querySelectorAll('.node');
+        const svg = container.querySelector('svg');
+        if (!svg) return;
+        const role = svg.getAttribute('aria-roledescription') || '';
+        // Only target flowcharts; never touch class diagrams, sequence, state, er, etc.
+        const isFlowchart = role.startsWith('flowchart') || svg.classList.contains('flowchart') || !!svg.querySelector('.flowchart-link');
+        if (!isFlowchart) return;
+
+        const nodes = container.querySelectorAll('.node.flowchart-label');
         nodes.forEach(node => {
-          const rect = node.querySelector('rect.basic, rect.label-container, rect');
+          if (node.getAttribute('data-clamping-fixed')) return;
+          node.setAttribute('data-clamping-fixed', 'true');
+          const rect = node.querySelector('rect.basic, rect.label-container');
           if (rect) {
             const h = parseFloat(rect.getAttribute('height') || '0');
             const y = parseFloat(rect.getAttribute('y') || '0');
-            // If height is compact (< 48px), expand vertical height by 10px so descenders never clamp
-            if (h > 0 && h < 48) {
-              const extra = 10;
+            if (h > 0 && h < 32) {
+              const extra = 8;
               rect.setAttribute('height', (h + extra).toString());
               rect.setAttribute('y', (y - extra / 2).toString());
             }
@@ -10530,13 +10520,6 @@
           const fo = node.querySelector('foreignObject');
           if (fo) {
             fo.style.overflow = 'visible';
-            const h = parseFloat(fo.getAttribute('height') || '0');
-            const y = parseFloat(fo.getAttribute('y') || '0');
-            if (h > 0 && h < 48) {
-              const extra = 10;
-              fo.setAttribute('height', (h + extra).toString());
-              fo.setAttribute('y', (y - extra / 2).toString());
-            }
           }
         });
       },
