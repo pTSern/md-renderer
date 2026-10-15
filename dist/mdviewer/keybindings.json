@@ -85,6 +85,8 @@
     "is_copy_to_yank": true,
     "scroll_step_y": 60,
     "scroll_step_x": 60,
-    "max_fps": 60
+    "max_fps": 60,
+    "tab_spaces": 4,
+    "json_collapse_level": "2"
   }
 }
