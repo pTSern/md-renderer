@@ -1,0 +1,90 @@
+{
+  "preview": {
+    "enable_cursor": true,
+    "scroll_down": "j",
+    "scroll_up": "k",
+    "scroll_right": "l",
+    "scroll_left": "h",
+    "prev_file": "Alt+Shift+H",
+    "next_file": "Alt+Shift+L",
+    "close_app": "Ctrl+q",
+    "save_file": "w",
+    "cycle_mode": "Shift+Tab",
+    "toggle_toc": "Alt+O"
+  },
+  "toc": {
+    "mode": "side_tab",
+    "side_tab": {
+      "width_percent": 20,
+      "position": "left",
+      "nav_down": "j",
+      "nav_up": "k"
+    },
+    "floating_window": {
+      "width_percent": 50,
+      "height_percent": 60,
+      "position": "center",
+      "nav_down": "j",
+      "nav_up": "k"
+    }
+  },
+  "theme": {
+    "heading_color": "#58a6ff",
+    "bold_color": "#f0883e",
+    "italic_color": "#d29922",
+    "inline_code_color": "#ff7b72",
+    "inline_code_bg": "#21262d",
+    "link_color": "#58a6ff",
+    "blockquote_color": "#8b949e",
+    "text_color": "#c9d1d9",
+    "table_border_color": "#30363d",
+    "hr_color": "#30363d"
+  },
+  "fonts": {
+    "ui_font": "System Default",
+    "custom_ui_font": "",
+    "code_font": "System Monospace",
+    "custom_code_font": "",
+    "preview_font_size": 14.5,
+    "editor_font_size": 13
+  },
+  "translation": {
+    "enabled": true,
+    "provider": "libretranslate",
+    "target_lang": "vi",
+    "source_lang": "auto",
+    "libretranslate_url": "https://translate.adminforge.de",
+    "libretranslate_api_key": "",
+    "popup_width": 440,
+    "show_selection_button": true,
+    "hotkey": "Ctrl+Alt+T"
+  },
+  "ai_agent": {
+    "enabled": true,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "api_key_source": "env",
+    "api_key_env": "GEMINI_API_KEY",
+    "api_key_direct": "",
+    "custom_endpoint": "http://localhost:11434/v1",
+    "mode": "side_tab",
+    "side_tab": {
+      "position": "right",
+      "width_percent": 28
+    },
+    "floating_window": {
+      "position": "center",
+      "width_percent": 45,
+      "height_percent": 70
+    },
+    "open_on_startup": false,
+    "default_scope": "current_file"
+  },
+  "settings": {
+    "middle_click_close_tab": true,
+    "is_copy_to_yank": true,
+    "scroll_step_y": 60,
+    "scroll_step_x": 60,
+    "max_fps": 60
+  }
+}

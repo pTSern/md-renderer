@@ -1,0 +1,4 @@
+* text=auto
+android/gradlew text eol=lf
+android/gradle/wrapper/* text eol=lf
+*.jar binary
