@@ -1031,7 +1031,10 @@ fn main() {
 
                         "open_file" => {
                             if let Some(path) = rfd::FileDialog::new()
+                                .add_filter("All Supported Documents (*.md, *.json, *.toml, *.txt)", &["md", "markdown", "json", "toml", "txt"])
                                 .add_filter("Markdown Files (*.md, *.markdown)", &["md", "markdown"])
+                                .add_filter("JSON Files (*.json)", &["json"])
+                                .add_filter("TOML Files (*.toml)", &["toml"])
                                 .add_filter("Text Files (*.txt)", &["txt"])
                                 .add_filter("All Files (*.*)", &["*"])
                                 .pick_file()
@@ -1115,7 +1118,10 @@ fn main() {
                             if let Some(content) = request.content {
                                 let default_name = request.default_name.unwrap_or_else(|| "document.md".to_string());
                                 let dialog = rfd::FileDialog::new()
-                                    .add_filter("Markdown (*.md)", &["md"])
+                                    .add_filter("All Supported Documents (*.md, *.json, *.toml, *.txt)", &["md", "markdown", "json", "toml", "txt"])
+                                    .add_filter("Markdown (*.md)", &["md", "markdown"])
+                                    .add_filter("JSON (*.json)", &["json"])
+                                    .add_filter("TOML (*.toml)", &["toml"])
                                     .add_filter("All Files (*.*)", &["*"])
                                     .set_file_name(&default_name);
 

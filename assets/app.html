@@ -2882,11 +2882,337 @@
       }
     }
 
-    @media (max-width: 480px) {
-      .tool-btn span.btn-label,
-      .mode-btn span.btn-label {
-        display: none !important;
-      }
+    /* =========================================================================
+       STRUCTURED VIEWER (JSON & TOML) & BEAUTIFIER STYLES
+       ========================================================================= */
+    .structured-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: var(--preview-font-size);
+      color: var(--text-primary);
+    }
+
+    .structured-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .structured-info-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .structured-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-tag {
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-ok {
+      background: rgba(166, 227, 161, 0.15);
+      color: var(--success);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .badge-err {
+      background: rgba(243, 139, 168, 0.15);
+      color: var(--danger);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .structured-error-banner {
+      background: rgba(243, 139, 168, 0.12);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .structured-code-body {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    .structured-code-pre {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-mono);
+      font-size: var(--preview-font-size);
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    .code-line {
+      display: flex;
+      min-width: 100%;
+      padding: 1px 12px 1px 0;
+    }
+
+    .code-line:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .line-has-error {
+      background: rgba(243, 139, 168, 0.18) !important;
+      border-left: 3px solid var(--danger);
+    }
+
+    .line-toml-header {
+      background: rgba(137, 180, 250, 0.08);
+      font-weight: 600;
+    }
+
+    .line-num {
+      width: 48px;
+      min-width: 48px;
+      text-align: right;
+      padding-right: 14px;
+      color: var(--text-muted);
+      opacity: 0.6;
+      user-select: none;
+      font-size: 12px;
+    }
+
+    .line-text {
+      flex: 1;
+      user-select: text;
+    }
+
+    /* Token highlighting colors */
+    .json-key, .toml-key { color: #89b4fa; font-weight: 600; }
+    .json-str, .toml-str { color: #a6e3a1; }
+    .json-num, .toml-num { color: #f9e2af; }
+    .json-bool, .toml-bool { color: #f38ba8; font-weight: 600; }
+    .json-null { color: #fab387; font-style: italic; }
+    .json-punct, .toml-punct { color: var(--text-muted); }
+    .toml-section { color: #cba6f7; font-weight: 700; }
+    .toml-comment { color: var(--text-muted); font-style: italic; opacity: 0.8; }
+
+    /* Tree View Styles */
+    .structured-tree-body {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      min-height: 200px;
+    }
+
+    .tree-node {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+      user-select: none;
+    }
+
+    .tree-node-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 1px 4px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .tree-node-header:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .tree-chevron {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      transition: transform 0.15s ease;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .tree-node.collapsed > .tree-node-header .tree-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .tree-node.collapsed > .tree-node-children {
+      display: none;
+    }
+
+    .tree-bullet {
+      color: var(--text-muted);
+      opacity: 0.5;
+      font-size: 11px;
+      width: 14px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .tree-leaf {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: fit-content;
+    }
+
+    .tree-leaf:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .tree-key {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tree-colon {
+      color: var(--text-muted);
+      margin-right: 2px;
+    }
+
+    .tree-val {
+      user-select: text;
+    }
+
+    .tree-str { color: var(--success); }
+    .tree-num { color: var(--warning); }
+    .tree-bool { color: var(--danger); font-weight: 600; }
+    .tree-null { color: #fab387; font-style: italic; }
+
+    .tree-badge {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    .badge-obj { background: rgba(137, 180, 250, 0.15); color: var(--accent); }
+    .badge-arr { background: rgba(203, 166, 247, 0.15); color: #cba6f7; }
+    .badge-str { background: rgba(166, 227, 161, 0.15); color: var(--success); }
+    .badge-num { background: rgba(249, 226, 175, 0.15); color: var(--warning); }
+    .badge-bool { background: rgba(243, 139, 168, 0.15); color: var(--danger); }
+    .badge-null { background: rgba(250, 179, 135, 0.15); color: #fab387; }
+    .badge-tbl { background: rgba(137, 220, 235, 0.15); color: #89dceb; }
+
+    .tree-breadcrumb-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      font-size: 11.5px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    .tree-search-input {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--text-primary);
+      width: 140px;
+      outline: none;
+    }
+
+    .tree-search-input:focus {
+      border-color: var(--accent);
+      width: 180px;
+    }
+
+    /* TOML Card Section in Tree View */
+    .toml-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .toml-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toml-card-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .toml-card.collapsed .tree-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .toml-card.collapsed .toml-card-body {
+      display: none;
+    }
+
+    .toml-card-body {
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toml-section-badge {
+      font-weight: 700;
+      font-size: 12px;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .toml-item-count {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-left: auto;
+    }
+
+    .toml-tree-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      padding: 2px 0;
     }
   </style>
 </head>
@@ -2959,6 +3285,17 @@
         <button class="btn" id="mode-split" title="Side-by-Side Split">Split</button>
         <button class="btn" id="mode-edit" title="Editor Only">Edit</button>
       </div>
+
+      <!-- Structured File View Mode Toggle (Code vs Tree for JSON/TOML) -->
+      <div class="btn-group" id="structured-view-mode" style="display:none;">
+        <button class="btn active" id="struct-mode-code" title="Syntax-Highlighted Code View">Code</button>
+        <button class="btn" id="struct-mode-tree" title="Interactive Tree View">Tree</button>
+      </div>
+
+      <!-- Beautify / Format Document -->
+      <button class="btn" id="btn-beautify" title="Beautify / Format Document (Ctrl+Alt+B / Shift+Alt+F)">
+        ⚡ Beautify
+      </button>
 
       <!-- Table of Contents / Outline Toggle -->
       <button class="btn" id="btn-toc" title="Toggle Document Outline / Table of Contents (Alt+O)">
@@ -3381,6 +3718,13 @@
                 <span class="kb-row-desc">Show or hide Table of Contents sidebar</span>
               </div>
               <input type="text" class="kb-input-box" data-cat="preview" data-key="toggle_toc" spellcheck="false" placeholder="Alt+O">
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Beautify / Format Document</span>
+                <span class="kb-row-desc">Format JSON (2-spaces), TOML, and Markdown tables</span>
+              </div>
+              <input type="text" class="kb-input-box" data-cat="preview" data-key="beautify" spellcheck="false" placeholder="Ctrl+Alt+B" readonly style="opacity:0.85;" title="Shortcut: Ctrl+Alt+B / Shift+Alt+F">
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -7499,34 +7843,79 @@
         const tocCountEl = document.getElementById('toc-count');
         if (!previewEl || !tocListEl) return;
 
-        const headingElements = previewEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        const currentFile = (typeof App !== 'undefined' && App.files && App.files[App.activeFileIndex]) ? App.files[App.activeFileIndex] : null;
+        const fileType = (typeof App !== 'undefined' && App.getFileType) ? App.getFileType(currentFile) : 'markdown';
         this.headings = [];
-        const idCounts = new Map();
 
-        headingElements.forEach((h, idx) => {
-          const level = parseInt(h.tagName.substring(1), 10);
-          let id = h.id;
-          if (!id) {
-            const rawText = h.innerText.trim();
-            id = rawText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') || `heading-${idx}`;
-            h.id = id;
-          }
-          if (idCounts.has(id)) {
-            const count = idCounts.get(id) + 1;
-            idCounts.set(id, count);
-            id = `${id}-${count}`;
-            h.id = id;
-          } else {
-            idCounts.set(id, 0);
-          }
-
-          this.headings.push({
-            id,
-            level,
-            text: h.innerText.trim() || `Heading ${idx + 1}`,
-            el: h
+        if (fileType === 'toml') {
+          const sections = TomlViewer.parse(App.editorEl.value);
+          sections.forEach((sec, idx) => {
+            if (sec.title === '(Global)' && sec.items.length === 0) return;
+            const isArr = sec.type === 'array_table';
+            const badge = isArr ? '[[' : '[';
+            const targetId = `toml-line-${sec.line}`;
+            this.headings.push({
+              id: targetId,
+              level: 2,
+              prefix: badge,
+              text: sec.title,
+              line: sec.line,
+              secIdx: idx,
+              el: document.getElementById(targetId) || document.getElementById(`toml-sec-${idx}`)
+            });
           });
-        });
+        } else if (fileType === 'json') {
+          try {
+            const parsed = JSON.parse(App.editorEl.value);
+            if (parsed && typeof parsed === 'object') {
+              const keys = Object.keys(parsed);
+              keys.forEach((k, idx) => {
+                const val = parsed[k];
+                const isObj = val && typeof val === 'object' && !Array.isArray(val);
+                const isArr = Array.isArray(val);
+                const badge = isObj ? '{ }' : (isArr ? '[ ]' : '•');
+                const targetId = `json-key-item-${idx}`;
+                this.headings.push({
+                  id: targetId,
+                  level: 2,
+                  prefix: badge,
+                  text: k,
+                  keyName: k,
+                  el: null
+                });
+              });
+            }
+          } catch (_) {}
+        } else {
+          const headingElements = previewEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+          const idCounts = new Map();
+
+          headingElements.forEach((h, idx) => {
+            const level = parseInt(h.tagName.substring(1), 10);
+            let id = h.id;
+            if (!id) {
+              const rawText = h.innerText.trim();
+              id = rawText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') || `heading-${idx}`;
+              h.id = id;
+            }
+            if (idCounts.has(id)) {
+              const count = idCounts.get(id) + 1;
+              idCounts.set(id, count);
+              id = `${id}-${count}`;
+              h.id = id;
+            } else {
+              idCounts.set(id, 0);
+            }
+
+            this.headings.push({
+              id,
+              level,
+              prefix: `H${level}`,
+              text: h.innerText.trim() || `Heading ${idx + 1}`,
+              el: h
+            });
+          });
+        }
 
         if (tocCountEl) {
           tocCountEl.innerText = this.headings.length ? `(${this.headings.length})` : '';
@@ -7550,9 +7939,9 @@
         tocListEl.innerHTML = items.map(item => `
           <div class="toc-item toc-level-${item.level} ${item.id === this.activeId ? 'active' : ''}"
                data-id="${item.id}"
-               title="H${item.level}: ${escapeHtml(item.text)}"
+               title="${item.prefix}: ${escapeHtml(item.text)}"
                onclick="TableOfContents.onItemClick('${item.id}')">
-            <span class="toc-bullet">H${item.level}</span>
+            <span class="toc-bullet">${escapeHtml(item.prefix || ('H' + item.level))}</span>
             <span class="toc-text">${escapeHtml(item.text)}</span>
           </div>
         `).join('');
@@ -7694,7 +8083,23 @@
 
       jumpTo(id, syncEditor = true) {
         const previewPane = document.getElementById('preview-pane');
-        const target = document.getElementById(id);
+        let target = document.getElementById(id);
+        const heading = this.headings.find(h => h.id === id);
+        if (!target && heading) {
+          if (heading.el) {
+            target = heading.el;
+          } else if (heading.line) {
+            target = document.getElementById(`toml-line-${heading.line}`) || document.getElementById(`json-line-${heading.line}`) || document.getElementById(`toml-sec-${heading.secIdx}`);
+          } else if (heading.keyName) {
+            const keys = document.querySelectorAll('.json-key, .tree-key');
+            for (let k of keys) {
+              if (k.innerText.replace(/"/g, '').trim() === heading.keyName) {
+                target = k.closest('.code-line') || k.closest('.tree-node');
+                break;
+              }
+            }
+          }
+        }
         if (!target || !previewPane) return;
 
         const targetTop = target.offsetTop - 16;
@@ -10313,6 +10718,596 @@
     };
 
     /* =========================================================================
+       JSON & TOML STRUCTURED VIEWERS & BEAUTIFICATION ENGINES
+       ========================================================================= */
+    const JsonViewer = {
+      activePath: '$',
+
+      renderCode(text) {
+        let parseError = null;
+        let parsed = null;
+        try {
+          parsed = JSON.parse(text);
+        } catch (e) {
+          parseError = e;
+        }
+
+        let errorHtml = '';
+        let errorLineNo = null;
+        if (parseError) {
+          const matchPos = parseError.message.match(/at position (\d+)/i);
+          const matchLineCol = parseError.message.match(/line (\d+) column (\d+)/i);
+          let posDesc = '';
+          if (matchLineCol) {
+            errorLineNo = parseInt(matchLineCol[1], 10);
+            posDesc = `Line ${matchLineCol[1]}, Col ${matchLineCol[2]}`;
+          } else if (matchPos) {
+            const pos = parseInt(matchPos[1], 10);
+            const upTo = text.substring(0, pos);
+            const lines = upTo.split('\n');
+            errorLineNo = lines.length;
+            const col = lines[lines.length - 1].length + 1;
+            posDesc = `Line ${errorLineNo}, Col ${col}`;
+          }
+          errorHtml = `
+            <div class="structured-error-banner">
+              <div style="font-weight:700; display:flex; align-items:center; gap:6px;">
+                <span>⚠️</span> <span>Invalid JSON Syntax: ${escapeHtml(parseError.message)}</span>
+              </div>
+              ${posDesc ? `<div style="font-size:11.5px; opacity:0.85; margin-top:2px;">Location: <strong>${escapeHtml(posDesc)}</strong></div>` : ''}
+            </div>
+          `;
+        }
+
+        const lines = text.split('\n');
+        const lineCount = lines.length;
+        const sizeBytes = new Blob([text]).size;
+        const sizeFormatted = sizeBytes > 1024 ? (sizeBytes / 1024).toFixed(1) + ' KB' : sizeBytes + ' B';
+
+        const highlightedLines = lines.map((line, idx) => {
+          const lineNum = idx + 1;
+          const isErr = errorLineNo === lineNum;
+          const highlighted = this.highlightJsonLine(line);
+          return `<div class="code-line ${isErr ? 'line-has-error' : ''}" id="json-line-${lineNum}"><span class="line-num">${lineNum}</span><span class="line-text">${highlighted || ' '}</span></div>`;
+        }).join('');
+
+        return `
+          <div class="structured-container">
+            <div class="structured-top-bar">
+              <div class="structured-info-badge">
+                <span class="badge-tag">JSON</span>
+                <span>${lineCount} lines</span>
+                <span>•</span>
+                <span>${sizeFormatted}</span>
+                ${parseError ? '<span class="badge-err">Syntax Error</span>' : '<span class="badge-ok">Valid</span>'}
+              </div>
+              <div class="structured-actions">
+                <button class="btn btn-sm" onclick="App.copyActiveFileContent(this)" title="Copy JSON">📋 Copy</button>
+                <button class="btn btn-sm btn-primary" onclick="CodeBeautifier.run()" title="Format JSON (Ctrl+Alt+B)">⚡ Beautify</button>
+              </div>
+            </div>
+            ${errorHtml}
+            <div class="structured-code-body">
+              <pre class="structured-code-pre">${highlightedLines}</pre>
+            </div>
+          </div>
+        `;
+      },
+
+      highlightJsonLine(line) {
+        if (!line) return '';
+        const tokenRegex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|[{}[\],:])/g;
+        let lastIndex = 0;
+        let result = '';
+        let match;
+        while ((match = tokenRegex.exec(line)) !== null) {
+          if (match.index > lastIndex) {
+            result += escapeHtml(line.substring(lastIndex, match.index));
+          }
+          const token = match[0];
+          if (token.startsWith('"')) {
+            if (token.endsWith(':')) {
+              const colonIdx = token.lastIndexOf(':');
+              const keyText = token.substring(0, colonIdx).trim();
+              result += `<span class="json-key">${escapeHtml(keyText)}</span><span class="json-punct">:</span>`;
+            } else {
+              result += `<span class="json-str">${escapeHtml(token)}</span>`;
+            }
+          } else if (token === 'true' || token === 'false') {
+            result += `<span class="json-bool">${token}</span>`;
+          } else if (token === 'null') {
+            result += `<span class="json-null">${token}</span>`;
+          } else if (/^-?\d/.test(token)) {
+            result += `<span class="json-num">${token}</span>`;
+          } else {
+            result += `<span class="json-punct">${escapeHtml(token)}</span>`;
+          }
+          lastIndex = tokenRegex.lastIndex;
+        }
+        if (lastIndex < line.length) {
+          result += escapeHtml(line.substring(lastIndex));
+        }
+        return result;
+      },
+
+      renderTree(text) {
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch (e) {
+          return this.renderCode(text);
+        }
+
+        const treeHtml = this.buildNodeHtml(parsed, 'root', '$', 0);
+        return `
+          <div class="structured-container">
+            <div class="structured-top-bar">
+              <div class="structured-info-badge">
+                <span class="badge-tag">JSON Tree</span>
+                <input type="text" class="tree-search-input" id="json-tree-filter" placeholder="Filter keys/values..." oninput="JsonViewer.filterTree(this.value)">
+              </div>
+              <div class="structured-actions">
+                <button class="btn btn-sm" onclick="JsonViewer.expandAll()">Expand All</button>
+                <button class="btn btn-sm" onclick="JsonViewer.collapseAll()">Collapse All</button>
+                <button class="btn btn-sm" onclick="App.copyActiveFileContent(this)">📋 Copy</button>
+                <button class="btn btn-sm btn-primary" onclick="CodeBeautifier.run()">⚡ Beautify</button>
+              </div>
+            </div>
+            <div class="tree-breadcrumb-bar" id="json-tree-breadcrumb">
+              <span style="opacity:0.6;">Path:</span>
+              <span id="json-active-path">$</span>
+              <button class="btn btn-xs" onclick="JsonViewer.copyActivePath()" title="Copy Path" style="margin-left:auto; padding:1px 6px; font-size:10px;">Copy Path</button>
+            </div>
+            <div class="structured-tree-body" id="json-tree-root">
+              ${treeHtml}
+            </div>
+          </div>
+        `;
+      },
+
+      buildNodeHtml(val, key, path, depth) {
+        const isRoot = path === '$';
+        const isArr = Array.isArray(val);
+        const isObj = val !== null && typeof val === 'object' && !isArr;
+        const nodeId = 'jnode_' + Math.random().toString(36).substr(2, 9);
+
+        if (isObj || isArr) {
+          const keys = isObj ? Object.keys(val) : val;
+          const count = isObj ? keys.length : val.length;
+          const typeBadge = isObj ? `<span class="tree-badge badge-obj">{ ${count} keys }</span>` : `<span class="tree-badge badge-arr">[ ${count} items ]</span>`;
+          const childrenHtml = isObj
+            ? keys.map(k => this.buildNodeHtml(val[k], k, `${path}.${k}`, depth + 1)).join('')
+            : val.map((item, idx) => this.buildNodeHtml(item, idx, `${path}[${idx}]`, depth + 1)).join('');
+
+          return `
+            <div class="tree-node ${depth > 2 ? 'collapsed' : ''}" id="${nodeId}" data-path="${escapeHtml(path)}" style="margin-left:${depth * 14}px;">
+              <div class="tree-node-header" onclick="JsonViewer.toggleNode('${nodeId}', '${escapeHtml(path)}')">
+                <span class="tree-chevron">▾</span>
+                ${!isRoot ? `<span class="tree-key">${escapeHtml(String(key))}</span><span class="tree-colon">:</span>` : ''}
+                ${typeBadge}
+              </div>
+              <div class="tree-node-children">
+                ${childrenHtml}
+              </div>
+            </div>
+          `;
+        } else {
+          let typeCls = 'tree-str';
+          let formattedVal = JSON.stringify(val);
+          let badgeType = 'str';
+          if (typeof val === 'number') {
+            typeCls = 'tree-num';
+            badgeType = 'num';
+          } else if (typeof val === 'boolean') {
+            typeCls = 'tree-bool';
+            badgeType = 'bool';
+          } else if (val === null) {
+            typeCls = 'tree-null';
+            badgeType = 'null';
+          }
+
+          return `
+            <div class="tree-node tree-leaf" data-path="${escapeHtml(path)}" style="margin-left:${depth * 14}px;" onclick="JsonViewer.selectPath('${escapeHtml(path)}')">
+              <span class="tree-bullet">•</span>
+              <span class="tree-key">${escapeHtml(String(key))}</span><span class="tree-colon">:</span>
+              <span class="tree-val ${typeCls}">${escapeHtml(formattedVal)}</span>
+              <span class="tree-badge badge-${badgeType}">${badgeType}</span>
+            </div>
+          `;
+        }
+      },
+
+      selectPath(path) {
+        this.activePath = path;
+        const el = document.getElementById('json-active-path');
+        if (el) el.innerText = path;
+      },
+
+      copyActivePath() {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(this.activePath).then(() => {
+            if (typeof App !== 'undefined') App.showToast(`Copied path: ${this.activePath}`);
+          });
+        }
+      },
+
+      toggleNode(nodeId, path) {
+        this.selectPath(path);
+        const node = document.getElementById(nodeId);
+        if (!node) return;
+        node.classList.toggle('collapsed');
+      },
+
+      expandAll() {
+        const nodes = document.querySelectorAll('#json-tree-root .tree-node');
+        nodes.forEach(n => n.classList.remove('collapsed'));
+      },
+
+      collapseAll() {
+        const nodes = document.querySelectorAll('#json-tree-root .tree-node');
+        nodes.forEach(n => n.classList.add('collapsed'));
+      },
+
+      filterTree(query) {
+        const q = (query || '').toLowerCase().trim();
+        const leafNodes = document.querySelectorAll('#json-tree-root .tree-leaf');
+        if (!q) {
+          leafNodes.forEach(n => n.style.display = '');
+          return;
+        }
+        leafNodes.forEach(node => {
+          const text = node.innerText.toLowerCase();
+          node.style.display = text.includes(q) ? '' : 'none';
+          if (text.includes(q)) {
+            let p = node.parentElement;
+            while (p && p.id !== 'json-tree-root') {
+              if (p.classList && p.classList.contains('tree-node')) {
+                p.classList.remove('collapsed');
+              }
+              p = p.parentElement;
+            }
+          }
+        });
+      }
+    };
+
+    const TomlViewer = {
+      parse(text) {
+        const lines = text.split('\n');
+        const sections = [];
+        let currentSection = {
+          title: '(Global)',
+          type: 'table',
+          line: 1,
+          items: [],
+          comments: []
+        };
+        sections.push(currentSection);
+
+        lines.forEach((line, idx) => {
+          const trimmed = line.trim();
+          const lineNo = idx + 1;
+          if (!trimmed) return;
+          if (trimmed.startsWith('#')) {
+            currentSection.comments.push({ line: lineNo, text: trimmed });
+            return;
+          }
+          const tableMatch = trimmed.match(/^\[\[([\w\.\-]+)\]\]/) || trimmed.match(/^\[([\w\.\-]+)\]/);
+          if (tableMatch) {
+            const isArray = trimmed.startsWith('[[');
+            currentSection = {
+              title: tableMatch[1],
+              type: isArray ? 'array_table' : 'table',
+              line: lineNo,
+              items: [],
+              comments: []
+            };
+            sections.push(currentSection);
+            return;
+          }
+
+          const kvMatch = trimmed.match(/^([\w\.\-]+)\s*=\s*(.*)$/);
+          if (kvMatch) {
+            currentSection.items.push({
+              line: lineNo,
+              key: kvMatch[1],
+              value: kvMatch[2],
+              raw: trimmed
+            });
+          }
+        });
+
+        return sections.filter(s => s.items.length > 0 || s.title !== '(Global)');
+      },
+
+      renderCode(text) {
+        const lines = text.split('\n');
+        const lineCount = lines.length;
+        const sizeBytes = new Blob([text]).size;
+        const sizeFormatted = sizeBytes > 1024 ? (sizeBytes / 1024).toFixed(1) + ' KB' : sizeBytes + ' B';
+
+        const highlightedLines = lines.map((line, idx) => {
+          const lineNum = idx + 1;
+          const highlighted = this.highlightTomlLine(line);
+          const isHeader = /^\s*\[\[?[\w\.\-]+\]\]?/.test(line);
+          return `<div class="code-line ${isHeader ? 'line-toml-header' : ''}" id="toml-line-${lineNum}"><span class="line-num">${lineNum}</span><span class="line-text">${highlighted || ' '}</span></div>`;
+        }).join('');
+
+        return `
+          <div class="structured-container">
+            <div class="structured-top-bar">
+              <div class="structured-info-badge">
+                <span class="badge-tag">TOML</span>
+                <span>${lineCount} lines</span>
+                <span>•</span>
+                <span>${sizeFormatted}</span>
+              </div>
+              <div class="structured-actions">
+                <button class="btn btn-sm" onclick="App.copyActiveFileContent(this)" title="Copy TOML">📋 Copy</button>
+                <button class="btn btn-sm btn-primary" onclick="CodeBeautifier.run()" title="Format TOML (Ctrl+Alt+B)">⚡ Beautify</button>
+              </div>
+            </div>
+            <div class="structured-code-body">
+              <pre class="structured-code-pre">${highlightedLines}</pre>
+            </div>
+          </div>
+        `;
+      },
+
+      highlightTomlLine(line) {
+        if (!line) return '';
+        if (/^\s*#/.test(line)) {
+          return `<span class="toml-comment">${escapeHtml(line)}</span>`;
+        }
+        if (/^\s*\[\[?[\w\.\-]+\]\]?/.test(line)) {
+          const m = line.match(/^(\s*)(\[\[?[\w\.\-]+\]\]?)(.*)$/);
+          if (m) {
+            const commentPart = m[3] ? `<span class="toml-comment">${escapeHtml(m[3])}</span>` : '';
+            return `${escapeHtml(m[1])}<span class="toml-section">${escapeHtml(m[2])}</span>${commentPart}`;
+          }
+        }
+        const kv = line.match(/^(\s*)([\w\.\-]+)(\s*=\s*)(.*)$/);
+        if (kv) {
+          const lead = escapeHtml(kv[1]);
+          const key = `<span class="toml-key">${escapeHtml(kv[2])}</span>`;
+          const eq = `<span class="toml-punct">${escapeHtml(kv[3])}</span>`;
+          const valAndComment = kv[4];
+
+          let valPart = valAndComment;
+          let inlineComment = '';
+          const cIdx = valAndComment.indexOf('#');
+          if (cIdx !== -1 && !/["'].*#.*["']/.test(valAndComment)) {
+            valPart = valAndComment.substring(0, cIdx);
+            inlineComment = `<span class="toml-comment">${escapeHtml(valAndComment.substring(cIdx))}</span>`;
+          }
+
+          let valColored = escapeHtml(valPart);
+          if (/^\s*["']/.test(valPart)) {
+            valColored = `<span class="toml-str">${valColored}</span>`;
+          } else if (/^\s*(true|false)\b/i.test(valPart)) {
+            valColored = `<span class="toml-bool">${valColored}</span>`;
+          } else if (/^\s*[-+]?\d+(\.\d+)?\b/.test(valPart)) {
+            valColored = `<span class="toml-num">${valColored}</span>`;
+          } else if (/^\s*\[/.test(valPart)) {
+            valColored = `<span class="toml-arr">${valColored}</span>`;
+          }
+
+          return `${lead}${key}${eq}${valColored}${inlineComment}`;
+        }
+
+        return escapeHtml(line);
+      },
+
+      renderTree(text) {
+        const sections = this.parse(text);
+        const sectionsHtml = sections.map((sec, idx) => {
+          const cardId = `toml-sec-${idx}`;
+          const isArr = sec.type === 'array_table';
+          const badge = isArr ? `[[ ${sec.title} ]]` : `[ ${sec.title} ]`;
+          const itemsHtml = sec.items.map(it => `
+            <div class="toml-tree-row">
+              <span class="toml-key">${escapeHtml(it.key)}</span>
+              <span class="toml-punct">=</span>
+              <span class="toml-val">${escapeHtml(it.value)}</span>
+            </div>
+          `).join('');
+
+          return `
+            <div class="toml-card" id="${cardId}">
+              <div class="toml-card-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                <span class="tree-chevron">▾</span>
+                <span class="toml-section-badge ${isArr ? 'badge-arr' : 'badge-tbl'}">${escapeHtml(badge)}</span>
+                <span class="toml-item-count">${sec.items.length} items</span>
+              </div>
+              <div class="toml-card-body">
+                ${itemsHtml || '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No keys in section</div>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="structured-container">
+            <div class="structured-top-bar">
+              <div class="structured-info-badge">
+                <span class="badge-tag">TOML Tree</span>
+                <span>${sections.length} sections</span>
+              </div>
+              <div class="structured-actions">
+                <button class="btn btn-sm" onclick="App.copyActiveFileContent(this)">📋 Copy</button>
+                <button class="btn btn-sm btn-primary" onclick="CodeBeautifier.run()">⚡ Beautify</button>
+              </div>
+            </div>
+            <div class="structured-tree-body" style="padding:12px;">
+              ${sectionsHtml}
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    const CodeBeautifier = {
+      formatJson(rawText, indent = 2) {
+        try {
+          const parsed = JSON.parse(rawText);
+          return JSON.stringify(parsed, null, indent);
+        } catch (e) {
+          throw e;
+        }
+      },
+
+      minifyJson(rawText) {
+        try {
+          const parsed = JSON.parse(rawText);
+          return JSON.stringify(parsed);
+        } catch (e) {
+          throw e;
+        }
+      },
+
+      formatToml(rawText) {
+        const lines = rawText.split('\n');
+        const result = [];
+        let prevWasBlank = false;
+
+        lines.forEach((line) => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            if (!prevWasBlank && result.length > 0) {
+              result.push('');
+              prevWasBlank = true;
+            }
+            return;
+          }
+          prevWasBlank = false;
+
+          // Comment
+          if (trimmed.startsWith('#')) {
+            result.push(line);
+            return;
+          }
+
+          // Section header [table] or [[array]]
+          if (/^\[\[?[\w\.\-]+\]\]?/.test(trimmed)) {
+            if (result.length > 0 && result[result.length - 1] !== '') {
+              result.push('');
+            }
+            result.push(trimmed);
+            return;
+          }
+
+          // Key = Value normalization
+          const kv = trimmed.match(/^([\w\.\-]+)\s*=\s*(.*)$/);
+          if (kv) {
+            const key = kv[1];
+            let val = kv[2];
+            result.push(`${key} = ${val}`);
+            return;
+          }
+
+          result.push(line);
+        });
+
+        return result.join('\n');
+      },
+
+      formatMarkdown(rawText) {
+        const lines = rawText.split('\n');
+        const result = [];
+        let tableBuffer = [];
+
+        const flushTable = () => {
+          if (tableBuffer.length === 0) return;
+          if (tableBuffer.length >= 2 && tableBuffer.some(l => /\|?\s*[-:]+[-| :]*\|/.test(l))) {
+            result.push(this.alignTable(tableBuffer));
+          } else {
+            result.push(...tableBuffer);
+          }
+          tableBuffer = [];
+        };
+
+        for (let line of lines) {
+          if (line.trim().startsWith('|') || (line.includes('|') && line.trim().endsWith('|'))) {
+            tableBuffer.push(line);
+          } else {
+            flushTable();
+            result.push(line);
+          }
+        }
+        flushTable();
+        return result.join('\n');
+      },
+
+      alignTable(rows) {
+        const parsedRows = rows.map(r => {
+          let trimmed = r.trim();
+          if (trimmed.startsWith('|')) trimmed = trimmed.substring(1);
+          if (trimmed.endsWith('|')) trimmed = trimmed.slice(0, -1);
+          return trimmed.split('|').map(c => c.trim());
+        });
+
+        const colCount = Math.max(...parsedRows.map(r => r.length));
+        const colWidths = new Array(colCount).fill(3);
+
+        parsedRows.forEach((row, rowIdx) => {
+          if (rowIdx === 1 && row.every(c => /^:?[-]+:?$/.test(c))) return;
+          row.forEach((cell, colIdx) => {
+            colWidths[colIdx] = Math.max(colWidths[colIdx] || 0, cell.length);
+          });
+        });
+
+        return parsedRows.map((row, rowIdx) => {
+          if (rowIdx === 1 && row.every(c => /^:?[-]+:?$/.test(c))) {
+            const sepCells = colWidths.map(w => '-'.repeat(Math.max(w, 3)));
+            return `| ${sepCells.join(' | ')} |`;
+          }
+          const cells = [];
+          for (let i = 0; i < colCount; i++) {
+            const val = row[i] || '';
+            const width = colWidths[i] || 3;
+            cells.push(val.padEnd(width, ' '));
+          }
+          return `| ${cells.join(' | ')} |`;
+        }).join('\n');
+      },
+
+      run() {
+        const file = App.files[App.activeFileIndex];
+        if (!file) return;
+
+        const fileType = App.getFileType(file);
+        const text = App.editorEl.value;
+
+        try {
+          let formatted = text;
+          let msg = '';
+          if (fileType === 'json') {
+            formatted = this.formatJson(text, 2);
+            msg = '⚡ Beautified JSON (2 spaces)';
+          } else if (fileType === 'toml') {
+            formatted = this.formatToml(text);
+            msg = '⚡ Beautified TOML';
+          } else {
+            formatted = this.formatMarkdown(text);
+            msg = '⚡ Beautified Markdown Tables';
+          }
+
+          if (formatted !== text) {
+            App.editorEl.value = formatted;
+            file.content = formatted;
+            App.markDirty();
+            App.renderMarkdown();
+            App.showToast(msg);
+          } else {
+            App.showToast('Document already cleanly formatted');
+          }
+        } catch (e) {
+          App.showToast(`Format error: ${e.message}`);
+        }
+      }
+    };
+
+    /* =========================================================================
        4. APP STATE, MULTI-FILE MANAGER & NVIM KEYBINDINGS
        ========================================================================= */
     const App = {
@@ -10320,6 +11315,39 @@
       files: [],
       activeFileIndex: 0,
       mode: 'preview', // Default view mode is Preview
+      structuredViewMode: 'code', // 'code' (default) or 'tree'
+
+      getFileType(file) {
+        if (!file) return 'markdown';
+        const name = (file.name || file.path || '').toLowerCase();
+        if (name.endsWith('.json')) return 'json';
+        if (name.endsWith('.toml')) return 'toml';
+        if (name.endsWith('.md') || name.endsWith('.markdown')) return 'markdown';
+        const text = (file.content || '').trim();
+        if ((text.startsWith('{') && text.endsWith('}')) || (text.startsWith('[') && text.endsWith(']'))) {
+          try { JSON.parse(text); return 'json'; } catch (_) {}
+        }
+        return 'markdown';
+      },
+
+      setStructuredViewMode(mode) {
+        this.structuredViewMode = mode;
+        const btnCode = document.getElementById('struct-mode-code');
+        const btnTree = document.getElementById('struct-mode-tree');
+        if (btnCode) btnCode.classList.toggle('active', mode === 'code');
+        if (btnTree) btnTree.classList.toggle('active', mode === 'tree');
+        this.renderMarkdown();
+      },
+
+      copyActiveFileContent(btn) {
+        const file = this.files[this.activeFileIndex];
+        if (!file) return;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(this.editorEl.value).then(() => {
+            this.showToast('📋 Copied document content');
+          });
+        }
+      },
 
       // Shared Vim marks across edit and preview modes
       marks: {},
@@ -10999,6 +12027,14 @@
         // Ensure active tab is visible in scroll
         const activeTab = this.tabsContainerEl.querySelector('.tab-item.active');
         if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+
+        // Update structured view toggle visibility
+        const currentFile = this.files[this.activeFileIndex];
+        const fileType = this.getFileType(currentFile);
+        const structGroup = document.getElementById('structured-view-mode');
+        if (structGroup) {
+          structGroup.style.display = (fileType === 'json' || fileType === 'toml') ? 'inline-flex' : 'none';
+        }
       },
 
       tabContextMenuTargetIndex: null,
@@ -11229,6 +12265,16 @@
         document.title = title;
         this.sendIpc('set_title', { title });
 
+        const fileType = this.getFileType(file);
+        const structGroup = document.getElementById('structured-view-mode');
+        if (structGroup) {
+          structGroup.style.display = (fileType === 'json' || fileType === 'toml') ? 'inline-flex' : 'none';
+        }
+        const btnCode = document.getElementById('struct-mode-code');
+        const btnTree = document.getElementById('struct-mode-tree');
+        if (btnCode) btnCode.classList.toggle('active', this.structuredViewMode === 'code');
+        if (btnTree) btnTree.classList.toggle('active', this.structuredViewMode === 'tree');
+
         this.updateEditor();
         this.renderMarkdown();
 
@@ -11279,6 +12325,33 @@
 
       renderMarkdown() {
         const text = this.editorEl.value;
+        const currentFile = this.files[this.activeFileIndex];
+        const fileType = this.getFileType(currentFile);
+
+        if (fileType === 'json') {
+          if (this.structuredViewMode === 'tree') {
+            this.previewEl.innerHTML = JsonViewer.renderTree(text);
+          } else {
+            this.previewEl.innerHTML = JsonViewer.renderCode(text);
+          }
+          if (TableOfContents.isOpen) {
+            TableOfContents.build();
+          }
+          return;
+        }
+
+        if (fileType === 'toml') {
+          if (this.structuredViewMode === 'tree') {
+            this.previewEl.innerHTML = TomlViewer.renderTree(text);
+          } else {
+            this.previewEl.innerHTML = TomlViewer.renderCode(text);
+          }
+          if (TableOfContents.isOpen) {
+            TableOfContents.build();
+          }
+          return;
+        }
+
         DynamicGraphRenderer.parsedCache.clear();
         this.previewEl.innerHTML = SimpleMarkdown.render(text);
 
@@ -11402,6 +12475,14 @@
             if (typeof AiAgent !== 'undefined') {
               AiAgent.toggle();
             }
+            return;
+          }
+
+          // Global shortcut: Ctrl+Alt+B or Shift+Alt+F beautifies / formats document
+          if (((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'b' || e.key === 'B')) ||
+              (e.shiftKey && e.altKey && (e.key === 'f' || e.key === 'F'))) {
+            e.preventDefault();
+            CodeBeautifier.run();
             return;
           }
 
@@ -12839,6 +13920,20 @@
         document.getElementById('mode-preview').addEventListener('click', () => this.setMode('preview'));
         document.getElementById('mode-split').addEventListener('click', () => this.setMode('split'));
         document.getElementById('mode-edit').addEventListener('click', () => this.setMode('edit'));
+
+        const btnBeautify = document.getElementById('btn-beautify');
+        if (btnBeautify) {
+          btnBeautify.addEventListener('click', () => CodeBeautifier.run());
+        }
+
+        const btnStructCode = document.getElementById('struct-mode-code');
+        const btnStructTree = document.getElementById('struct-mode-tree');
+        if (btnStructCode) {
+          btnStructCode.addEventListener('click', () => this.setStructuredViewMode('code'));
+        }
+        if (btnStructTree) {
+          btnStructTree.addEventListener('click', () => this.setStructuredViewMode('tree'));
+        }
 
         const btnVim = document.getElementById('btn-vim-toggle');
         if (btnVim) {

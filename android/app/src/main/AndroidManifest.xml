@@ -36,6 +36,11 @@
                 <data android:mimeType="text/markdown" />
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="text/x-markdown" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="text/json" />
+                <data android:mimeType="application/toml" />
+                <data android:mimeType="text/x-toml" />
+                <data android:mimeType="text/toml" />
             </intent-filter>
         </activity>
     </application>
