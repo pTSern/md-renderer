@@ -148,19 +148,31 @@ jobs:
           cp logo.png android/app/src/main/assets/ || true
           ls -la android/app/src/main/assets/
 
-      - name: Build Android Release APK
+      - name: Build Android APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
 
       - name: Package Android Artifact
         run: |
           mkdir -p artifacts
-          if ls android/app/build/outputs/apk/release/*.apk 1> /dev/null 2>&1; then
-            cp android/app/build/outputs/apk/release/*.apk artifacts/mdviewer-android.apk
+          echo "=== Searching for generated APK files ==="
+          find android/app/build/outputs/apk/ -type f -name "*.apk" || true
+          
+          # Prioritize release APK, fallback to debug APK
+          APK_FILE=$(find android/app/build/outputs/apk/ -type f -name "*release*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            APK_FILE=$(find android/app/build/outputs/apk/ -type f -name "*.apk" | head -n 1)
+          fi
+          
+          if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
+            echo "Packaging APK: $APK_FILE -> artifacts/mdviewer-android.apk"
+            cp "$APK_FILE" artifacts/mdviewer-android.apk
           else
-            cp android/app/build/outputs/apk/debug/*.apk artifacts/mdviewer-android.apk
+            echo "ERROR: No APK file found in android/app/build/outputs/apk/"
+            find android -maxdepth 5 || true
+            exit 1
           fi
           ls -la artifacts/
 
