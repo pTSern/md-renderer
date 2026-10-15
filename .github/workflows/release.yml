@@ -168,7 +168,7 @@ jobs:
         shell: bash
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace || gradle assembleDebug assembleRelease --no-daemon --stacktrace
 
       - name: Package Android Artifact
         shell: bash
