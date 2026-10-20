@@ -1758,7 +1758,7 @@
     }
 
     /* =========================================================================
-       DYNAMIC BOX GRAPH STYLING (NEXUS-GRAPH STYLE)
+       DYNAMIC FLOWCHART - CLASSIC SVG LOOK WITH RE-POSITIONABLE BOXES
        ========================================================================= */
     .dyn-graph-viewport {
       width: 100%;
@@ -1766,8 +1766,8 @@
       position: relative;
       overflow: hidden;
       background-color: var(--bg-secondary);
-      background-image: radial-gradient(rgba(205, 214, 244, 0.16) 1.2px, transparent 1.2px);
-      background-size: 24px 24px;
+      background-image: radial-gradient(rgba(205, 214, 244, 0.14) 1px, transparent 1px);
+      background-size: 20px 20px;
       cursor: grab;
       user-select: none;
     }
@@ -1775,7 +1775,7 @@
       cursor: grabbing !important;
     }
     [data-theme="light"] .dyn-graph-viewport {
-      background-image: radial-gradient(rgba(15, 23, 42, 0.13) 1.2px, transparent 1.2px);
+      background-image: radial-gradient(rgba(15, 23, 42, 0.12) 1px, transparent 1px);
     }
 
     .dyn-graph-world {
@@ -1790,321 +1790,245 @@
       position: absolute;
       left: 0;
       top: 0;
-      width: 4000px;
-      height: 4000px;
+      width: 6000px;
+      height: 6000px;
       pointer-events: none;
-      z-index: 1;
+      z-index: 2;
       overflow: visible;
     }
 
+    /* Classic Connectors / Edges */
     .dyn-edge-path {
       fill: none;
       stroke: var(--accent);
-      stroke-width: 2.4;
+      stroke-width: 2.2;
       stroke-linecap: round;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
-      transition: stroke 0.12s;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));
+      transition: stroke 0.12s, stroke-width 0.12s;
+    }
+    .dyn-edge-path.edge-dashed {
+      stroke-dasharray: 6, 4;
+    }
+    .dyn-edge-path.edge-thick {
+      stroke-width: 3.5;
     }
     .dyn-edge-path:hover {
-      stroke: var(--accent-hover);
+      stroke: var(--accent-hover, #b4befe);
       stroke-width: 3.2;
     }
 
     .dyn-edge-label-wrap {
       position: absolute;
       transform: translate(-50%, -50%);
-      z-index: 3;
+      z-index: 5;
       pointer-events: none;
     }
     .dyn-edge-label {
       background: var(--bg-card);
-      border: 1.2px solid var(--accent);
-      color: var(--accent);
-      font-size: 10.5px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      padding: 2px 8px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      white-space: nowrap;
-    }
-
-    /* Dynamic Subgraph Container Box (nexus-graph movable box) */
-    .dyn-box {
-      position: absolute;
-      background: var(--bg-card);
-      border: 1.8px solid var(--border);
-      border-radius: 9px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      user-select: none;
-      transform-origin: top left;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .dyn-box:hover, .dyn-box.is-selected {
-      border-color: var(--accent);
-      box-shadow: 0 10px 32px var(--accent-glow), 0 4px 14px rgba(0,0,0,0.4);
-    }
-
-    .dyn-box.is-dragging {
-      opacity: 0.95;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-      cursor: grabbing !important;
-      z-index: 10 !important;
-    }
-
-    .dyn-box-header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-light);
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: move;
-      gap: 8px;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-    }
-
-    .dyn-box-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 700;
+      border: 1.2px solid var(--border);
       color: var(--text-primary);
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      padding: 2px 7px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       white-space: nowrap;
-      flex: 1;
     }
 
-    .dyn-box-icon {
-      font-size: 13px;
-      opacity: 0.85;
+    /* Subgraph Cluster Frame */
+    .dyn-subgraph-cluster {
+      position: absolute;
+      border: 1.5px dashed var(--accent);
+      border-radius: 10px;
+      background: rgba(137, 180, 250, 0.04);
+      z-index: 1;
+      pointer-events: auto;
+      box-sizing: border-box;
+      transition: border-color 0.15s, background-color 0.15s;
     }
-
-    .dyn-box-controls {
+    [data-theme="light"] .dyn-subgraph-cluster {
+      background: rgba(59, 130, 246, 0.03);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .dyn-subgraph-cluster:hover {
+      border-color: var(--accent);
+      background: rgba(137, 180, 250, 0.08);
+    }
+    .dyn-subgraph-cluster.is-dragging {
+      cursor: grabbing !important;
+      opacity: 0.9;
+      z-index: 25 !important;
+    }
+    .dyn-subgraph-header {
+      position: absolute;
+      top: 6px;
+      left: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent);
       display: flex;
       align-items: center;
-      gap: 3px;
-      flex-shrink: 0;
+      gap: 5px;
+      cursor: grab;
+      user-select: none;
+      background: var(--bg-secondary);
+      padding: 2px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border-light);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .dyn-subgraph-header:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent);
     }
 
-    .dyn-scale-btn {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-light);
-      color: var(--text-secondary);
-      width: 20px;
-      height: 20px;
+    /* =========================================================================
+       CLASSIC FLOWCHART NODE BOXES (RE-POSITIONABLE)
+       ========================================================================= */
+    .dyn-node-box {
+      position: absolute;
+      z-index: 10;
+      cursor: grab;
+      user-select: none;
+      box-sizing: border-box;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 3px;
-      font-size: 11px;
-      cursor: pointer;
-      font-family: var(--font-mono);
-      line-height: 1;
-      padding: 0;
-      transition: all 0.1s;
-    }
-    .dyn-scale-btn:hover {
-      background: var(--border);
-      color: var(--text-primary);
-      border-color: var(--accent);
-    }
-
-    .dyn-box-scale-val {
-      font-size: 10px;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      min-width: 32px;
       text-align: center;
-      cursor: pointer;
-      padding: 1px 3px;
-      border-radius: 2px;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.08s;
     }
-    .dyn-box-scale-val:hover {
-      background: var(--bg-tertiary);
-      color: var(--accent);
+    .dyn-node-box:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 4px 16px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.3);
     }
-
-    .dyn-box-body {
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      background: var(--bg-primary);
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-    }
-
-    /* Node items inside subgraph */
-    .dyn-node-item {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-light);
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 11.5px;
-      color: var(--text-primary);
-      line-height: 1.45;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-height: 38px;
-      box-sizing: border-box;
-      transition: border-color 0.12s, background-color 0.12s, box-shadow 0.12s;
-    }
-    .dyn-node-item:hover {
-      border-color: var(--accent);
-      background: var(--bg-tertiary);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .dyn-node-item.is-decision {
-      border-left: 3.5px solid #f59e0b;
-      background: rgba(245, 158, 11, 0.04);
-    }
-    .dyn-node-item.is-decision:hover {
-      border-color: #f59e0b;
-      background: rgba(245, 158, 11, 0.09);
-    }
-
-    .dyn-node-header-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .dyn-node-title {
-      font-weight: 600;
-      font-size: 11.5px;
-      color: var(--text-primary);
-      line-height: 1.35;
-      word-break: break-word;
-    }
-
-    .dyn-node-badges {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .dyn-badge-decision {
-      font-size: 9px;
-      font-weight: 700;
-      color: #f59e0b;
-      background: rgba(245, 158, 11, 0.15);
-      padding: 1px 5px;
-      border-radius: 3px;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      white-space: nowrap;
-    }
-
-    .dyn-node-id-tag {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: var(--bg-primary);
-      border: 1px solid var(--border-light);
-      padding: 1px 5px;
-      border-radius: 3px;
-      white-space: nowrap;
-    }
-
-    .dyn-node-desc {
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      color: var(--text-secondary);
-      background: var(--bg-primary);
-      border: 1px solid var(--border-light);
-      border-left: 2.5px solid var(--accent);
-      padding: 4px 7px;
-      border-radius: 4px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.35;
-    }
-
-    /* Standalone Node Card */
-    .dyn-node-card {
-      position: absolute;
-      background: var(--bg-card);
-      border: 1.8px solid var(--border);
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.28);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      min-height: 42px;
-      box-sizing: border-box;
-      user-select: none;
-      transform-origin: top left;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .dyn-node-card:hover, .dyn-node-card.is-selected {
-      border-color: var(--accent);
-      box-shadow: 0 8px 24px var(--accent-glow);
-    }
-    .dyn-node-card.is-dragging {
-      opacity: 0.95;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    .dyn-node-box.is-dragging {
       cursor: grabbing !important;
-      z-index: 10 !important;
-    }
-    .dyn-node-card-header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-light);
-      padding: 7px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: move;
-      gap: 6px;
-      border-top-left-radius: 7px;
-      border-top-right-radius: 7px;
-    }
-    .dyn-node-card-title-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      overflow: hidden;
-    }
-    .dyn-node-card-title-group .dyn-node-title {
-      font-weight: 600;
-      font-size: 11.5px;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .dyn-node-card-body {
-      padding: 8px 10px;
-      background: var(--bg-primary);
-      border-bottom-left-radius: 7px;
-      border-bottom-right-radius: 7px;
+      z-index: 40 !important;
+      opacity: 0.95;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
     }
 
-    /* Box Corner Resizer */
-    .dyn-box-resizer {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      width: 14px;
-      height: 14px;
-      cursor: nwse-resize;
-      background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
-      border-bottom-right-radius: 6px;
-      opacity: 0.6;
+    /* Shape: Rectangle (A[Text]) */
+    .dyn-node-box.shape-rect {
+      background: var(--bg-card);
+      border: 1.8px solid var(--accent);
+      border-radius: 6px;
+      padding: 8px 16px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
     }
-    .dyn-box-resizer:hover {
-      opacity: 1;
+
+    /* Shape: Rounded / Stadium / Pill (A(Text) or A([Text])) */
+    .dyn-node-box.shape-round,
+    .dyn-node-box.shape-stadium {
+      background: var(--bg-card);
+      border: 1.8px solid var(--accent);
+      border-radius: 999px;
+      padding: 8px 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    /* Shape: Circle (A((Text))) */
+    .dyn-node-box.shape-circle {
+      background: var(--bg-card);
+      border: 1.8px solid var(--accent);
+      border-radius: 50%;
+      padding: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    /* Shape: Subroutine (A[[Text]]) - double borders */
+    .dyn-node-box.shape-subroutine {
+      background: var(--bg-card);
+      border: 1.8px solid var(--accent);
+      border-left: 5px double var(--accent);
+      border-right: 5px double var(--accent);
+      border-radius: 4px;
+      padding: 8px 18px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    /* Shape: Cylinder / Database (A[(Text)]) */
+    .dyn-node-box.shape-cylinder {
+      background: var(--bg-card);
+      border: 1.8px solid var(--accent);
+      border-radius: 8px / 16px;
+      padding: 10px 18px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+      position: relative;
+    }
+    .dyn-node-box.shape-cylinder::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 8px;
+      right: 8px;
+      height: 6px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+
+    /* Shape: Diamond / Decision (A{Text}) */
+    .dyn-node-box.shape-diamond {
+      background: transparent;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dyn-node-diamond-bg {
+      position: absolute;
+      width: 72%;
+      height: 72%;
+      top: 14%;
+      left: 14%;
+      background: var(--bg-card);
+      border: 1.8px solid #f59e0b;
+      transform: rotate(45deg);
+      border-radius: 4px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+      transition: all 0.15s;
+    }
+    .dyn-node-box.shape-diamond:hover .dyn-node-diamond-bg {
+      border-color: #fbbf24;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+    .dyn-node-diamond-text {
+      position: relative;
+      z-index: 2;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      line-height: 1.35;
+      max-width: 130px;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    /* Shape: Hexagon (A{{Text}}) */
+    .dyn-node-box.shape-hexagon {
+      background: var(--bg-card);
+      border: 1.8px solid var(--accent);
+      clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
+      padding: 8px 22px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    /* Node Text */
+    .dyn-node-text {
+      font-family: var(--font-ui);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.35;
+      white-space: pre-line;
+      word-break: break-word;
+      pointer-events: none;
+      padding: 2px 4px;
     }
 
     /* Drag & Drop Full Window Overlay */
@@ -5439,7 +5363,7 @@
     }
 
     /* =========================================================================
-       4. DYNAMIC BOX GRAPH ENGINE (nexus-graph style movable & scalable boxes)
+       4. DYNAMIC FLOWCHART ENGINE (Classic SVG style with re-positionable boxes)
        ========================================================================= */
     const DynamicGraphRenderer = {
       instances: new Map(),
@@ -5448,7 +5372,7 @@
       canRender(code) {
         if (!code) return false;
         const trimmed = code.trim();
-        return /^(flowchart|graph)\b/i.test(trimmed);
+        return /^(?:flowchart|graph)/i.test(trimmed);
       },
 
       cacheParsed(blockId, parsed) {
@@ -5457,10 +5381,11 @@
 
       parse(src) {
         // Pre-process: protect newlines inside quotes, brackets, braces, and parentheses
-        let protectedSrc = src.replace(/(\[[^\]]*?\]|\([^\)]*?\)|(?:\{[^\}]*?\}))/gs, (match) => {
+        let protectedSrc = src.replace(/([[^]]*?]|([^)]*?)|(?:{[^}]*?}))/gs, (match) => {
           return match.replace(/\r?\n/g, '\\n');
         });
 
+        let direction = 'TD';
         const subgraphs = [];
         const nodeMap = new Map();
         const edges = [];
@@ -5468,13 +5393,21 @@
 
         function extractNode(str) {
           str = str.trim();
-          const m = str.match(/^([a-zA-Z0-9_\-]+)\s*(\{\{|\(\[\s*|\[\[|\(\(|\(\[\(|\{|\(|\[)\s*(["']?)([\s\S]*?)\3\s*(\}\}|\s*\]\)|\]\]|\)\)|\)\s*\]\)\}|\}|\)|\])$/);
+          // Match shapes: {{hexagon}}, {diamond}, [(cylinder)], ((circle)), ([stadium]), [[subroutine]], (round), [rect]
+          const m = str.match(/^([a-zA-Z0-9_\-]+)\s*(\{\{|\{|\(\[\(|\(\[|\[\(|\[\[|\(\(|\(|\{|\[)\s*(["']?)([\s\S]*?)\3\s*(\}\}\}|\}|(?:\]\)\))|\s*\]\)|(?:\]\))|(?:\]\])|(?:\)\))|\)|\}|\])$/);
           if (m) {
             const id = m[1];
             const openSym = m[2];
             let shape = 'rect';
-            if (openSym === '{' || openSym === '{{') shape = 'diamond';
-            else if (openSym === '(' || openSym === '((' || openSym.includes('(')) shape = 'round';
+            if (openSym === '{{') shape = 'hexagon';
+            else if (openSym === '{') shape = 'diamond';
+            else if (openSym === '[(' || openSym === '([(') shape = 'cylinder';
+            else if (openSym === '((') shape = 'circle';
+            else if (openSym === '([' || openSym === '([') shape = 'stadium';
+            else if (openSym === '[[') shape = 'subroutine';
+            else if (openSym === '(') shape = 'round';
+            else shape = 'rect';
+
             const label = m[4].trim().replace(/\\n/g, '\n');
             return { id, label, shape };
           }
@@ -5489,15 +5422,21 @@
         for (let line of lines) {
           line = line.trim();
           if (!line || line.startsWith('%%')) continue;
-          if (/^(flowchart|graph)\b/i.test(line)) continue;
-          if (/^(classDef|style|click)\b/i.test(line)) continue;
+
+          const dirMatch = line.match(/^(?:flowchart|graph)\s+([A-Z]{2})\b/i);
+          if (dirMatch) {
+            direction = dirMatch[1].toUpperCase();
+            continue;
+          }
+          if (/^(?:flowchart|graph)\b/i.test(line)) continue;
+          if (/^(?:classDef|style|click)\b/i.test(line)) continue;
 
           // Subgraph start
           const sgMatch = line.match(/^subgraph\s+([a-zA-Z0-9_\-]+)(?:\s*\[\s*(["']?)([\s\S]*?)\2\s*\])?/i);
           if (sgMatch) {
             const id = sgMatch[1];
             const title = (sgMatch[3] !== undefined ? sgMatch[3] : id).replace(/\\n/g, '\n').trim();
-            currentSubgraph = { id, title, nodes: [] };
+            currentSubgraph = { id, title, nodeIds: [] };
             subgraphs.push(currentSubgraph);
             continue;
           }
@@ -5508,13 +5447,30 @@
             continue;
           }
 
-          // Edge connection: A --> B or A -->|Label| B
-          const edgeMatch = line.match(/^(.+?)\s*(-->|==>|-\.->|---)\s*(?:\|(["']?)([\s\S]*?)\3\|)?\s*(.+)$/);
+          // Edge matching (pipe syntax, inline text syntax, and simple arrows)
+          const edgeRegex = /^(.+?)\s*(?:(-->|==>|-\.->|---)\s*\|(["']?)([\s\S]*?)\3\|\s*|(--\s*(.*?)\s*-->|--\s*(.*?)\s*---|==\s*(.*?)\s*==>|-\.\s*(.*?)\s*\.->)|(-->|==>|-\.->|---))\s*(.+)$/;
+          const edgeMatch = line.match(edgeRegex);
+
           if (edgeMatch) {
             const leftRaw = edgeMatch[1].trim();
-            const edgeType = edgeMatch[2];
-            const edgeLabel = (edgeMatch[4] || '').trim();
-            const rightRaw = edgeMatch[5].trim();
+            let edgeType = '-->';
+            let edgeLabel = '';
+
+            if (edgeMatch[2]) {
+              edgeType = edgeMatch[2];
+              edgeLabel = (edgeMatch[4] || '').trim();
+            } else if (edgeMatch[5]) {
+              const fullToken = edgeMatch[5];
+              edgeLabel = (edgeMatch[6] || edgeMatch[7] || edgeMatch[8] || edgeMatch[9] || '').trim();
+              if (fullToken.includes('==>')) edgeType = '==>';
+              else if (fullToken.includes('.->')) edgeType = '-.->';
+              else if (fullToken.includes('---')) edgeType = '---';
+              else edgeType = '-->';
+            } else if (edgeMatch[10]) {
+              edgeType = edgeMatch[10];
+            }
+
+            const rightRaw = edgeMatch[11].trim();
 
             const leftNode = extractNode(leftRaw);
             const rightNode = extractNode(rightRaw);
@@ -5523,126 +5479,235 @@
             const toId = rightNode ? rightNode.id : rightRaw;
 
             if (leftNode && !nodeMap.has(leftNode.id)) {
-              nodeMap.set(leftNode.id, leftNode);
+              nodeMap.set(leftNode.id, { ...leftNode, subgraphId: currentSubgraph ? currentSubgraph.id : null });
+              if (currentSubgraph) currentSubgraph.nodeIds.push(leftNode.id);
             }
             if (rightNode && !nodeMap.has(rightNode.id)) {
-              nodeMap.set(rightNode.id, rightNode);
+              nodeMap.set(rightNode.id, { ...rightNode, subgraphId: currentSubgraph ? currentSubgraph.id : null });
+              if (currentSubgraph) currentSubgraph.nodeIds.push(rightNode.id);
+            }
+
+            if (!nodeMap.has(fromId)) {
+              nodeMap.set(fromId, { id: fromId, label: fromId, shape: 'rect', subgraphId: currentSubgraph ? currentSubgraph.id : null });
+              if (currentSubgraph) currentSubgraph.nodeIds.push(fromId);
+            }
+            if (!nodeMap.has(toId)) {
+              nodeMap.set(toId, { id: toId, label: toId, shape: 'rect', subgraphId: currentSubgraph ? currentSubgraph.id : null });
+              if (currentSubgraph) currentSubgraph.nodeIds.push(toId);
             }
 
             edges.push({ from: fromId, to: toId, label: edgeLabel, type: edgeType });
             continue;
           }
 
-          // Node inside subgraph
-          if (currentSubgraph) {
-            const n = extractNode(line);
-            if (n) {
-              currentSubgraph.nodes.push(n);
-              nodeMap.set(n.id, n);
-            }
-          } else {
-            const n = extractNode(line);
-            if (n && !nodeMap.has(n.id)) {
-              nodeMap.set(n.id, n);
+          // Standalone or subgraph node declaration
+          const n = extractNode(line);
+          if (n) {
+            if (!nodeMap.has(n.id)) {
+              nodeMap.set(n.id, { ...n, subgraphId: currentSubgraph ? currentSubgraph.id : null });
+              if (currentSubgraph) currentSubgraph.nodeIds.push(n.id);
+            } else if (currentSubgraph) {
+              nodeMap.get(n.id).subgraphId = currentSubgraph.id;
+              if (!currentSubgraph.nodeIds.includes(n.id)) currentSubgraph.nodeIds.push(n.id);
             }
           }
         }
 
-        // Detect standalone nodes (exclude subnodes and subgraphs themselves)
-        const subNodeIds = new Set();
-        subgraphs.forEach(sg => {
-          subNodeIds.add(sg.id);
-          sg.nodes.forEach(n => subNodeIds.add(n.id));
+        const nodes = Array.from(nodeMap.values());
+        this.computeInitialLayout({ direction, subgraphs, nodes, edges });
+        return { direction, subgraphs, nodes, edges };
+      },
+
+      computeInitialLayout(parsed) {
+        const { direction, nodes, edges } = parsed;
+        const inDegree = new Map();
+        const adj = new Map();
+        nodes.forEach(n => {
+          inDegree.set(n.id, 0);
+          adj.set(n.id, []);
         });
-        const standaloneNodes = [];
-        nodeMap.forEach((n, id) => {
-          if (!subNodeIds.has(id)) {
-            standaloneNodes.push(n);
+        edges.forEach(e => {
+          if (adj.has(e.from)) adj.get(e.from).push(e.to);
+          if (inDegree.has(e.to)) inDegree.set(e.to, inDegree.get(e.to) + 1);
+        });
+
+        // Compute layer ranks
+        const ranks = new Map();
+        const queue = [];
+        nodes.forEach(n => {
+          if (inDegree.get(n.id) === 0) {
+            ranks.set(n.id, 0);
+            queue.push(n.id);
+          }
+        });
+        if (queue.length === 0 && nodes.length > 0) {
+          ranks.set(nodes[0].id, 0);
+          queue.push(nodes[0].id);
+        }
+
+        const visitedCount = new Map();
+        while (queue.length > 0) {
+          const u = queue.shift();
+          const rU = ranks.get(u) || 0;
+          const neighbors = adj.get(u) || [];
+          for (const v of neighbors) {
+            const curR = ranks.get(v);
+            const newR = rU + 1;
+            if (curR === undefined || newR > curR) {
+              ranks.set(v, newR);
+              const vc = (visitedCount.get(v) || 0) + 1;
+              visitedCount.set(v, vc);
+              if (vc <= nodes.length) queue.push(v);
+            }
+          }
+        }
+        nodes.forEach(n => {
+          if (!ranks.has(n.id)) ranks.set(n.id, 0);
+        });
+
+        // Dimensions estimation based on shape & content
+        nodes.forEach(n => {
+          const lines = (n.label || n.id).split('\n');
+          const maxLineLen = Math.max(...lines.map(l => l.length), 1);
+          if (n.shape === 'diamond') {
+            const side = Math.max(90, Math.min(180, maxLineLen * 9.5 + 42));
+            n.w = side;
+            n.h = side;
+          } else if (n.shape === 'circle') {
+            const d = Math.max(56, Math.min(120, maxLineLen * 9 + 30));
+            n.w = d;
+            n.h = d;
+          } else if (n.shape === 'cylinder') {
+            n.w = Math.max(100, Math.min(260, maxLineLen * 8.5 + 36));
+            n.h = Math.max(52, lines.length * 18 + 26);
+          } else if (n.shape === 'hexagon') {
+            n.w = Math.max(100, Math.min(260, maxLineLen * 9 + 44));
+            n.h = Math.max(40, lines.length * 18 + 18);
+          } else {
+            n.w = Math.max(90, Math.min(260, maxLineLen * 8.5 + 32));
+            n.h = Math.max(40, lines.length * 18 + 18);
           }
         });
 
-        return { subgraphs, standaloneNodes, edges };
+        // Group by layer
+        const layerMap = new Map();
+        nodes.forEach(n => {
+          const r = ranks.get(n.id);
+          if (!layerMap.has(r)) layerMap.set(r, []);
+          layerMap.get(r).push(n);
+        });
+        const sortedRanks = Array.from(layerMap.keys()).sort((a, b) => a - b);
+
+        if (direction === 'LR' || direction === 'RL') {
+          let curX = 60;
+          const layerWidths = [];
+          sortedRanks.forEach(r => {
+            const layer = layerMap.get(r);
+            const maxW = Math.max(...layer.map(n => n.w), 80);
+            layerWidths.push({ r, maxW });
+          });
+
+          let maxTotalH = 0;
+          sortedRanks.forEach(r => {
+            const layer = layerMap.get(r);
+            const totalH = layer.reduce((s, n) => s + n.h, 0) + (layer.length - 1) * 32;
+            if (totalH > maxTotalH) maxTotalH = totalH;
+          });
+          const centerY = Math.max(220, maxTotalH / 2 + 50);
+
+          sortedRanks.forEach((r, idx) => {
+            const layer = layerMap.get(r);
+            const maxW = layerWidths[idx].maxW;
+            const totalH = layer.reduce((s, n) => s + n.h, 0) + (layer.length - 1) * 32;
+            let startY = centerY - totalH / 2;
+
+            layer.forEach(n => {
+              n.x = Math.round(curX + (maxW - n.w) / 2);
+              n.y = Math.round(startY);
+              n.origX = n.x;
+              n.origY = n.y;
+              startY += n.h + 32;
+            });
+            curX += maxW + 90;
+          });
+        } else {
+          // TD or TB
+          let curY = 50;
+          const layerHeights = [];
+          sortedRanks.forEach(r => {
+            const layer = layerMap.get(r);
+            const maxH = Math.max(...layer.map(n => n.h), 40);
+            layerHeights.push({ r, maxH });
+          });
+
+          let maxTotalW = 0;
+          sortedRanks.forEach(r => {
+            const layer = layerMap.get(r);
+            const totalW = layer.reduce((s, n) => s + n.w, 0) + (layer.length - 1) * 40;
+            if (totalW > maxTotalW) maxTotalW = totalW;
+          });
+          const centerX = Math.max(360, maxTotalW / 2 + 50);
+
+          sortedRanks.forEach((r, idx) => {
+            const layer = layerMap.get(r);
+            const maxH = layerHeights[idx].maxH;
+            const totalW = layer.reduce((s, n) => s + n.w, 0) + (layer.length - 1) * 40;
+            let startX = centerX - totalW / 2;
+
+            layer.forEach(n => {
+              n.x = Math.round(startX);
+              n.y = Math.round(curY + (maxH - n.h) / 2);
+              n.origX = n.x;
+              n.origY = n.y;
+              startX += n.w + 40;
+            });
+            curY += maxH + 60;
+          });
+        }
       },
 
       renderHtml(blockId, parsed) {
-        let boxesHtml = '';
+        let nodesHtml = '';
+        let subgraphsHtml = '';
         let overlayEdgesHtml = '';
         let labelsHtml = '';
 
-        // Render Subgraph Boxes
-        parsed.subgraphs.forEach((sg, idx) => {
-          const nodesHtml = sg.nodes.map(n => {
-            const lines = (n.label || n.id).split('\n').map(l => l.trim()).filter(Boolean);
-            const titleText = lines.length > 0 ? lines[0] : n.id;
-            const descText = lines.length > 1 ? lines.slice(1).join('\n') : '';
-            const isDecision = n.shape === 'diamond';
-
-            return `
-              <div class="dyn-node-item ${isDecision ? 'is-decision' : ''}" id="node-${blockId}-${n.id}" data-node-id="${n.id}">
-                <div class="dyn-node-header-row">
-                  <span class="dyn-node-title">${escapeHtml(titleText)}</span>
-                  <div class="dyn-node-badges">
-                    ${isDecision ? '<span class="dyn-badge-decision">◆ Decision</span>' : ''}
-                    <span class="dyn-node-id-tag">${escapeHtml(n.id)}</span>
-                  </div>
-                </div>
-                ${descText ? `<div class="dyn-node-desc">${escapeHtml(descText)}</div>` : ''}
+        // Render Subgraph Cluster Frames
+        parsed.subgraphs.forEach(sg => {
+          subgraphsHtml += `
+            <div class="dyn-subgraph-cluster" id="subgraph-${blockId}-${sg.id}" data-subgraph-id="${sg.id}" style="display:none;">
+              <div class="dyn-subgraph-header" data-subgraph-id="${sg.id}" title="Drag to move entire subgraph cluster">
+                <span class="dyn-subgraph-icon">📦</span>
+                <span class="dyn-subgraph-title">${escapeHtml(sg.title)}</span>
               </div>
-            `;
-          }).join('');
-
-          boxesHtml += `
-            <div class="dyn-box" id="dyn-box-${blockId}-${sg.id}" data-box-id="${sg.id}" style="left: 40px; top: ${40 + idx * 240}px; width: 430px;">
-              <div class="dyn-box-header">
-                <div class="dyn-box-title" title="${escapeHtml(sg.title)}">
-                  <span class="dyn-box-icon">📦</span>
-                  <span class="dyn-box-label">${escapeHtml(sg.title)}</span>
-                </div>
-                <div class="dyn-box-controls">
-                  <span class="dyn-node-id-tag">${escapeHtml(sg.id)}</span>
-                  <button class="dyn-scale-btn" data-action="scale-down" data-target="${sg.id}" title="Scale Box Smaller">−</button>
-                  <span class="dyn-box-scale-val" id="scale-val-${blockId}-${sg.id}" data-target="${sg.id}" title="Click to reset box scale">100%</span>
-                  <button class="dyn-scale-btn" data-action="scale-up" data-target="${sg.id}" title="Scale Box Larger">+</button>
-                </div>
-              </div>
-              <div class="dyn-box-body">
-                ${nodesHtml}
-              </div>
-              <div class="dyn-box-resizer" data-target="${sg.id}" title="Drag corner to scale box"></div>
             </div>
           `;
         });
 
-        // Render Standalone Nodes
-        parsed.standaloneNodes.forEach((n, idx) => {
-          const lines = (n.label || n.id).split('\n').map(l => l.trim()).filter(Boolean);
-          const titleText = lines.length > 0 ? lines[0] : n.id;
-          const descText = lines.length > 1 ? lines.slice(1).join('\n') : '';
-
-          boxesHtml += `
-            <div class="dyn-node-card" id="dyn-node-${blockId}-${n.id}" data-node-id="${n.id}" style="left: 540px; top: ${480 + idx * 130}px; width: 340px;">
-              <div class="dyn-node-card-header">
-                <div class="dyn-node-card-title-group" title="${escapeHtml(titleText)}">
-                  <span class="dyn-node-title-icon">🔹</span>
-                  <span class="dyn-node-title">${escapeHtml(titleText)}</span>
-                </div>
-                <div class="dyn-box-controls">
-                  <span class="dyn-node-id-tag">${escapeHtml(n.id)}</span>
-                  <button class="dyn-scale-btn" data-action="scale-down" data-target="${n.id}" title="Scale Smaller">−</button>
-                  <span class="dyn-box-scale-val" id="scale-val-${blockId}-${n.id}" data-target="${n.id}" title="Click to reset scale">100%</span>
-                  <button class="dyn-scale-btn" data-action="scale-up" data-target="${n.id}" title="Scale Larger">+</button>
-                </div>
-              </div>
-              ${descText ? `<div class="dyn-node-card-body"><div class="dyn-node-desc">${escapeHtml(descText)}</div></div>` : ''}
-              <div class="dyn-box-resizer" data-target="${n.id}" title="Drag corner to scale node"></div>
+        // Render Classic Flowchart Nodes
+        parsed.nodes.forEach(n => {
+          const isDiamond = n.shape === 'diamond';
+          nodesHtml += `
+            <div class="dyn-node-box shape-${n.shape}" id="node-${blockId}-${n.id}" data-node-id="${n.id}" style="left:${n.x}px; top:${n.y}px; width:${n.w}px; min-height:${n.h}px;">
+              ${isDiamond ? `
+                <div class="dyn-node-diamond-bg"></div>
+                <div class="dyn-node-diamond-text">${escapeHtml(n.label)}</div>
+              ` : `
+                <div class="dyn-node-text">${escapeHtml(n.label)}</div>
+              `}
             </div>
           `;
         });
 
-        // Pre-create SVG paths for edges
+        // Render SVG Edges
         parsed.edges.forEach((e, idx) => {
           const edgeId = `dyn-edge-${blockId}-${idx}`;
-          overlayEdgesHtml += `<path class="dyn-edge-path" id="${edgeId}" marker-end="url(#dyn-arrow-${blockId})" d="M 0 0 L 0 0" />`;
+          let cls = 'dyn-edge-path';
+          if (e.type === '-.->') cls += ' edge-dashed';
+          if (e.type === '==>') cls += ' edge-thick';
+          const marker = e.type === '---' ? '' : `marker-end="url(#dyn-arrow-${blockId})"`;
+
+          overlayEdgesHtml += `<path class="${cls}" id="${edgeId}" ${marker} d="M 0 0 L 0 0" />`;
           if (e.label) {
             labelsHtml += `
               <div class="dyn-edge-label-wrap" id="dyn-label-${blockId}-${idx}">
@@ -5655,9 +5720,12 @@
         return `
           <div class="dyn-graph-viewport" id="viewport-${blockId}">
             <div class="dyn-graph-world" id="world-${blockId}">
+              <div class="dyn-subgraphs-layer" id="subgraphs-${blockId}">
+                ${subgraphsHtml}
+              </div>
               <svg class="dyn-svg-overlay" id="svg-overlay-${blockId}">
                 <defs>
-                  <marker id="dyn-arrow-${blockId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <marker id="dyn-arrow-${blockId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
                     <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="var(--accent)"></path>
                   </marker>
                 </defs>
@@ -5666,8 +5734,8 @@
               <div class="dyn-labels-layer" id="labels-${blockId}">
                 ${labelsHtml}
               </div>
-              <div class="dyn-boxes-layer" id="boxes-${blockId}">
-                ${boxesHtml}
+              <div class="dyn-nodes-layer" id="nodes-${blockId}">
+                ${nodesHtml}
               </div>
             </div>
           </div>
@@ -5692,84 +5760,91 @@
           parsed,
           panX: 40,
           panY: 30,
-          scale: 0.95,
+          scale: 1.0,
           isPanningWorld: false,
           startPanX: 0,
           startPanY: 0,
-          draggingItem: null,
-          resizingItem: null,
-          boxes: new Map(),
+          draggingNode: null,
+          draggingSubgraph: null,
+          nodes: new Map(),
+          subgraphs: new Map(),
           cleanup: null
         };
 
-        this.computeInitialLayout(state);
-
-        // Box scale button events
-        viewport.querySelectorAll('.dyn-scale-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const targetId = btn.getAttribute('data-target');
-            const action = btn.getAttribute('data-action');
-            this.adjustBoxScale(state, targetId, action === 'scale-up' ? 0.15 : -0.15);
+        // Store node states
+        parsed.nodes.forEach(n => {
+          const el = document.getElementById(`node-${blockId}-${n.id}`);
+          state.nodes.set(n.id, {
+            ...n,
+            el,
+            x: n.x,
+            y: n.y,
+            w: n.w,
+            h: n.h,
+            origX: n.origX,
+            origY: n.origY
           });
         });
 
-        // Box scale reset badge events
-        viewport.querySelectorAll('.dyn-box-scale-val').forEach(badge => {
-          badge.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const targetId = badge.getAttribute('data-target');
-            this.resetBoxScale(state, targetId);
+        // Store subgraph states
+        parsed.subgraphs.forEach(sg => {
+          const el = document.getElementById(`subgraph-${blockId}-${sg.id}`);
+          state.subgraphs.set(sg.id, {
+            ...sg,
+            el
           });
         });
 
-        // Mouse interactions
         const onMouseDown = (e) => {
           if (e.button !== 0 && e.button !== 1) return;
 
-          // 1. Resizing specific box handle
-          const resizer = e.target.closest('.dyn-box-resizer');
-          if (resizer) {
+          // 1. Dragging an individual node box
+          const nodeEl = e.target.closest('.dyn-node-box');
+          if (nodeEl) {
             e.preventDefault();
             e.stopPropagation();
-            const targetId = resizer.getAttribute('data-target');
-            const box = state.boxes.get(targetId);
-            if (box) {
-              state.resizingItem = {
-                id: targetId,
-                box,
+            const nodeId = nodeEl.getAttribute('data-node-id');
+            const node = state.nodes.get(nodeId);
+            if (node) {
+              nodeEl.classList.add('is-dragging');
+              state.draggingNode = {
+                node,
                 startX: e.clientX,
                 startY: e.clientY,
-                origScale: box.scale
+                origX: node.x,
+                origY: node.y
               };
+              nodeEl.parentElement.appendChild(nodeEl);
             }
             return;
           }
 
-          // 2. Dragging specific box
-          const boxEl = e.target.closest('.dyn-box, .dyn-node-card');
-          if (boxEl && !e.target.closest('.dyn-box-controls') && !e.target.closest('button')) {
+          // 2. Dragging a subgraph cluster by header
+          const headerEl = e.target.closest('.dyn-subgraph-header');
+          if (headerEl) {
             e.preventDefault();
             e.stopPropagation();
-            const boxId = boxEl.getAttribute('data-box-id') || boxEl.getAttribute('data-node-id');
-            const box = state.boxes.get(boxId);
-            if (box) {
-              boxEl.classList.add('is-dragging');
-              state.draggingItem = {
-                id: boxId,
-                box,
+            const sgId = headerEl.getAttribute('data-subgraph-id');
+            const sg = state.subgraphs.get(sgId);
+            if (sg) {
+              const clusterEl = document.getElementById(`subgraph-${blockId}-${sg.id}`);
+              if (clusterEl) clusterEl.classList.add('is-dragging');
+              state.draggingSubgraph = {
+                sg,
+                clusterEl,
                 startX: e.clientX,
                 startY: e.clientY,
-                origBoxX: box.x,
-                origBoxY: box.y
+                memberNodes: (sg.nodeIds || []).map(id => {
+                  const n = state.nodes.get(id);
+                  return n ? { node: n, origX: n.x, origY: n.y } : null;
+                }).filter(Boolean)
               };
-              boxEl.parentElement.appendChild(boxEl);
             }
             return;
           }
 
           // 3. Panning World
-          if (e.target === viewport || e.target.closest('.dyn-svg-overlay') || e.target === world) {
+          if (e.target === viewport || e.target.closest('.dyn-svg-overlay') || e.target === world || e.target.closest('.dyn-subgraph-cluster')) {
             e.preventDefault();
             state.isPanningWorld = true;
             state.startPanX = e.clientX - state.panX;
@@ -5779,35 +5854,40 @@
         };
 
         const onMouseMove = (e) => {
-          // Dragging Box
-          if (state.draggingItem) {
+          if (state.draggingNode) {
             e.preventDefault();
-            const dx = (e.clientX - state.draggingItem.startX) / state.scale;
-            const dy = (e.clientY - state.draggingItem.startY) / state.scale;
-            const box = state.draggingItem.box;
-            box.x = Math.round(state.draggingItem.origBoxX + dx);
-            box.y = Math.round(state.draggingItem.origBoxY + dy);
-            box.el.style.left = box.x + 'px';
-            box.el.style.top = box.y + 'px';
+            const dx = (e.clientX - state.draggingNode.startX) / state.scale;
+            const dy = (e.clientY - state.draggingNode.startY) / state.scale;
+            const n = state.draggingNode.node;
+            n.x = Math.round(state.draggingNode.origX + dx);
+            n.y = Math.round(state.draggingNode.origY + dy);
+            if (n.el) {
+              n.el.style.left = n.x + 'px';
+              n.el.style.top = n.y + 'px';
+            }
             this.updateConnections(state);
+            this.updateSubgraphClusters(state);
             return;
           }
 
-          // Scaling Box
-          if (state.resizingItem) {
+          if (state.draggingSubgraph) {
             e.preventDefault();
-            const dx = (e.clientX - state.resizingItem.startX) / state.scale;
-            const box = state.resizingItem.box;
-            const deltaScale = dx / 280;
-            box.scale = Math.max(0.4, Math.min(2.5, Math.round((state.resizingItem.origScale + deltaScale) * 100) / 100));
-            box.el.style.transform = `scale(${box.scale})`;
-            const badge = document.getElementById(`scale-val-${blockId}-${box.id}`);
-            if (badge) badge.innerText = Math.round(box.scale * 100) + '%';
+            const dx = (e.clientX - state.draggingSubgraph.startX) / state.scale;
+            const dy = (e.clientY - state.draggingSubgraph.startY) / state.scale;
+            state.draggingSubgraph.memberNodes.forEach(item => {
+              const n = item.node;
+              n.x = Math.round(item.origX + dx);
+              n.y = Math.round(item.origY + dy);
+              if (n.el) {
+                n.el.style.left = n.x + 'px';
+                n.el.style.top = n.y + 'px';
+              }
+            });
             this.updateConnections(state);
+            this.updateSubgraphClusters(state);
             return;
           }
 
-          // Panning World
           if (state.isPanningWorld) {
             e.preventDefault();
             state.panX = Math.round(e.clientX - state.startPanX);
@@ -5817,11 +5897,18 @@
         };
 
         const onMouseUp = () => {
-          if (state.draggingItem) {
-            state.draggingItem.box.el.classList.remove('is-dragging');
-            state.draggingItem = null;
+          if (state.draggingNode) {
+            if (state.draggingNode.node && state.draggingNode.node.el) {
+              state.draggingNode.node.el.classList.remove('is-dragging');
+            }
+            state.draggingNode = null;
           }
-          state.resizingItem = null;
+          if (state.draggingSubgraph) {
+            if (state.draggingSubgraph.clusterEl) {
+              state.draggingSubgraph.clusterEl.classList.remove('is-dragging');
+            }
+            state.draggingSubgraph = null;
+          }
           if (state.isPanningWorld) {
             state.isPanningWorld = false;
             viewport.classList.remove('is-panning');
@@ -5847,7 +5934,7 @@
         };
 
         const onDblClick = (e) => {
-          if (e.target.closest('.dyn-box') || e.target.closest('.dyn-node-card')) return;
+          if (e.target.closest('.dyn-node-box') || e.target.closest('.dyn-subgraph-header')) return;
           this.fit(blockId);
         };
 
@@ -5868,175 +5955,20 @@
         this.instances.set(blockId, state);
 
         setTimeout(() => {
-          this.applyWorldTransform(state);
           this.measureBoxes(state);
           this.updateConnections(state);
+          this.updateSubgraphClusters(state);
           this.fit(blockId);
         }, 40);
       },
 
-      computeInitialLayout(state) {
-        let currentY = 40;
-        state.parsed.subgraphs.forEach((sg) => {
-          const el = document.getElementById(`dyn-box-${state.blockId}-${sg.id}`);
-          if (el) {
-            const h = el.offsetHeight || (120 + sg.nodes.length * 62);
-            const boxData = {
-              id: sg.id,
-              el,
-              x: 40,
-              y: currentY,
-              w: el.offsetWidth || 430,
-              h,
-              scale: 1.0,
-              origX: 40,
-              origY: currentY,
-              origScale: 1.0
-            };
-            el.style.left = boxData.x + 'px';
-            el.style.top = boxData.y + 'px';
-            state.boxes.set(sg.id, boxData);
-            currentY += h + 50;
-          }
-        });
-
-        let branchY = 500;
-        state.parsed.standaloneNodes.forEach((n, idx) => {
-          const el = document.getElementById(`dyn-node-${state.blockId}-${n.id}`);
-          if (el) {
-            const h = el.offsetHeight || 90;
-            const boxData = {
-              id: n.id,
-              el,
-              x: 540,
-              y: branchY + idx * 130,
-              w: el.offsetWidth || 340,
-              h,
-              scale: 1.0,
-              origX: 540,
-              origY: branchY + idx * 130,
-              origScale: 1.0
-            };
-            el.style.left = boxData.x + 'px';
-            el.style.top = boxData.y + 'px';
-            state.boxes.set(n.id, boxData);
-          }
-        });
-      },
-
       measureBoxes(state) {
-        state.boxes.forEach(box => {
-          if (box.el) {
-            box.w = box.el.offsetWidth || box.w;
-            box.h = box.el.offsetHeight || box.h;
+        state.nodes.forEach(n => {
+          if (n.el) {
+            n.w = n.el.offsetWidth || n.w;
+            n.h = n.el.offsetHeight || n.h;
           }
         });
-      },
-
-      adjustBoxScale(state, boxId, delta) {
-        const box = state.boxes.get(boxId);
-        if (!box) return;
-        box.scale = Math.max(0.4, Math.min(2.5, Math.round((box.scale + delta) * 100) / 100));
-        box.el.style.transform = `scale(${box.scale})`;
-        const badge = document.getElementById(`scale-val-${state.blockId}-${box.id}`);
-        if (badge) badge.innerText = Math.round(box.scale * 100) + '%';
-        this.updateConnections(state);
-      },
-
-      resetBoxScale(state, boxId) {
-        const box = state.boxes.get(boxId);
-        if (!box) return;
-        box.scale = 1.0;
-        box.el.style.transform = 'scale(1.0)';
-        const badge = document.getElementById(`scale-val-${state.blockId}-${box.id}`);
-        if (badge) badge.innerText = '100%';
-        this.updateConnections(state);
-      },
-
-      resetLayout(blockId) {
-        const state = this.instances.get(blockId);
-        if (!state) return;
-        state.boxes.forEach(box => {
-          box.x = box.origX;
-          box.y = box.origY;
-          box.scale = 1.0;
-          box.el.style.left = box.x + 'px';
-          box.el.style.top = box.y + 'px';
-          box.el.style.transform = 'scale(1.0)';
-          const badge = document.getElementById(`scale-val-${blockId}-${box.id}`);
-          if (badge) badge.innerText = '100%';
-        });
-        this.updateConnections(state);
-        this.fit(blockId);
-      },
-
-      getEntityWorldRect(state, entityId) {
-        const box = state.boxes.get(entityId);
-        if (box && box.el) {
-          const w = (box.el.offsetWidth || box.w) * box.scale;
-          const h = (box.el.offsetHeight || box.h) * box.scale;
-          return {
-            isSubnode: false,
-            box,
-            x: box.x,
-            y: box.y,
-            w,
-            h,
-            cx: box.x + w / 2,
-            cy: box.y + h / 2,
-            parentId: null
-          };
-        }
-
-        const nodeEl = document.getElementById(`node-${state.blockId}-${entityId}`);
-        if (nodeEl) {
-          const parentBoxEl = nodeEl.closest('.dyn-box');
-          const parentId = parentBoxEl ? parentBoxEl.getAttribute('data-box-id') : null;
-          const parentBox = parentId ? state.boxes.get(parentId) : null;
-          if (parentBox) {
-            const itemX = parentBox.x + (nodeEl.offsetLeft || 0) * parentBox.scale;
-            const itemY = parentBox.y + (nodeEl.offsetTop || 0) * parentBox.scale;
-            const itemW = (nodeEl.offsetWidth || 200) * parentBox.scale;
-            const itemH = (nodeEl.offsetHeight || 38) * parentBox.scale;
-
-            return {
-              isSubnode: true,
-              parentBox,
-              parentId,
-              nodeEl,
-              x: itemX,
-              y: itemY,
-              w: itemW,
-              h: itemH,
-              cx: itemX + itemW / 2,
-              cy: itemY + itemH / 2
-            };
-          }
-        }
-
-        return null;
-      },
-
-      getPort(rect, side) {
-        if (!rect.isSubnode) {
-          switch (side) {
-            case 'left':   return { x: Math.round(rect.x), y: Math.round(rect.cy) };
-            case 'right':  return { x: Math.round(rect.x + rect.w), y: Math.round(rect.cy) };
-            case 'top':    return { x: Math.round(rect.cx), y: Math.round(rect.y) };
-            case 'bottom': return { x: Math.round(rect.cx), y: Math.round(rect.y + rect.h) };
-          }
-        } else {
-          const pb = rect.parentBox;
-          const pbW = (pb.el ? pb.el.offsetWidth : pb.w) * pb.scale;
-          const pbH = (pb.el ? pb.el.offsetHeight : pb.h) * pb.scale;
-          switch (side) {
-            case 'right':  return { x: Math.round(pb.x + pbW), y: Math.round(rect.cy) };
-            case 'left':   return { x: Math.round(pb.x), y: Math.round(rect.cy) };
-            case 'bottom': return { x: Math.round(rect.cx), y: Math.round(pb.y + pbH) };
-            case 'top':    return { x: Math.round(rect.cx), y: Math.round(pb.y) };
-          }
-        }
-        return { x: Math.round(rect.cx), y: Math.round(rect.cy) };
       },
 
       updateConnections(state) {
@@ -6044,16 +5976,43 @@
           const pathEl = document.getElementById(`dyn-edge-${state.blockId}-${idx}`);
           if (!pathEl) return;
 
-          const rFrom = this.getEntityWorldRect(state, edge.from);
-          const rTo = this.getEntityWorldRect(state, edge.to);
+          const nFrom = state.nodes.get(edge.from);
+          const nTo = state.nodes.get(edge.to);
+          if (!nFrom || !nTo) return;
 
-          if (!rFrom || !rTo) return;
+          const rFrom = {
+            x: nFrom.x,
+            y: nFrom.y,
+            w: nFrom.w,
+            h: nFrom.h,
+            cx: nFrom.x + nFrom.w / 2,
+            cy: nFrom.y + nFrom.h / 2
+          };
+          const rTo = {
+            x: nTo.x,
+            y: nTo.y,
+            w: nTo.w,
+            h: nTo.h,
+            cx: nTo.x + nTo.w / 2,
+            cy: nTo.y + nTo.h / 2
+          };
+
+          if (edge.from === edge.to) {
+            const p1 = { x: Math.round(rFrom.x + rFrom.w), y: Math.round(rFrom.cy - 8) };
+            const p2 = { x: Math.round(rFrom.cx), y: Math.round(rFrom.y) };
+            const loopDist = 36;
+            const cp1 = { x: p1.x + loopDist, y: p1.y };
+            const cp2 = { x: p2.x, y: p2.y - loopDist };
+            pathEl.setAttribute('d', `M ${p1.x} ${p1.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${p2.x} ${p2.y}`);
+            return;
+          }
+
+          const dx = rTo.cx - rFrom.cx;
+          const dy = rTo.cy - rFrom.cy;
 
           let p1, p2, d1, d2;
 
-          // SPECIAL CASE: Both nodes are subnodes in the EXACT SAME subgraph box (e.g. R4 --> R5)
-          if (rFrom.isSubnode && rTo.isSubnode && rFrom.parentId === rTo.parentId) {
-            const dy = rTo.cy - rFrom.cy;
+          if (Math.abs(dy) >= Math.abs(dx)) {
             if (dy >= 0) {
               p1 = { x: Math.round(rFrom.cx), y: Math.round(rFrom.y + rFrom.h) };
               d1 = [0, 1];
@@ -6066,39 +6025,20 @@
               d2 = [0, 1];
             }
           } else {
-            const dx = rTo.cx - rFrom.cx;
-            const dy = rTo.cy - rFrom.cy;
-
-            const isHorizontal = Math.abs(dx) >= Math.abs(dy);
-
-            if (isHorizontal) {
-              if (dx >= 0) {
-                p1 = this.getPort(rFrom, 'right');
-                d1 = [1, 0];
-                p2 = this.getPort(rTo, 'left');
-                d2 = [-1, 0];
-              } else {
-                p1 = this.getPort(rFrom, 'left');
-                d1 = [-1, 0];
-                p2 = this.getPort(rTo, 'right');
-                d2 = [1, 0];
-              }
+            if (dx >= 0) {
+              p1 = { x: Math.round(rFrom.x + rFrom.w), y: Math.round(rFrom.cy) };
+              d1 = [1, 0];
+              p2 = { x: Math.round(rTo.x), y: Math.round(rTo.cy) };
+              d2 = [-1, 0];
             } else {
-              if (dy >= 0) {
-                p1 = this.getPort(rFrom, 'bottom');
-                d1 = [0, 1];
-                p2 = this.getPort(rTo, 'top');
-                d2 = [0, -1];
-              } else {
-                p1 = this.getPort(rFrom, 'top');
-                d1 = [0, -1];
-                p2 = this.getPort(rTo, 'bottom');
-                d2 = [0, 1];
-              }
+              p1 = { x: Math.round(rFrom.x), y: Math.round(rFrom.cy) };
+              d1 = [-1, 0];
+              p2 = { x: Math.round(rTo.x + rTo.w), y: Math.round(rTo.cy) };
+              d2 = [1, 0];
             }
           }
 
-          const dist = Math.max(Math.min(Math.hypot(p2.x - p1.x, p2.y - p1.y) * 0.45, 140), 25);
+          const dist = Math.max(Math.min(Math.hypot(p2.x - p1.x, p2.y - p1.y) * 0.45, 120), 20);
           const cp1 = {
             x: Math.round(p1.x + d1[0] * dist),
             y: Math.round(p1.y + d1[1] * dist)
@@ -6121,6 +6061,39 @@
         });
       },
 
+      updateSubgraphClusters(state) {
+        state.parsed.subgraphs.forEach(sg => {
+          const clusterEl = document.getElementById(`subgraph-${state.blockId}-${sg.id}`);
+          if (!clusterEl) return;
+          const memberNodes = (sg.nodeIds || []).map(id => state.nodes.get(id)).filter(Boolean);
+          if (memberNodes.length === 0) {
+            clusterEl.style.display = 'none';
+            return;
+          }
+          clusterEl.style.display = 'block';
+          let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          memberNodes.forEach(n => {
+            minX = Math.min(minX, n.x);
+            minY = Math.min(minY, n.y);
+            maxX = Math.max(maxX, n.x + n.w);
+            maxY = Math.max(maxY, n.y + n.h);
+          });
+          const padX = 24;
+          const padTop = 38;
+          const padBottom = 20;
+
+          const clusterX = Math.round(minX - padX);
+          const clusterY = Math.round(minY - padTop);
+          const clusterW = Math.round(maxX - minX + padX * 2);
+          const clusterH = Math.round(maxY - minY + padTop + padBottom);
+
+          clusterEl.style.left = clusterX + 'px';
+          clusterEl.style.top = clusterY + 'px';
+          clusterEl.style.width = clusterW + 'px';
+          clusterEl.style.height = clusterH + 'px';
+        });
+      },
+
       applyWorldTransform(state) {
         state.world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
         state.viewport.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
@@ -6134,25 +6107,38 @@
         const state = this.instances.get(blockId);
         if (!state) return;
         const vRect = state.viewport.getBoundingClientRect();
-        if (vRect.width === 0) return;
+        if (vRect.width === 0 || vRect.height === 0) return;
 
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        state.boxes.forEach(b => {
-          minX = Math.min(minX, b.x);
-          minY = Math.min(minY, b.y);
-          maxX = Math.max(maxX, b.x + b.w * b.scale);
-          maxY = Math.max(maxY, b.y + b.h * b.scale);
+        state.nodes.forEach(n => {
+          minX = Math.min(minX, n.x);
+          minY = Math.min(minY, n.y);
+          maxX = Math.max(maxX, n.x + n.w);
+          maxY = Math.max(maxY, n.y + n.h);
+        });
+        state.parsed.subgraphs.forEach(sg => {
+          const el = document.getElementById(`subgraph-${blockId}-${sg.id}`);
+          if (el && el.style.display !== 'none') {
+            const left = parseFloat(el.style.left) || 0;
+            const top = parseFloat(el.style.top) || 0;
+            const w = parseFloat(el.style.width) || 0;
+            const h = parseFloat(el.style.height) || 0;
+            minX = Math.min(minX, left);
+            minY = Math.min(minY, top);
+            maxX = Math.max(maxX, left + w);
+            maxY = Math.max(maxY, top + h);
+          }
         });
 
         if (minX === Infinity) return;
 
         const totalW = maxX - minX;
         const totalH = maxY - minY;
-        const padding = 50;
+        const padding = 60;
 
-        const scaleW = (vRect.width - padding) / totalW;
-        const scaleH = (vRect.height - padding) / totalH;
-        state.scale = Math.max(0.2, Math.min(1.1, Math.round(Math.min(scaleW, scaleH) * 100) / 100));
+        const scaleW = (vRect.width - padding) / Math.max(totalW, 100);
+        const scaleH = (vRect.height - padding) / Math.max(totalH, 100);
+        state.scale = Math.max(0.2, Math.min(1.15, Math.round(Math.min(scaleW, scaleH) * 100) / 100));
 
         state.panX = Math.round((vRect.width - totalW * state.scale) / 2 - minX * state.scale);
         state.panY = Math.round((vRect.height - totalH * state.scale) / 2 - minY * state.scale);
@@ -6182,6 +6168,22 @@
         state.panX = 40;
         state.panY = 30;
         this.applyWorldTransform(state);
+      },
+
+      resetLayout(blockId) {
+        const state = this.instances.get(blockId);
+        if (!state) return;
+        state.nodes.forEach(n => {
+          n.x = n.origX;
+          n.y = n.origY;
+          if (n.el) {
+            n.el.style.left = n.x + 'px';
+            n.el.style.top = n.y + 'px';
+          }
+        });
+        this.updateConnections(state);
+        this.updateSubgraphClusters(state);
+        this.fit(blockId);
       },
 
       initAll(container) {
@@ -6452,7 +6454,7 @@
           const mermaidId = 'mermaid-' + Math.random().toString(36).substr(2, 9);
           if (DynamicGraphRenderer.canRender(code)) {
             const parsed = DynamicGraphRenderer.parse(code);
-            if (parsed.subgraphs.length > 0 || parsed.standaloneNodes.length > 0) {
+            if (parsed.nodes && parsed.nodes.length > 0) {
               DynamicGraphRenderer.cacheParsed(blockId, parsed);
               const dynHtml = DynamicGraphRenderer.renderHtml(blockId, parsed);
               return `
@@ -6460,7 +6462,7 @@
                   <div class="diagram-header">
                     <div class="diagram-title-group">
                       <span>Dynamic Flowchart</span>
-                      <span class="diagram-hint">🗔 Drag boxes • Corner scale • Pan world</span>
+                      <span class="diagram-hint">🗔 Drag boxes • Pan canvas • Zoom wheel</span>
                     </div>
                     <div class="diagram-controls">
                       <div class="btn-group" style="margin-right: 4px;">
