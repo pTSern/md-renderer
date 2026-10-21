@@ -178,6 +178,13 @@
       display: none;
     }
     .tab-item.is-dirty .tab-dirty { display: inline-block; }
+    .tab-sync {
+      font-size: 11px;
+      color: var(--accent);
+      display: none;
+      margin-right: 2px;
+    }
+    .tab-item.has-sync .tab-sync { display: inline-block; }
     .tab-close {
       font-size: 12px;
       opacity: 0.6;
@@ -2062,6 +2069,92 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
+    /* Notepad++ Style External File Change Sync Modal */
+    .sync-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 10, 15, 0.72);
+      backdrop-filter: blur(3px);
+      z-index: 1050;
+      justify-content: center;
+      align-items: center;
+    }
+    .sync-modal-overlay.show { display: flex; }
+    .sync-modal-box {
+      width: 480px;
+      max-width: 92vw;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(-6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .sync-modal-header {
+      padding: 12px 18px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sync-modal-icon {
+      font-size: 18px;
+    }
+    .sync-modal-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-primary);
+      letter-spacing: 0.3px;
+    }
+    .sync-modal-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .sync-modal-filename {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--bg-secondary);
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      word-break: break-all;
+    }
+    .sync-modal-warning {
+      background: rgba(239, 68, 68, 0.12);
+      border-left: 3px solid var(--danger, #ef4444);
+      padding: 8px 12px;
+      border-radius: 0 4px 4px 0;
+      color: var(--danger, #ef4444);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .sync-modal-footer {
+      padding: 12px 18px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
     /* Modal / Lightbox / Settings */
     .modal-overlay {
       display: none;
@@ -3751,6 +3844,27 @@
   <div class="drop-overlay" id="drop-overlay">
     <div class="drop-overlay-box">
       📄 Drop Markdown file here to instant open
+    </div>
+  </div>
+
+  <!-- External File Change (Notepad++ Sync) Modal -->
+  <div class="sync-modal-overlay" id="sync-modal-overlay" style="display:none;">
+    <div class="sync-modal-box">
+      <div class="sync-modal-header">
+        <span class="sync-modal-icon">⚠️</span>
+        <span class="sync-modal-title">File Modified Externally</span>
+      </div>
+      <div class="sync-modal-body">
+        <div class="sync-modal-filename" id="sync-modal-filename">document.md</div>
+        <p id="sync-modal-msg">This file has been modified by another program.<br>Do you want to reload it from disk?</p>
+        <div class="sync-modal-warning" id="sync-modal-warning" style="display:none;">
+          ⚠️ <strong>Warning:</strong> You have unsaved changes in MDViewer. Reloading will discard your local changes.
+        </div>
+      </div>
+      <div class="sync-modal-footer">
+        <button class="btn btn-secondary" id="sync-btn-keep">Keep Local Version</button>
+        <button class="btn btn-primary" id="sync-btn-reload">Reload from Disk</button>
+      </div>
     </div>
   </div>
 
@@ -12314,13 +12428,21 @@
               if (data.message) {
                 this.showTopError(data.message);
               }
-              this.openNewFile(data.path, data.name, data.content);
+              this.openNewFile(data.path, data.name, data.content, data.mtime);
               break;
             case 'file_opened':
-              this.openNewFile(data.path, data.name, data.content);
+              this.openNewFile(data.path, data.name, data.content, data.mtime);
               break;
             case 'file_saved':
-              this.onFileSaved(data.path, data.name);
+              this.onFileSaved(data.path, data.name, data.mtime);
+              break;
+            case 'files_externally_modified':
+              if (data.json) {
+                try {
+                  const changed = JSON.parse(data.json);
+                  this.handleExternalFileChanges(changed);
+                } catch (_) {}
+              }
               break;
             case 'image_data':
               if (data.path && data.content) {
@@ -12404,7 +12526,7 @@
       },
 
       /* MULTI-FILE MANAGER */
-      openNewFile(path, name, content) {
+      openNewFile(path, name, content, mtime = null) {
         // If file already opened, switch to it
         if (path) {
           const normPath = path.replace(/[/\\]+/g, '/').toLowerCase();
@@ -12421,36 +12543,173 @@
           }
         }
 
+        // Save current file cursor & mode before adding and switching to new file
+        if (this.files[this.activeFileIndex]) {
+          this.saveFileCursorState(this.files[this.activeFileIndex]);
+        }
+
         const newFile = {
           id: 'file_' + Math.random().toString(36).substr(2, 9),
           path: path || null,
           name: name || 'Untitled.md',
           content: content || '',
-          isDirty: false
+          isDirty: false,
+          mode: 'preview',
+          cursor: { line: 1, col: 1, pos: 0, selectionStart: 0, selectionEnd: 0, editorScrollTop: 0, editorScrollLeft: 0, previewScrollTop: 0, previewScrollLeft: 0, vimCursor: 0, previewCursorIndex: 0 },
+          mtime: mtime || null
         };
 
         this.files.push(newFile);
         this.activeFileIndex = this.files.length - 1;
         this.renderTabs();
         this.loadActiveFileIntoEditor();
-        this.setMode('preview');
+        this.restoreFileCursorState(newFile);
+      },
+
+      saveFileCursorState(file) {
+        if (!file) return;
+        file.mode = this.mode || 'preview';
+
+        let line = 1;
+        let col = 1;
+        let pos = 0;
+        let selStart = 0;
+        let selEnd = 0;
+        let editorScrollTop = 0;
+        let editorScrollLeft = 0;
+        let previewScrollTop = 0;
+        let previewScrollLeft = 0;
+        let vimCursor = 0;
+        let previewCursorIndex = 0;
+
+        if (this.editorEl) {
+          selStart = this.editorEl.selectionStart || 0;
+          selEnd = this.editorEl.selectionEnd || 0;
+          editorScrollTop = this.editorEl.scrollTop || 0;
+          editorScrollLeft = this.editorEl.scrollLeft || 0;
+          pos = selStart;
+          const text = this.editorEl.value || '';
+          const lines = text.substring(0, pos).split('\n');
+          line = lines.length;
+          col = lines[lines.length - 1].length + 1;
+        }
+
+        const previewScroller = this.previewPaneEl ? (this.previewPaneEl.querySelector('.preview-content-scroll') || this.previewPaneEl) : null;
+        if (previewScroller) {
+          previewScrollTop = previewScroller.scrollTop || 0;
+          previewScrollLeft = previewScroller.scrollLeft || 0;
+        }
+
+        if (typeof VimMode !== 'undefined' && VimMode.active) {
+          vimCursor = VimMode.cursorPos || pos;
+          if (VimMode.getLineInfo) {
+            line = VimMode.getLineInfo(vimCursor).lineIndex + 1;
+          }
+        }
+
+        if (file.mode === 'preview' && typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+          line = PreviewCursor.getCurrentLine();
+          previewCursorIndex = PreviewCursor.currentIndex || 0;
+        }
+
+        file.cursor = {
+          line,
+          col,
+          pos,
+          selectionStart: selStart,
+          selectionEnd: selEnd,
+          editorScrollTop,
+          editorScrollLeft,
+          previewScrollTop,
+          previewScrollLeft,
+          vimCursor,
+          previewCursorIndex
+        };
+      },
+
+      restoreFileCursorState(file) {
+        if (!file) return;
+        const targetMode = file.mode || 'preview';
+        this.setMode(targetMode);
+
+        const cur = file.cursor;
+        if (!cur) return;
+
+        // 1. Restore editor cursor and scroll
+        if (this.editorEl) {
+          try {
+            this.editorEl.selectionStart = cur.selectionStart || 0;
+            this.editorEl.selectionEnd = cur.selectionEnd || 0;
+            this.editorEl.scrollTop = cur.editorScrollTop || 0;
+            this.editorEl.scrollLeft = cur.editorScrollLeft || 0;
+          } catch (_) {}
+        }
+
+        // 2. Restore preview scroll
+        requestAnimationFrame(() => {
+          const previewScroller = this.previewPaneEl ? (this.previewPaneEl.querySelector('.preview-content-scroll') || this.previewPaneEl) : null;
+          if (previewScroller && cur.previewScrollTop !== undefined) {
+            previewScroller.scrollTop = cur.previewScrollTop;
+            previewScroller.scrollLeft = cur.previewScrollLeft || 0;
+          }
+        });
+
+        // 3. Restore Vim or editor cursor
+        if (targetMode === 'edit' || targetMode === 'split') {
+          if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+            VimMode.activate();
+            VimMode.setMode('NORMAL');
+            const vimPos = (cur.vimCursor !== undefined) ? cur.vimCursor : (cur.pos || 0);
+            VimMode.setCursor(vimPos);
+          } else {
+            this.updateCursor();
+          }
+        }
+
+        // 4. Restore Preview cursor
+        if (targetMode === 'preview' && typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
+          if (cur.line) {
+            PreviewCursor.init(this);
+            PreviewCursor.jumpToLine(cur.line);
+          } else if (cur.previewCursorIndex !== undefined) {
+            PreviewCursor.currentIndex = cur.previewCursorIndex;
+            PreviewCursor.render();
+          }
+        }
+
+        // 5. Update status line
+        if (this.statusCursorEl && cur.line) {
+          this.statusCursorEl.innerText = `Ln ${cur.line}, Col ${cur.col || 1}`;
+        }
       },
 
       switchFile(index) {
         if (index < 0 || index >= this.files.length) return;
-        // Save current editor content to active file before switching
-        if (this.files[this.activeFileIndex]) {
-          this.files[this.activeFileIndex].content = this.editorEl.value;
+        const currentFile = this.files[this.activeFileIndex];
+        if (currentFile) {
+          currentFile.content = this.editorEl.value;
+          this.saveFileCursorState(currentFile);
           if (typeof DocTranslator !== 'undefined') {
-            DocTranslator.saveCurrentFileState(this.files[this.activeFileIndex]);
+            DocTranslator.saveCurrentFileState(currentFile);
           }
         }
         if (typeof DocTranslator !== 'undefined' && DocTranslator.isTranslating) {
           DocTranslator.stopTranslation();
         }
+
         this.activeFileIndex = index;
         this.renderTabs();
         this.loadActiveFileIntoEditor();
+
+        const targetFile = this.files[index];
+        if (targetFile) {
+          this.restoreFileCursorState(targetFile);
+          if (targetFile.externalChange) {
+            this.showSyncModal(targetFile);
+          } else {
+            this.checkFilesSync();
+          }
+        }
       },
 
       switchFileRelative(delta) {
@@ -12481,13 +12740,14 @@
 
       renderTabs() {
         this.tabsContainerEl.innerHTML = this.files.map((file, idx) => `
-          <div class="tab-item ${idx === this.activeFileIndex ? 'active' : ''} ${file.isDirty ? 'is-dirty' : ''}"
+          <div class="tab-item ${idx === this.activeFileIndex ? 'active' : ''} ${file.isDirty ? 'is-dirty' : ''} ${file.externalChange ? 'has-sync' : ''}"
                onclick="App.switchFile(${idx})"
                onauxclick="App.onTabAuxClick(${idx}, event)"
                oncontextmenu="App.onTabContextMenu(${idx}, event)"
                onmousedown="if(event.button===1) event.preventDefault();"
                title="${file.path || file.name}">
             <span class="tab-dirty"></span>
+            <span class="tab-sync" title="File modified on disk by another program">🔄</span>
             <span class="tab-name">${escapeHtml(file.name)}</span>
             <span class="tab-close" onclick="App.closeFile(${idx}, event)" title="Close Tab">✕</span>
           </div>
@@ -12751,20 +13011,17 @@
           DocTranslator.restoreFileState(file);
         }
 
-        if (this.mode === 'edit' || this.mode === 'split') {
-          if (VimMode.enabled) {
-            VimMode.setMode('NORMAL');
-            VimMode.setCursor(0);
-          }
-        }
+        this.restoreFileCursorState(file);
       },
 
-      onFileSaved(path, name) {
+      onFileSaved(path, name, mtime = null) {
         const file = this.files[this.activeFileIndex];
         if (file) {
           file.path = path;
           file.name = name;
           file.isDirty = false;
+          if (mtime) file.mtime = mtime;
+          delete file.externalChange;
         }
         if (this.statusSaveEl) {
           this.statusSaveEl.innerText = '✓ Saved';
@@ -12939,6 +13196,25 @@
             e.preventDefault();
             TableOfContents.toggle();
             return;
+          }
+
+          // If External Change Sync Modal is open, handle Enter / Escape
+          const syncModal = document.getElementById('sync-modal-overlay');
+          if (syncModal && syncModal.classList.contains('show')) {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              this.keepSyncTargetFile();
+              return;
+            }
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (this.syncTargetFile && this.syncTargetFile.isDirty) {
+                this.keepSyncTargetFile();
+              } else {
+                this.reloadSyncTargetFile();
+              }
+              return;
+            }
           }
 
           // Global shortcut: Ctrl+Alt+V toggles Vim mode for editor
@@ -13860,6 +14136,10 @@
 
       setMode(mode) {
         this.mode = mode;
+        const currentFile = this.files[this.activeFileIndex];
+        if (currentFile) {
+          currentFile.mode = mode;
+        }
         document.body.className = `mode-${mode}`;
         document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
         const btn = document.getElementById(`mode-${mode}`);
@@ -13923,6 +14203,138 @@
 
       saveFileAs() {
         this.saveAs();
+      },
+
+      /* NOTEPAD++ STYLE EXTERNAL FILE SYNC */
+      syncTargetFile: null,
+
+      checkFilesSync() {
+        if (document.getElementById('sync-modal-overlay')?.classList.contains('show')) {
+          return;
+        }
+        const filesToCheck = this.files
+          .filter(f => f.path && (f.path.includes('/') || f.path.includes('\\')) && f.mtime)
+          .map(f => ({ id: f.id, path: f.path, mtime: f.mtime }));
+        if (filesToCheck.length === 0) return;
+        this.sendIpc('check_file_sync', { json: JSON.stringify(filesToCheck) });
+      },
+
+      handleExternalFileChanges(changedList) {
+        if (!Array.isArray(changedList) || changedList.length === 0) return;
+        let activeChanged = null;
+
+        for (const item of changedList) {
+          const file = this.files.find(f => f.id === item.id || (f.path && f.path.replace(/[/\\]+/g, '/').toLowerCase() === item.path.replace(/[/\\]+/g, '/').toLowerCase()));
+          if (!file) continue;
+
+          // If content on disk is identical to current buffer content, silently sync mtime
+          if (file.content === item.content) {
+            file.mtime = item.mtime;
+            delete file.externalChange;
+            continue;
+          }
+
+          file.externalChange = { diskContent: item.content, newMtime: item.mtime };
+          if (file === this.files[this.activeFileIndex]) {
+            activeChanged = file;
+          }
+        }
+
+        this.renderTabs();
+
+        if (activeChanged) {
+          this.showSyncModal(activeChanged);
+        }
+      },
+
+      showSyncModal(file) {
+        if (!file || !file.externalChange) return;
+        this.syncTargetFile = file;
+        const modal = document.getElementById('sync-modal-overlay');
+        if (!modal) return;
+
+        const filenameEl = document.getElementById('sync-modal-filename');
+        if (filenameEl) filenameEl.innerText = file.path || file.name;
+
+        const warningEl = document.getElementById('sync-modal-warning');
+        const btnReload = document.getElementById('sync-btn-reload');
+        const btnKeep = document.getElementById('sync-btn-keep');
+
+        if (file.isDirty) {
+          if (warningEl) warningEl.style.display = 'block';
+          if (btnReload) {
+            btnReload.innerText = 'Reload (Discard Changes)';
+            btnReload.className = 'btn btn-danger';
+          }
+          if (btnKeep) {
+            btnKeep.innerText = 'Keep Local Version';
+            btnKeep.className = 'btn btn-primary';
+            setTimeout(() => btnKeep.focus(), 50);
+          }
+        } else {
+          if (warningEl) warningEl.style.display = 'none';
+          if (btnReload) {
+            btnReload.innerText = 'Reload from Disk';
+            btnReload.className = 'btn btn-primary';
+            setTimeout(() => btnReload.focus(), 50);
+          }
+          if (btnKeep) {
+            btnKeep.innerText = 'Keep Current';
+            btnKeep.className = 'btn btn-secondary';
+          }
+        }
+
+        modal.classList.add('show');
+      },
+
+      hideSyncModal() {
+        const modal = document.getElementById('sync-modal-overlay');
+        if (modal) modal.classList.remove('show');
+        this.syncTargetFile = null;
+      },
+
+      reloadSyncTargetFile() {
+        const file = this.syncTargetFile;
+        if (!file || !file.externalChange) {
+          this.hideSyncModal();
+          return;
+        }
+
+        const newContent = file.externalChange.diskContent;
+        const newMtime = file.externalChange.newMtime;
+        file.content = newContent;
+        file.mtime = newMtime;
+        file.isDirty = false;
+        delete file.externalChange;
+
+        if (this.files[this.activeFileIndex] === file) {
+          this.editorEl.value = newContent;
+          this.statusSaveEl.innerText = '✓ Saved';
+          this.statusSaveEl.style.color = '';
+          this.updateEditor();
+          this.renderMarkdown();
+          if (file.cursor) {
+            this.restoreFileCursorState(file);
+          }
+        }
+        this.renderTabs();
+        this.hideSyncModal();
+        this.showToast(`Reloaded "${file.name}" from disk`);
+      },
+
+      keepSyncTargetFile() {
+        const file = this.syncTargetFile;
+        if (!file || !file.externalChange) {
+          this.hideSyncModal();
+          return;
+        }
+
+        // Acknowledge this disk modification so we don't ask again
+        file.mtime = file.externalChange.newMtime;
+        delete file.externalChange;
+        this.renderTabs();
+        this.hideSyncModal();
+        this.showToast(`Kept local version of "${file.name}"`);
       },
 
       copyCode(btn) {
@@ -14445,6 +14857,26 @@
             this.closeToolsMenu();
           });
         }
+
+        // Notepad++ Sync Modal Button Handlers
+        const btnSyncReload = document.getElementById('sync-btn-reload');
+        if (btnSyncReload) {
+          btnSyncReload.addEventListener('click', () => this.reloadSyncTargetFile());
+        }
+        const btnSyncKeep = document.getElementById('sync-btn-keep');
+        if (btnSyncKeep) {
+          btnSyncKeep.addEventListener('click', () => this.keepSyncTargetFile());
+        }
+
+        // Window Focus & Periodic External Change Check
+        window.addEventListener('focus', () => {
+          this.checkFilesSync();
+        });
+        setInterval(() => {
+          if (document.hasFocus()) {
+            this.checkFilesSync();
+          }
+        }, 3000);
 
         document.getElementById('btn-theme').addEventListener('click', () => {
           const current = document.body.getAttribute('data-theme');

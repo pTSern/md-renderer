@@ -58,6 +58,14 @@ struct IpcResponse<'a> {
     content: Option<String>,
     message: Option<String>,
     json: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    mtime: Option<u64>,
+}
+
+fn get_file_mtime(p: &Path) -> Option<u64> {
+    fs::metadata(p).ok().and_then(|m| m.modified().ok()).and_then(|t| {
+        t.duration_since(std::time::UNIX_EPOCH).ok().map(|d| d.as_millis() as u64)
+    })
 }
 
 fn url_decode(s: &str) -> String {
@@ -1196,6 +1204,7 @@ fn main() {
                                                 content: Some(content),
                                                 message: kb_err,
                                                 json: Some(kb_json),
+                                                mtime: get_file_mtime(path_buf),
                                             },
                                         );
                                         return;
@@ -1213,6 +1222,8 @@ fn main() {
                                     content: Some(SAMPLE_MD.to_string()),
                                     message: kb_err,
                                     json: Some(kb_json),
+
+                                    mtime: None,
                                 },
                             );
                         }
@@ -1236,6 +1247,7 @@ fn main() {
                                                 content: Some(content),
                                                 message: None,
                                                 json: None,
+                                                mtime: get_file_mtime(&path),
                                             },
                                         );
                                         return;
@@ -1271,6 +1283,7 @@ fn main() {
                                                 content: Some(content),
                                                 message: None,
                                                 json: None,
+                                                mtime: get_file_mtime(&path),
                                             },
                                         );
                                     }
@@ -1285,6 +1298,7 @@ fn main() {
                                                 content: None,
                                                 message: Some(format!("Failed to open file: {}", e)),
                                                 json: None,
+                                                mtime: None,
                                             },
                                         );
                                     }
@@ -1313,6 +1327,7 @@ fn main() {
                                                 content: None,
                                                 message: None,
                                                 json: None,
+                                                mtime: get_file_mtime(&path),
                                             },
                                         );
                                     }
@@ -1327,6 +1342,7 @@ fn main() {
                                                 content: None,
                                                 message: Some(format!("Failed to save file to '{}': {}", path.display(), e)),
                                                 json: None,
+                                                mtime: None,
                                             },
                                         );
                                     }
@@ -1365,6 +1381,7 @@ fn main() {
                                                     content: None,
                                                     message: None,
                                                     json: None,
+                                                mtime: get_file_mtime(&path),
                                                 },
                                             );
                                         }
@@ -1379,6 +1396,7 @@ fn main() {
                                                     content: None,
                                                     message: Some(format!("Failed to save file to '{}': {}", path.display(), e)),
                                                     json: None,
+                                                    mtime: None,
                                                 },
                                             );
                                         }
@@ -1399,6 +1417,69 @@ fn main() {
                             }
                         }
 
+                        "check_file_sync" => {
+                            if let Some(json_str) = request.json {
+                                #[derive(Deserialize)]
+                                struct SyncItem {
+                                    id: String,
+                                    path: String,
+                                    mtime: u64,
+                                }
+                                #[derive(Serialize)]
+                                struct ChangedItem {
+                                    id: String,
+                                    path: String,
+                                    name: String,
+                                    mtime: u64,
+                                    content: String,
+                                }
+                                if let Ok(items) = serde_json::from_str::<Vec<SyncItem>>(&json_str) {
+                                    let mut changed = Vec::new();
+                                    for item in items {
+                                        let path = normalize_file_path(&item.path);
+                                        if path.exists() && path.is_file() {
+                                            if let Some(current_mtime) = get_file_mtime(&path) {
+                                                // 50ms tolerance threshold to avoid false positives
+                                                if current_mtime > item.mtime + 50 {
+                                                    if let Ok(disk_content) = fs::read_to_string(&path) {
+                                                        let name = path
+                                                            .file_name()
+                                                            .and_then(|n| n.to_str())
+                                                            .unwrap_or("document.md")
+                                                            .to_string();
+                                                        changed.push(ChangedItem {
+                                                            id: item.id,
+                                                            path: path.to_string_lossy().to_string(),
+                                                            name,
+                                                            mtime: current_mtime,
+                                                            content: disk_content,
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if !changed.is_empty() {
+                                        if let Ok(changed_json) = serde_json::to_string(&changed) {
+                                            log_info!("check_file_sync detected {} externally changed file(s)", changed.len());
+                                            send_to_webview(
+                                                wv,
+                                                &IpcResponse {
+                                                    response_type: "files_externally_modified",
+                                                    path: None,
+                                                    name: None,
+                                                    content: None,
+                                                    message: None,
+                                                    json: Some(changed_json),
+                                                    mtime: None,
+                                                },
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         "save_keybindings" => {
                             if let Some(json_content) = request.json {
                                 match serde_json::from_str::<serde_json::Value>(&json_content) {
@@ -1415,6 +1496,7 @@ fn main() {
                                                     content: None,
                                                     message: Some(format!("Failed to save keybindings: {}", e)),
                                                     json: None,
+                                                    mtime: None,
                                                 },
                                             );
                                         } else {
@@ -1436,6 +1518,8 @@ fn main() {
                                                     content: None,
                                                     message: Some("Keybindings saved successfully.".to_string()),
                                                     json: Some(json_content),
+
+                                                    mtime: None,
                                                 },
                                             );
                                         }
@@ -1450,6 +1534,7 @@ fn main() {
                                                 content: None,
                                                 message: Some(format!("Invalid keybindings JSON: {}", e)),
                                                 json: None,
+                                                mtime: None,
                                             },
                                         );
                                     }
@@ -1478,6 +1563,8 @@ fn main() {
                                     content: None,
                                     message: Some("Keybindings reset to default settings.".to_string()),
                                     json: Some(DEFAULT_KEYBINDINGS.to_string()),
+
+                                    mtime: None,
                                 },
                             );
                         }
@@ -1521,6 +1608,8 @@ fn main() {
                                                 content: Some(data_url),
                                                 message: None,
                                                 json: None,
+
+                                                mtime: None,
                                             },
                                         );
                                     }
@@ -1550,6 +1639,8 @@ fn main() {
                                     content: res_text,
                                     message: err_msg,
                                     json: Some(payload.to_string()),
+
+                                    mtime: None,
                                 };
                                 if let Ok(json_str) = serde_json::to_string(&resp) {
                                     let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
@@ -1569,6 +1660,7 @@ fn main() {
                                     content: if ok { Some("connected".into()) } else { Some("failed".into()) },
                                     message: if ok { None } else { Some(format!("Connection to {} failed. Check URL or verify if LibreTranslate is running.", url)) },
                                     json: None,
+                                    mtime: None,
                                 };
                                 if let Ok(json_str) = serde_json::to_string(&resp) {
                                     let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
@@ -1588,6 +1680,8 @@ fn main() {
                                     content: None,
                                     message: None,
                                     json: packs_json,
+
+                                    mtime: None,
                                 },
                             );
                         }
@@ -1614,6 +1708,7 @@ fn main() {
                                         content: if success { Some("success".into()) } else { Some("failed".into()) },
                                         message: if success { None } else { Some("Failed to install pack".into()) },
                                         json: packs_json,
+                                        mtime: None,
                                     };
                                     if let Ok(json_str) = serde_json::to_string(&resp) {
                                         let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
@@ -1640,6 +1735,8 @@ fn main() {
                                         content: Some("deleted".into()),
                                         message: None,
                                         json: packs_json,
+
+                                        mtime: None,
                                     },
                                 );
                             }
@@ -1661,6 +1758,8 @@ fn main() {
                                     content: None,
                                     message: None,
                                     json: Some(content),
+
+                                    mtime: None,
                                 },
                             );
                         }
@@ -1678,6 +1777,7 @@ fn main() {
                                         content: if res.is_ok() { Some("ok".to_string()) } else { Some("error".to_string()) },
                                         message: res.err().map(|e| e.to_string()),
                                         json: None,
+                                        mtime: None,
                                     },
                                 );
                             }
@@ -1718,6 +1818,8 @@ fn main() {
                                     content: Some(status.to_string()),
                                     message: Some(msg),
                                     json: Some(payload.to_string()),
+
+                                    mtime: None,
                                 },
                             );
                         }
@@ -1755,6 +1857,8 @@ fn main() {
                                         content: None,
                                         message: Some(err_msg),
                                         json: Some(payload.to_string()),
+
+                                        mtime: None,
                                     };
                                     if let Ok(json_str) = serde_json::to_string(&resp) {
                                         let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
@@ -1782,6 +1886,8 @@ fn main() {
                                     content: res_text,
                                     message: res_err,
                                     json: Some(payload.to_string()),
+
+                                    mtime: None,
                                 };
                                 if let Ok(json_str) = serde_json::to_string(&resp) {
                                     let _ = proxy_clone.send_event(AppEvent::SendToWebview(json_str));
@@ -1841,6 +1947,7 @@ fn main() {
                                     content: Some(content),
                                     message: None,
                                     json: None,
+                                                mtime: get_file_mtime(&path),
                                 },
                             );
                         }
@@ -1884,6 +1991,7 @@ fn main() {
                                     content: Some(content),
                                     message: None,
                                     json: None,
+                                    mtime: get_file_mtime(&abs_path),
                                 },
                             );
                         }
@@ -2068,6 +2176,21 @@ mod tests {
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().kind(), std::io::ErrorKind::PermissionDenied);
 
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_get_file_mtime() {
+        let temp_dir = std::env::temp_dir().join(format!("mdviewer_mtime_test_{}", std::process::id()));
+        let _ = fs::create_dir_all(&temp_dir);
+        let test_file = temp_dir.join("mtime_test.md");
+
+        assert!(safe_write_file(&test_file, "mtime content").is_ok());
+        let mtime = get_file_mtime(&test_file);
+        assert!(mtime.is_some());
+        assert!(mtime.unwrap() > 0);
+
+        let _ = fs::remove_file(&test_file);
         let _ = fs::remove_dir_all(&temp_dir);
     }
 }
