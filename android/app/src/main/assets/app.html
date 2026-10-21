@@ -2201,8 +2201,8 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 22px;
-      width: 92%;
-      max-width: 640px;
+      width: 94%;
+      max-width: 720px;
       max-height: 85vh;
       overflow-y: auto;
       display: flex;
@@ -2280,6 +2280,180 @@
     .kb-row-desc {
       font-size: 10.5px;
       color: var(--text-muted);
+    }
+    /* Multi-keybinding chip styles */
+    .kb-chip-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px dashed var(--border-light);
+    }
+    .kb-chip-row:last-child {
+      border-bottom: none;
+    }
+    .kb-chips-container {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      min-height: 36px;
+      min-width: 210px;
+      max-width: 330px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .kb-chips-container:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+    .kb-chips-empty {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2px 4px;
+      user-select: none;
+    }
+    .kb-chip {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 4px 2px 6px;
+      gap: 5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: all 0.15s ease;
+    }
+    .kb-chip:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+    .kb-chip-key {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.2px;
+      user-select: none;
+    }
+    .kb-mode-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      font-family: var(--font-mono);
+    }
+    .kb-mode-pill.mode-all {
+      background: rgba(88, 166, 255, 0.16);
+      color: #58a6ff;
+      border: 1px solid rgba(88, 166, 255, 0.35);
+    }
+    .kb-mode-pill.mode-normal {
+      background: rgba(63, 185, 80, 0.16);
+      color: #3fb950;
+      border: 1px solid rgba(63, 185, 80, 0.35);
+    }
+    .kb-mode-pill.mode-visual {
+      background: rgba(188, 140, 255, 0.16);
+      color: #bc8cff;
+      border: 1px solid rgba(188, 140, 255, 0.35);
+    }
+    .kb-mode-pill.mode-insert {
+      background: rgba(210, 153, 34, 0.16);
+      color: #d29922;
+      border: 1px solid rgba(210, 153, 34, 0.35);
+    }
+    .kb-mode-pill:hover {
+      filter: brightness(1.25);
+      transform: scale(1.06);
+    }
+    .kb-chip-del {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 0 3px;
+      line-height: 1;
+      border-radius: 3px;
+      opacity: 0.6;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .kb-chip-del:hover {
+      opacity: 1;
+      color: var(--danger, #f85149);
+    }
+    .kb-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .kb-btn-add {
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .kb-btn-add:hover {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    .kb-btn-clear {
+      background: rgba(248, 81, 73, 0.08);
+      color: var(--text-muted);
+      border: 1px solid var(--border-light);
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .kb-btn-clear:hover {
+      background: rgba(248, 81, 73, 0.22);
+      color: var(--danger, #f85149);
+      border-color: rgba(248, 81, 73, 0.45);
+    }
+    .kb-mode-choice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .kb-mode-choice:hover {
+      background: var(--bg-card);
+      border-color: var(--accent);
+    }
+    .kb-mode-choice.active {
+      background: var(--accent-glow);
+      border-color: var(--accent);
     }
     .kb-input-box {
       width: 140px;
@@ -3933,7 +4107,7 @@
           <!-- Preview Navigation Group -->
           <div class="kb-group">
             <div class="kb-group-title">
-              <span>🖱️ Preview Mode Navigation</span>
+              <span>🖱️ Preview Mode Navigation &amp; Scrolling</span>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -3945,33 +4119,94 @@
                 <option value="false">false</option>
               </select>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="scroll_down" data-name="Scroll Down">
               <div class="kb-row-info">
                 <span class="kb-row-label">Scroll Down</span>
-                <span class="kb-row-desc">Move preview view downward</span>
+                <span class="kb-row-desc">Move preview / cursor downward</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_down" spellcheck="false" placeholder="j">
+              <div class="kb-chips-container" id="kb-chips-preview-scroll_down"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_down', 'Scroll Down')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_down')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="scroll_up" data-name="Scroll Up">
               <div class="kb-row-info">
                 <span class="kb-row-label">Scroll Up</span>
-                <span class="kb-row-desc">Move preview view upward</span>
+                <span class="kb-row-desc">Move preview / cursor upward</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_up" spellcheck="false" placeholder="k">
+              <div class="kb-chips-container" id="kb-chips-preview-scroll_up"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_up', 'Scroll Up')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_up')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="scroll_left" data-name="Scroll Left">
               <div class="kb-row-info">
                 <span class="kb-row-label">Scroll Left</span>
-                <span class="kb-row-desc">Pan view leftward</span>
+                <span class="kb-row-desc">Pan preview leftward</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_left" spellcheck="false" placeholder="h">
+              <div class="kb-chips-container" id="kb-chips-preview-scroll_left"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_left', 'Scroll Left')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_left')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="scroll_right" data-name="Scroll Right">
               <div class="kb-row-info">
                 <span class="kb-row-label">Scroll Right</span>
-                <span class="kb-row-desc">Pan view rightward</span>
+                <span class="kb-row-desc">Pan preview rightward</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="scroll_right" spellcheck="false" placeholder="l">
+              <div class="kb-chips-container" id="kb-chips-preview-scroll_right"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_right', 'Scroll Right')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_right')">✕ Clear</button>
+              </div>
+            </div>
+            <!-- Neovim scrolling actions -->
+            <div class="kb-chip-row" data-cat="preview" data-key="scroll_line_down" data-name="Scroll Line Down (C-e)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Scroll Line Down (C-e)</span>
+                <span class="kb-row-desc">Neovim viewport 1 line down</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-scroll_line_down"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_line_down', 'Scroll Line Down (C-e)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_line_down')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="scroll_line_up" data-name="Scroll Line Up (C-y)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Scroll Line Up (C-y)</span>
+                <span class="kb-row-desc">Neovim viewport 1 line up</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-scroll_line_up"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_line_up', 'Scroll Line Up (C-y)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_line_up')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="fast_scroll_down" data-name="Fast Scroll Down (C-d)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Fast Scroll Down (C-d)</span>
+                <span class="kb-row-desc">Half page down jump</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-fast_scroll_down"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.fast_scroll_down', 'Fast Scroll Down (C-d)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.fast_scroll_down')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="fast_scroll_up" data-name="Fast Scroll Up (C-u)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Fast Scroll Up (C-u)</span>
+                <span class="kb-row-desc">Half page up jump</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-fast_scroll_up"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.fast_scroll_up', 'Fast Scroll Up (C-u)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.fast_scroll_up')">✕ Clear</button>
+              </div>
             </div>
           </div>
 
@@ -3980,40 +4215,60 @@
             <div class="kb-group-title">
               <span>📂 File &amp; Window Management</span>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="save_file" data-name="Save Current File">
               <div class="kb-row-info">
                 <span class="kb-row-label">Save Current File</span>
-                <span class="kb-row-desc">Quick-save active document in preview</span>
+                <span class="kb-row-desc">Quick-save active document</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="save_file" spellcheck="false" placeholder="w">
+              <div class="kb-chips-container" id="kb-chips-preview-save_file"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.save_file', 'Save Current File')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.save_file')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="prev_file" data-name="Previous Tab">
               <div class="kb-row-info">
                 <span class="kb-row-label">Previous Tab</span>
-                <span class="kb-row-desc">Switch to previous open file tab</span>
+                <span class="kb-row-desc">Switch to previous open tab</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="prev_file" spellcheck="false" placeholder="Alt+Shift+H">
+              <div class="kb-chips-container" id="kb-chips-preview-prev_file"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.prev_file', 'Previous Tab')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.prev_file')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="next_file" data-name="Next Tab">
               <div class="kb-row-info">
                 <span class="kb-row-label">Next Tab</span>
-                <span class="kb-row-desc">Switch to next open file tab</span>
+                <span class="kb-row-desc">Switch to next open tab</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="next_file" spellcheck="false" placeholder="Alt+Shift+L">
+              <div class="kb-chips-container" id="kb-chips-preview-next_file"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.next_file', 'Next Tab')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.next_file')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="cycle_mode" data-name="Cycle View Mode">
               <div class="kb-row-info">
                 <span class="kb-row-label">Cycle View Mode</span>
-                <span class="kb-row-desc">Switch between Preview, Split, and Edit modes</span>
+                <span class="kb-row-desc">Switch Preview / Split / Edit modes</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="cycle_mode" spellcheck="false" placeholder="Shift+Tab">
+              <div class="kb-chips-container" id="kb-chips-preview-cycle_mode"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.cycle_mode', 'Cycle View Mode')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.cycle_mode')">✕ Clear</button>
+              </div>
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="toggle_toc" data-name="Toggle Outline (TOC)">
               <div class="kb-row-info">
                 <span class="kb-row-label">Toggle Outline (TOC)</span>
                 <span class="kb-row-desc">Show or hide Table of Contents sidebar</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="toggle_toc" spellcheck="false" placeholder="Alt+O">
+              <div class="kb-chips-container" id="kb-chips-preview-toggle_toc"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.toggle_toc', 'Toggle Outline (TOC)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.toggle_toc')">✕ Clear</button>
+              </div>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -4022,12 +4277,16 @@
               </div>
               <input type="text" class="kb-input-box" data-cat="preview" data-key="beautify" spellcheck="false" placeholder="Ctrl+Alt+B" readonly style="opacity:0.85;" title="Shortcut: Ctrl+Alt+B / Shift+Alt+F">
             </div>
-            <div class="kb-row">
+            <div class="kb-chip-row" data-cat="preview" data-key="close_app" data-name="Close App">
               <div class="kb-row-info">
                 <span class="kb-row-label">Close App</span>
                 <span class="kb-row-desc">Exit application</span>
               </div>
-              <input type="text" class="kb-input-box" data-cat="preview" data-key="close_app" spellcheck="false" placeholder="Ctrl+q">
+              <div class="kb-chips-container" id="kb-chips-preview-close_app"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.close_app', 'Close App')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.close_app')">✕ Clear</button>
+              </div>
             </div>
           </div>
 
@@ -4352,6 +4611,16 @@
           <div class="kb-group">
             <div class="kb-group-title">
               <span>🖥️ Performance &amp; Vim Settings</span>
+            </div>
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Enable Neovim Mode</span>
+                <span class="kb-row-desc">Enable Vim Normal, Visual, and Insert modes in editor and preview</span>
+              </div>
+              <select class="kb-input-box" data-cat="settings" data-key="enable_vim" id="kb-settings-enable-vim">
+                <option value="true">true (Enabled)</option>
+                <option value="false">false (Disabled)</option>
+              </select>
             </div>
             <div class="kb-row">
               <div class="kb-row-info">
@@ -4739,6 +5008,66 @@
             <button class="btn btn-primary" id="kb-save-btn" onclick="App.saveKeybindingsFromModal()">💾 Save Keybindings</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Recorder Modal -->
+  <div class="modal-overlay" id="kb-recorder-modal" style="z-index: 100002;">
+    <div class="modal-card" style="max-width: 440px; padding: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+        <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+          <span>⌨️ Assign Shortcut Key</span>
+        </div>
+        <button class="btn btn-sm" onclick="App.closeKeyRecorderModal()" style="padding: 2px 8px; border:none; background:transparent; color:var(--text-muted); font-size:14px; cursor:pointer;">✕</button>
+      </div>
+      
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px;" id="kb-recorder-action-name">Action: Previous Tab</div>
+        <div style="position: relative;">
+          <input type="text" id="kb-recorder-key-input" class="kb-input-box" style="width: 100%; height: 38px; text-align: left; padding: 6px 12px; font-size: 13px;" placeholder="Press key combo or type (e.g. F5, Alt+Left, Tab+j)..." spellcheck="false" autocomplete="off" />
+          <span style="position: absolute; right: 10px; top: 10px; font-size: 10.5px; color: var(--text-muted); pointer-events: none;">Listening...</span>
+        </div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Press any key combo directly, or type manually (e.g. <code>F5</code>, <code>Alt+ArrowLeft</code>, <code>Tab+j</code>).</div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Mode Scope:</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;" id="kb-recorder-modes">
+          <label class="kb-mode-choice active" data-mode="all" onclick="App.selectRecorderMode('all')">
+            <span class="kb-mode-pill mode-all">(a)</span>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600;">All Modes</span>
+              <span style="font-size: 9.5px; color: var(--text-muted);">Preview &amp; Editor</span>
+            </div>
+          </label>
+          <label class="kb-mode-choice" data-mode="normal" onclick="App.selectRecorderMode('normal')">
+            <span class="kb-mode-pill mode-normal">(n)</span>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600;">Normal Mode</span>
+              <span style="font-size: 9.5px; color: var(--text-muted);">Preview &amp; Vim Normal</span>
+            </div>
+          </label>
+          <label class="kb-mode-choice" data-mode="visual" onclick="App.selectRecorderMode('visual')">
+            <span class="kb-mode-pill mode-visual">(v)</span>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600;">Visual Mode</span>
+              <span style="font-size: 9.5px; color: var(--text-muted);">Vim &amp; Preview Visual</span>
+            </div>
+          </label>
+          <label class="kb-mode-choice" data-mode="insert" onclick="App.selectRecorderMode('insert')">
+            <span class="kb-mode-pill mode-insert">(i)</span>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600;">Insert Mode</span>
+              <span style="font-size: 9.5px; color: var(--text-muted);">Editor typing mode</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn btn-secondary" onclick="App.closeKeyRecorderModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="App.confirmKeyRecorder()">Add Shortcut</button>
       </div>
     </div>
   </div>
@@ -7446,9 +7775,11 @@
           return;
         }
 
+        const kbPrev = (this.app.keybindings && this.app.keybindings.preview) || {};
+
         // Shift+Tab cycles mode between Preview -> Split -> Edit
-        const cycleBinding = (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.cycle_mode) || 'Shift+Tab';
-        if ((this.app.matchesCombo && this.app.matchesCombo(e, cycleBinding)) || (e.key === 'Tab' && e.shiftKey)) {
+        const cycleBinding = kbPrev.cycle_mode || 'Shift+Tab';
+        if ((this.app.matchesAction && this.app.matchesAction(e, cycleBinding)) || (this.app.matchesCombo && this.app.matchesCombo(e, cycleBinding)) || (e.key === 'Tab' && e.shiftKey)) {
           e.preventDefault();
           e.stopPropagation();
           e.stopImmediatePropagation();
@@ -7457,11 +7788,38 @@
         }
 
         // Toggle Outline (TOC) shortcut: Alt+O
-        const tocBinding = (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.toggle_toc) || 'Alt+O';
-        if ((this.app.matchesCombo && this.app.matchesCombo(e, tocBinding)) || (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o')) {
+        const tocBinding = kbPrev.toggle_toc || 'Alt+O';
+        if ((this.app.matchesAction && this.app.matchesAction(e, tocBinding)) || (this.app.matchesCombo && this.app.matchesCombo(e, tocBinding)) || (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o')) {
           e.preventDefault();
           e.stopPropagation();
           TableOfContents.toggle();
+          return;
+        }
+
+        // Tab Navigation: Previous File / Tab
+        if (this.app.matchesAction && this.app.matchesAction(e, kbPrev.prev_file || 'Alt+Shift+H')) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          this.app.switchFileRelative(-1);
+          return;
+        }
+
+        // Tab Navigation: Next File / Tab
+        if (this.app.matchesAction && this.app.matchesAction(e, kbPrev.next_file || 'Alt+Shift+L')) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          this.app.switchFileRelative(1);
+          return;
+        }
+
+        // Save File shortcut in editor
+        if (this.app.matchesAction && this.app.matchesAction(e, kbPrev.save_file || 'Ctrl+s')) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          this.app.save();
           return;
         }
 
@@ -7713,11 +8071,31 @@
           for (let i = 0; i < targetLine; i++) cur += lines[i].length + 1;
           this.setCursor(cur);
         }
-        else if (e.ctrlKey && key === 'd') {
+        else if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.scroll_line_down) || 'Ctrl+e')) || (e.ctrlKey && key === 'e')) {
+          const charH = this.getCharMetrics().height || 20.8;
+          if (this.editorScroller) this.editorScroller.scrollBy(charH);
+          else this.editorEl.scrollTop += charH;
+          const info = this.getLineInfo();
+          const visibleTopLine = Math.floor(this.editorEl.scrollTop / charH);
+          if (info.lineIndex < visibleTopLine) {
+            this.moveVertical(visibleTopLine - info.lineIndex);
+          }
+        }
+        else if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.scroll_line_up) || 'Ctrl+y')) || (e.ctrlKey && key === 'y')) {
+          const charH = this.getCharMetrics().height || 20.8;
+          if (this.editorScroller) this.editorScroller.scrollBy(-charH);
+          else this.editorEl.scrollTop -= charH;
+          const info = this.getLineInfo();
+          const visibleBottomLine = Math.floor((this.editorEl.scrollTop + this.editorEl.clientHeight) / charH) - 1;
+          if (info.lineIndex > visibleBottomLine) {
+            this.moveVertical(visibleBottomLine - info.lineIndex);
+          }
+        }
+        else if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.fast_scroll_down) || 'Ctrl+d')) || (e.ctrlKey && key === 'd')) {
           this.moveVertical(15);
           if (this.editorScroller) this.editorScroller.scrollBy(15 * 20);
         }
-        else if (e.ctrlKey && key === 'u') {
+        else if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.fast_scroll_up) || 'Ctrl+u')) || (e.ctrlKey && key === 'u')) {
           this.moveVertical(-15);
           if (this.editorScroller) this.editorScroller.scrollBy(-15 * 20);
         }
@@ -7853,7 +8231,29 @@
           return;
         }
 
-        // Visual motions
+        // Visual motions and scrolling
+        if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.scroll_line_down) || 'Ctrl+e')) || (e.ctrlKey && key === 'e')) {
+          const charH = this.getCharMetrics().height || 20.8;
+          if (this.editorScroller) this.editorScroller.scrollBy(charH);
+          else this.editorEl.scrollTop += charH;
+          return;
+        }
+        if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.scroll_line_up) || 'Ctrl+y')) || (e.ctrlKey && key === 'y')) {
+          const charH = this.getCharMetrics().height || 20.8;
+          if (this.editorScroller) this.editorScroller.scrollBy(-charH);
+          else this.editorEl.scrollTop -= charH;
+          return;
+        }
+        if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.fast_scroll_down) || 'Ctrl+d')) || (e.ctrlKey && key === 'd')) {
+          this.moveVertical(15);
+          if (this.editorScroller) this.editorScroller.scrollBy(15 * 20);
+          return;
+        }
+        if ((this.app && this.app.matchesAction && this.app.matchesAction(e, (this.app.keybindings && this.app.keybindings.preview && this.app.keybindings.preview.fast_scroll_up) || 'Ctrl+u')) || (e.ctrlKey && key === 'u')) {
+          this.moveVertical(-15);
+          if (this.editorScroller) this.editorScroller.scrollBy(-15 * 20);
+          return;
+        }
         if (key === 'h' || key === 'ArrowLeft') this.moveHorizontal(-1);
         else if (key === 'l' || key === 'ArrowRight') this.moveHorizontal(1);
         else if (key === 'j' || key === 'ArrowDown') this.moveVertical(1);
@@ -11931,16 +12331,53 @@
       defaultKeybindings: {
         preview: {
           enable_cursor: true,
-          scroll_down: "j",
-          scroll_up: "k",
-          scroll_right: "l",
-          scroll_left: "h",
-          prev_file: "Alt+Shift+H",
-          next_file: "Alt+Shift+L",
-          close_app: "Ctrl+q",
-          save_file: "w",
-          cycle_mode: "Shift+Tab",
-          toggle_toc: "Alt+O"
+          scroll_down: [
+            { key: "j", mode: "normal" },
+            { key: "ArrowDown", mode: "all" }
+          ],
+          scroll_up: [
+            { key: "k", mode: "normal" },
+            { key: "ArrowUp", mode: "all" }
+          ],
+          scroll_right: [
+            { key: "l", mode: "normal" },
+            { key: "ArrowRight", mode: "all" }
+          ],
+          scroll_left: [
+            { key: "h", mode: "normal" },
+            { key: "ArrowLeft", mode: "all" }
+          ],
+          scroll_line_down: [
+            { key: "Ctrl+e", mode: "all" }
+          ],
+          scroll_line_up: [
+            { key: "Ctrl+y", mode: "all" }
+          ],
+          fast_scroll_down: [
+            { key: "Ctrl+d", mode: "all" }
+          ],
+          fast_scroll_up: [
+            { key: "Ctrl+u", mode: "all" }
+          ],
+          prev_file: [
+            { key: "Alt+Shift+H", mode: "all" }
+          ],
+          next_file: [
+            { key: "Alt+Shift+L", mode: "all" }
+          ],
+          close_app: [
+            { key: "Ctrl+q", mode: "all" }
+          ],
+          save_file: [
+            { key: "w", mode: "normal" },
+            { key: "Ctrl+s", mode: "all" }
+          ],
+          cycle_mode: [
+            { key: "Shift+Tab", mode: "all" }
+          ],
+          toggle_toc: [
+            { key: "Alt+O", mode: "all" }
+          ]
         },
         toc: {
           mode: "side_tab",
@@ -12011,6 +12448,7 @@
           default_scope: "current_file"
         },
         settings: {
+          enable_vim: true,
           middle_click_close_tab: true,
           is_copy_to_yank: true,
           scroll_step_y: 60,
@@ -12023,16 +12461,53 @@
       keybindings: {
         preview: {
           enable_cursor: true,
-          scroll_down: "j",
-          scroll_up: "k",
-          scroll_right: "l",
-          scroll_left: "h",
-          prev_file: "Alt+Shift+H",
-          next_file: "Alt+Shift+L",
-          close_app: "Ctrl+q",
-          save_file: "w",
-          cycle_mode: "Shift+Tab",
-          toggle_toc: "Alt+O"
+          scroll_down: [
+            { key: "j", mode: "normal" },
+            { key: "ArrowDown", mode: "all" }
+          ],
+          scroll_up: [
+            { key: "k", mode: "normal" },
+            { key: "ArrowUp", mode: "all" }
+          ],
+          scroll_right: [
+            { key: "l", mode: "normal" },
+            { key: "ArrowRight", mode: "all" }
+          ],
+          scroll_left: [
+            { key: "h", mode: "normal" },
+            { key: "ArrowLeft", mode: "all" }
+          ],
+          scroll_line_down: [
+            { key: "Ctrl+e", mode: "all" }
+          ],
+          scroll_line_up: [
+            { key: "Ctrl+y", mode: "all" }
+          ],
+          fast_scroll_down: [
+            { key: "Ctrl+d", mode: "all" }
+          ],
+          fast_scroll_up: [
+            { key: "Ctrl+u", mode: "all" }
+          ],
+          prev_file: [
+            { key: "Alt+Shift+H", mode: "all" }
+          ],
+          next_file: [
+            { key: "Alt+Shift+L", mode: "all" }
+          ],
+          close_app: [
+            { key: "Ctrl+q", mode: "all" }
+          ],
+          save_file: [
+            { key: "w", mode: "normal" },
+            { key: "Ctrl+s", mode: "all" }
+          ],
+          cycle_mode: [
+            { key: "Shift+Tab", mode: "all" }
+          ],
+          toggle_toc: [
+            { key: "Alt+O", mode: "all" }
+          ]
         },
         toc: {
           mode: "side_tab",
@@ -12118,28 +12593,227 @@
         return isNaN(fps) ? 60 : fps;
       },
 
-      matchesCombo(e, comboStr) {
+      normalizeMode(mode) {
+        if (!mode) return 'all';
+        const m = String(mode).trim().toLowerCase();
+        if (m === 'n' || m === 'normal') return 'normal';
+        if (m === 'v' || m === 'visual') return 'visual';
+        if (m === 'i' || m === 'insert') return 'insert';
+        return 'all';
+      },
+
+      getModeBadge(mode) {
+        const norm = this.normalizeMode(mode);
+        if (norm === 'normal') return { label: '(n)', className: 'mode-normal', title: 'Mode: Normal (n) - Active in Preview & Vim Normal (Click to cycle)' };
+        if (norm === 'visual') return { label: '(v)', className: 'mode-visual', title: 'Mode: Visual (v) - Active in Vim & Preview Selection (Click to cycle)' };
+        if (norm === 'insert') return { label: '(i)', className: 'mode-insert', title: 'Mode: Insert (i) - Active in Editor typing mode (Click to cycle)' };
+        return { label: '(a)', className: 'mode-all', title: 'Mode: All (a) - Active everywhere (Click to cycle)' };
+      },
+
+      normalizeBindingList(val, fallbackDefault) {
+        if (val === undefined || val === null || val === '') {
+          if (fallbackDefault !== undefined) return this.normalizeBindingList(fallbackDefault);
+          return [];
+        }
+        if (Array.isArray(val)) {
+          return val.map(item => {
+            if (typeof item === 'object' && item !== null && item.key) {
+              return {
+                key: String(item.key).trim(),
+                mode: this.normalizeMode(item.mode)
+              };
+            }
+            if (typeof item === 'string') {
+              return this.parseStringBinding(item);
+            }
+            return null;
+          }).filter(Boolean);
+        }
+        if (typeof val === 'object' && val !== null && val.key) {
+          return [{
+            key: String(val.key).trim(),
+            mode: this.normalizeMode(val.mode)
+          }];
+        }
+        if (typeof val === 'string') {
+          return [this.parseStringBinding(val)];
+        }
+        return [];
+      },
+
+      parseStringBinding(str) {
+        if (!str) return null;
+        str = str.trim();
+        const matchParen = str.match(/^(.*?)\(([anvi]|all|normal|visual|insert)\)$/i);
+        if (matchParen) {
+          return {
+            key: matchParen[1].trim(),
+            mode: this.normalizeMode(matchParen[2])
+          };
+        }
+        const matchColon = str.match(/^(.*?):([anvi]|all|normal|visual|insert)$/i);
+        if (matchColon) {
+          return {
+            key: matchColon[1].trim(),
+            mode: this.normalizeMode(matchColon[2])
+          };
+        }
+        const lower = str.toLowerCase();
+        const hasMod = lower.includes('ctrl') || lower.includes('alt') || lower.includes('shift') || lower.includes('meta') || /^f\d+$/i.test(str);
+        return {
+          key: str,
+          mode: hasMod ? 'all' : 'normal'
+        };
+      },
+
+      normalizeKeyName(k) {
+        if (!k) return '';
+        k = String(k).trim().toLowerCase();
+        if (k === 'left_arrow' || k === 'left-arrow' || k === 'arrowleft' || k === 'left') return 'arrowleft';
+        if (k === 'right_arrow' || k === 'right-arrow' || k === 'arrowright' || k === 'right') return 'arrowright';
+        if (k === 'up_arrow' || k === 'up-arrow' || k === 'arrowup' || k === 'up') return 'arrowup';
+        if (k === 'down_arrow' || k === 'down-arrow' || k === 'arrowdown' || k === 'down') return 'arrowdown';
+        if (k === 'esc' || k === 'escape') return 'escape';
+        if (k === 'enter' || k === 'return') return 'enter';
+        if (k === 'space' || k === 'spacebar') return 'space';
+        if (k === 'tab') return 'tab';
+        return k;
+      },
+
+      eventKeyMatches(eKey, targetKey) {
+        const normTarget = this.normalizeKeyName(targetKey);
+        const normE = this.normalizeKeyName(eKey);
+        if (normTarget === 'space') return normE === ' ' || normE === 'space';
+        return normE === normTarget;
+      },
+
+      matchesKeyCombo(e, comboStr) {
         if (!comboStr) return false;
-        const parts = comboStr.split('+').map(p => p.trim().toLowerCase());
+        let clean = String(comboStr).trim();
+        // Support C-e, C-y, A-h Vim notations
+        clean = clean.replace(/\bC-/gi, 'Ctrl+').replace(/\bA-/gi, 'Alt+').replace(/\bM-/gi, 'Meta+').replace(/\bS-/gi, 'Shift+');
+        const parts = clean.split('+').map(p => p.trim().toLowerCase());
+
         const wantsCtrl = parts.includes('ctrl') || parts.includes('control');
         const wantsAlt = parts.includes('alt');
         const wantsShift = parts.includes('shift');
         const wantsMeta = parts.includes('meta') || parts.includes('cmd');
+        const wantsTab = parts.includes('tab');
 
         if ((e.ctrlKey || false) !== wantsCtrl) return false;
         if ((e.altKey || false) !== wantsAlt) return false;
         if ((e.shiftKey || false) !== wantsShift) return false;
         if ((e.metaKey || false) !== wantsMeta) return false;
 
-        const mainKey = parts.filter(p => !['ctrl', 'control', 'alt', 'shift', 'meta', 'cmd'].includes(p))[0];
-        if (!mainKey) return false;
+        const mainParts = parts.filter(p => !['ctrl', 'control', 'alt', 'shift', 'meta', 'cmd'].includes(p));
+        if (mainParts.length === 0) return false;
 
-        const eKey = (e.key || '').toLowerCase();
-        if (mainKey === 'tab') return eKey === 'tab';
-        if (mainKey === 'esc' || mainKey === 'escape') return eKey === 'escape';
-        if (mainKey === 'enter') return eKey === 'enter';
-        if (mainKey === 'space') return eKey === ' ' || eKey === 'space';
-        return eKey === mainKey;
+        if (wantsTab) {
+          if (mainParts.length === 1 && mainParts[0] === 'tab') {
+            return (e.key || '').toLowerCase() === 'tab';
+          }
+          const nonTabKey = mainParts.find(p => p !== 'tab');
+          if (!nonTabKey) return false;
+          const isTabHeldOrRecent = Boolean(this._tabKeyDown) || (Date.now() - (this._tabKeyTime || 0) < 450);
+          if (!isTabHeldOrRecent) return false;
+          return this.eventKeyMatches(e.key, nonTabKey);
+        }
+
+        return this.eventKeyMatches(e.key, mainParts[0]);
+      },
+
+      getCurrentAppMode() {
+        const activeEl = document.activeElement;
+        const activeTag = activeEl ? activeEl.tagName.toLowerCase() : '';
+        const isInputOrTextArea = activeTag === 'input' || activeTag === 'textarea';
+
+        if (isInputOrTextArea && activeEl !== this.editorEl) {
+          return 'input';
+        }
+
+        if (this.mode === 'preview') {
+          if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && PreviewCursor.mode === 'VISUAL') {
+            return 'visual';
+          }
+          return 'normal';
+        }
+
+        if (this.mode === 'edit' || this.mode === 'split') {
+          if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+            if (VimMode.mode === 'VISUAL' || VimMode.mode === 'VISUAL_LINE') return 'visual';
+            if (VimMode.mode === 'INSERT') return 'insert';
+            if (VimMode.mode === 'NORMAL') return 'normal';
+            if (VimMode.mode === 'COMMAND') return 'command';
+          } else {
+            return 'insert';
+          }
+        }
+        return 'normal';
+      },
+
+      matchesAction(e, actionConfig, scopeOverride) {
+        if (!actionConfig) return false;
+        const bindings = this.normalizeBindingList(actionConfig);
+        if (bindings.length === 0) return false;
+
+        const curMode = scopeOverride || this.getCurrentAppMode();
+        if (curMode === 'input') return false;
+
+        for (const b of bindings) {
+          const bMode = this.normalizeMode(b.mode);
+          let modeOk = false;
+          if (bMode === 'all') modeOk = true;
+          else if (bMode === 'normal') modeOk = (curMode === 'normal');
+          else if (bMode === 'visual') modeOk = (curMode === 'visual');
+          else if (bMode === 'insert') modeOk = (curMode === 'insert');
+
+          if (modeOk && this.matchesKeyCombo(e, b.key)) {
+            return true;
+          }
+        }
+        return false;
+      },
+
+      matchesCombo(e, comboStr) {
+        return this.matchesKeyCombo(e, comboStr);
+      },
+
+      eventToComboString(e) {
+        if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
+          const parts = [];
+          if (e.ctrlKey) parts.push('Ctrl');
+          if (e.altKey) parts.push('Alt');
+          if (e.shiftKey) parts.push('Shift');
+          if (e.metaKey) parts.push('Meta');
+          return parts.join('+');
+        }
+
+        const parts = [];
+        if (e.ctrlKey) parts.push('Ctrl');
+        if (e.altKey) parts.push('Alt');
+        if (e.shiftKey) parts.push('Shift');
+        if (e.metaKey) parts.push('Meta');
+
+        if (this._recorderTabHeld && e.key !== 'Tab') {
+          parts.unshift('Tab');
+        }
+
+        let mainKey = e.key;
+        if (mainKey === ' ') mainKey = 'Space';
+        else if (mainKey === 'ArrowLeft') mainKey = 'ArrowLeft';
+        else if (mainKey === 'ArrowRight') mainKey = 'ArrowRight';
+        else if (mainKey === 'ArrowUp') mainKey = 'ArrowUp';
+        else if (mainKey === 'ArrowDown') mainKey = 'ArrowDown';
+        else if (mainKey && mainKey.length === 1) mainKey = mainKey.toUpperCase();
+
+        if (mainKey === 'Tab' && parts.length === 0) {
+          return 'Tab';
+        }
+
+        if (parts.length > 0 && !parts.includes(mainKey)) {
+          return parts.join('+') + '+' + mainKey;
+        }
+        return mainKey;
       },
 
       cycleMode() {
@@ -13181,6 +13855,24 @@
       /* NVIM KEYBINDINGS (ACTIVE ONLY IN PREVIEW MODE) */
       setupNVimKeybindings() {
         window.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab') {
+            this._tabKeyDown = true;
+            this._tabKeyTime = Date.now();
+          }
+        }, true);
+
+        window.addEventListener('keyup', (e) => {
+          if (e.key === 'Tab') {
+            this._tabKeyDown = false;
+          }
+        }, true);
+
+        window.addEventListener('blur', () => {
+          this._tabKeyDown = false;
+          this._tabKeyTime = 0;
+        });
+
+        window.addEventListener('keydown', (e) => {
           // Global shortcut: Cycle mode between Preview -> Split -> Edit
           const kb = (this.keybindings && this.keybindings.preview) || {};
           const cycleBinding = kb.cycle_mode || 'Shift+Tab';
@@ -13296,35 +13988,50 @@
           const stepY = (this.keybindings.settings && this.keybindings.settings.scroll_step_y) || 60;
           const stepX = (this.keybindings.settings && this.keybindings.settings.scroll_step_x) || 60;
           const scroller = SmoothScroller.get(this.previewPaneEl);
+          const lineStep = Math.max(20, Math.round(stepY / 2.5));
 
-          // Alt + Shift + H (Previous file)
-          if (e.altKey && e.shiftKey && e.key.toUpperCase() === 'H') {
+          // Previous file / tab shortcut
+          if (this.matchesAction(e, kb.prev_file || 'Alt+Shift+H') || (e.altKey && e.shiftKey && e.key.toUpperCase() === 'H')) {
             e.preventDefault();
             this.switchFileRelative(-1);
             return;
           }
 
-          // Alt + Shift + L (Next file)
-          if (e.altKey && e.shiftKey && e.key.toUpperCase() === 'L') {
+          // Next file / tab shortcut
+          if (this.matchesAction(e, kb.next_file || 'Alt+Shift+L') || (e.altKey && e.shiftKey && e.key.toUpperCase() === 'L')) {
             e.preventDefault();
             this.switchFileRelative(1);
             return;
           }
 
-          // Ctrl+d / Ctrl+u in preview (Neovide fluid half-page jump)
-          if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey) {
+          // Neovim scrolling: C-e (scroll 1 line down), C-y (scroll 1 line up)
+          if (this.matchesAction(e, kb.scroll_line_down || 'Ctrl+e') || ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === 'e')) {
+            e.preventDefault();
+            if (scroller) scroller.scrollBy(lineStep, 0);
+            else this.previewPaneEl.scrollBy({ top: lineStep, behavior: 'auto' });
+            return;
+          }
+          if (this.matchesAction(e, kb.scroll_line_up || 'Ctrl+y') || ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === 'y')) {
+            e.preventDefault();
+            if (scroller) scroller.scrollBy(-lineStep, 0);
+            else this.previewPaneEl.scrollBy({ top: -lineStep, behavior: 'auto' });
+            return;
+          }
+
+          // Neovim scrolling: C-d (half-page down), C-u (half-page up)
+          if (this.matchesAction(e, kb.fast_scroll_down || 'Ctrl+d') || ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === 'd')) {
             const halfView = (this.previewPaneEl.clientHeight || 400) * 0.5;
-            if (e.key === 'd') {
-              e.preventDefault();
-              if (scroller) scroller.scrollBy(halfView, 0);
-              else this.previewPaneEl.scrollBy({ top: halfView, behavior: 'auto' });
-              return;
-            } else if (e.key === 'u') {
-              e.preventDefault();
-              if (scroller) scroller.scrollBy(-halfView, 0);
-              else this.previewPaneEl.scrollBy({ top: -halfView, behavior: 'auto' });
-              return;
-            }
+            e.preventDefault();
+            if (scroller) scroller.scrollBy(halfView, 0);
+            else this.previewPaneEl.scrollBy({ top: halfView, behavior: 'auto' });
+            return;
+          }
+          if (this.matchesAction(e, kb.fast_scroll_up || 'Ctrl+u') || ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === 'u')) {
+            const halfView = (this.previewPaneEl.clientHeight || 400) * 0.5;
+            e.preventDefault();
+            if (scroller) scroller.scrollBy(-halfView, 0);
+            else this.previewPaneEl.scrollBy({ top: -halfView, behavior: 'auto' });
+            return;
           }
 
           // Shared Memory Marks handling in Preview mode
@@ -13921,6 +14628,215 @@
         curr[parts[parts.length - 1]] = val;
       },
 
+      renderChipsForContainer(containerEl, bindings) {
+        if (!containerEl) return;
+        containerEl.innerHTML = '';
+        if (!bindings || bindings.length === 0) {
+          const empty = document.createElement('span');
+          empty.className = 'kb-chips-empty';
+          empty.textContent = '(no key assigned)';
+          containerEl.appendChild(empty);
+          return;
+        }
+        bindings.forEach(b => {
+          const chip = document.createElement('div');
+          chip.className = 'kb-chip';
+          chip.setAttribute('data-key', b.key);
+          chip.setAttribute('data-mode', b.mode);
+
+          const keySpan = document.createElement('span');
+          keySpan.className = 'kb-chip-key';
+          keySpan.textContent = b.key;
+
+          const modeInfo = this.getModeBadge(b.mode);
+          const pillSpan = document.createElement('span');
+          pillSpan.className = `kb-mode-pill ${modeInfo.className}`;
+          pillSpan.textContent = modeInfo.label;
+          pillSpan.title = modeInfo.title;
+          pillSpan.onclick = (e) => {
+            e.stopPropagation();
+            this.cycleChipMode(pillSpan);
+          };
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'kb-chip-del';
+          delBtn.textContent = '✕';
+          delBtn.title = `Remove shortcut ${b.key}`;
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.removeKeybindingChip(delBtn);
+          };
+
+          chip.appendChild(keySpan);
+          chip.appendChild(pillSpan);
+          chip.appendChild(delBtn);
+          containerEl.appendChild(chip);
+        });
+      },
+
+      cycleChipMode(pillEl) {
+        const chip = pillEl.closest('.kb-chip');
+        if (!chip) return;
+        const curMode = chip.getAttribute('data-mode') || 'all';
+        const modes = ['all', 'normal', 'visual', 'insert'];
+        const nextIdx = (modes.indexOf(curMode) + 1) % modes.length;
+        const nextMode = modes[nextIdx];
+        chip.setAttribute('data-mode', nextMode);
+
+        const modeInfo = this.getModeBadge(nextMode);
+        pillEl.className = `kb-mode-pill ${modeInfo.className}`;
+        pillEl.textContent = modeInfo.label;
+        pillEl.title = modeInfo.title;
+
+        this.syncFieldsToJson();
+      },
+
+      removeKeybindingChip(btnEl) {
+        const chip = btnEl.closest('.kb-chip');
+        if (!chip) return;
+        const container = chip.parentElement;
+        chip.remove();
+        if (container && container.querySelectorAll('.kb-chip').length === 0) {
+          container.innerHTML = '<span class="kb-chips-empty">(no key assigned)</span>';
+        }
+        this.syncFieldsToJson();
+      },
+
+      clearKeybindingChips(actionPath) {
+        const [cat, key] = actionPath.split('.');
+        const container = document.getElementById(`kb-chips-${cat}-${key}`);
+        if (container) {
+          container.innerHTML = '<span class="kb-chips-empty">(no key assigned)</span>';
+          this.syncFieldsToJson();
+        }
+      },
+
+      openKeyRecorderModal(actionPath, actionLabel) {
+        this._recorderTargetAction = actionPath;
+        this._recorderMode = 'all';
+        this._recorderTabHeld = false;
+
+        const titleEl = document.getElementById('kb-recorder-action-name');
+        if (titleEl) titleEl.textContent = `Action: ${actionLabel || actionPath}`;
+
+        const input = document.getElementById('kb-recorder-key-input');
+        if (input) {
+          input.value = '';
+          input.onkeydown = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.key === 'Escape') {
+              this.closeKeyRecorderModal();
+              return;
+            }
+            if (e.key === 'Enter') {
+              this.confirmKeyRecorder();
+              return;
+            }
+            if (e.key === 'Tab') {
+              this._recorderTabHeld = true;
+            }
+            const combo = this.eventToComboString(e);
+            if (combo) {
+              input.value = combo;
+              if (combo.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                this.selectRecorderMode('normal');
+              } else {
+                this.selectRecorderMode('all');
+              }
+            }
+          };
+          input.onkeyup = (e) => {
+            if (e.key === 'Tab') {
+              setTimeout(() => { this._recorderTabHeld = false; }, 400);
+            }
+          };
+        }
+        this.selectRecorderMode('all');
+
+        const modal = document.getElementById('kb-recorder-modal');
+        if (modal) {
+          modal.classList.add('show');
+          setTimeout(() => input && input.focus(), 50);
+        }
+      },
+
+      closeKeyRecorderModal() {
+        const modal = document.getElementById('kb-recorder-modal');
+        if (modal) modal.classList.remove('show');
+        this._recorderTargetAction = null;
+        this._recorderTabHeld = false;
+      },
+
+      selectRecorderMode(mode) {
+        this._recorderMode = this.normalizeMode(mode);
+        const choices = document.querySelectorAll('.kb-mode-choice');
+        choices.forEach(c => {
+          c.classList.toggle('active', c.getAttribute('data-mode') === this._recorderMode);
+        });
+      },
+
+      confirmKeyRecorder() {
+        const input = document.getElementById('kb-recorder-key-input');
+        const rawKey = input ? input.value.trim() : '';
+        if (!rawKey) {
+          alert('Please enter or press a key combination.');
+          return;
+        }
+        if (!this._recorderTargetAction) return;
+
+        const [cat, key] = this._recorderTargetAction.split('.');
+        const container = document.getElementById(`kb-chips-${cat}-${key}`);
+        if (!container) return;
+
+        const emptySpan = container.querySelector('.kb-chips-empty');
+        if (emptySpan) emptySpan.remove();
+
+        const existingChips = Array.from(container.querySelectorAll('.kb-chip'));
+        const already = existingChips.some(c => c.getAttribute('data-key').toLowerCase() === rawKey.toLowerCase() && c.getAttribute('data-mode') === this._recorderMode);
+        if (already) {
+          this.closeKeyRecorderModal();
+          return;
+        }
+
+        const chip = document.createElement('div');
+        chip.className = 'kb-chip';
+        chip.setAttribute('data-key', rawKey);
+        chip.setAttribute('data-mode', this._recorderMode);
+
+        const keySpan = document.createElement('span');
+        keySpan.className = 'kb-chip-key';
+        keySpan.textContent = rawKey;
+
+        const modeInfo = this.getModeBadge(this._recorderMode);
+        const pillSpan = document.createElement('span');
+        pillSpan.className = `kb-mode-pill ${modeInfo.className}`;
+        pillSpan.textContent = modeInfo.label;
+        pillSpan.title = modeInfo.title;
+        pillSpan.onclick = (e) => {
+          e.stopPropagation();
+          this.cycleChipMode(pillSpan);
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'kb-chip-del';
+        delBtn.textContent = '✕';
+        delBtn.title = `Remove shortcut ${rawKey}`;
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          this.removeKeybindingChip(delBtn);
+        };
+
+        chip.appendChild(keySpan);
+        chip.appendChild(pillSpan);
+        chip.appendChild(delBtn);
+        container.appendChild(chip);
+
+        this.syncFieldsToJson();
+        this.closeKeyRecorderModal();
+        this.showToast(`Shortcut added: ${rawKey} (${modeInfo.label})`);
+      },
+
       populateKbFields() {
         const kb = this.keybindings || this.defaultKeybindings;
         const inputs = document.querySelectorAll('.kb-input-box');
@@ -13943,6 +14859,22 @@
             }
           }
         });
+
+        // Populate multi-keybinding chips
+        const chipRows = document.querySelectorAll('.kb-chip-row');
+        chipRows.forEach(row => {
+          const cat = row.getAttribute('data-cat');
+          const key = row.getAttribute('data-key');
+          const path = cat ? `${cat}.${key}` : key;
+          const val = this.getNestedValue(kb, path);
+          const defVal = this.getNestedValue(this.defaultKeybindings, path);
+          const bindings = this.normalizeBindingList(val !== undefined ? val : defVal);
+          const container = row.querySelector('.kb-chips-container');
+          if (container) {
+            this.renderChipsForContainer(container, bindings);
+          }
+        });
+
         this.updateTocFieldsVisibility();
         this.updateTransFieldsVisibility();
         this.updateAiFieldsVisibility();
@@ -14001,6 +14933,23 @@
           this.setNestedValue(kb, path, val);
         });
 
+        // Collect multi-keybinding chips
+        const chipRows = document.querySelectorAll('.kb-chip-row');
+        chipRows.forEach(row => {
+          const cat = row.getAttribute('data-cat');
+          const key = row.getAttribute('data-key');
+          const path = cat ? `${cat}.${key}` : key;
+          const container = row.querySelector('.kb-chips-container');
+          if (container) {
+            const chips = Array.from(container.querySelectorAll('.kb-chip'));
+            const bindings = chips.map(c => ({
+              key: c.getAttribute('data-key'),
+              mode: c.getAttribute('data-mode') || 'all'
+            }));
+            this.setNestedValue(kb, path, bindings);
+          }
+        });
+
         this.keybindings = kb;
         if (kb.theme) {
           this.applyTheme(kb.theme);
@@ -14039,6 +14988,22 @@
               }
             }
           });
+
+          // Sync multi-keybinding chips from JSON
+          const chipRows = document.querySelectorAll('.kb-chip-row');
+          chipRows.forEach(row => {
+            const cat = row.getAttribute('data-cat');
+            const key = row.getAttribute('data-key');
+            const path = cat ? `${cat}.${key}` : key;
+            const val = this.getNestedValue(parsed, path);
+            const defVal = this.getNestedValue(this.defaultKeybindings, path);
+            const bindings = this.normalizeBindingList(val !== undefined ? val : defVal);
+            const container = row.querySelector('.kb-chips-container');
+            if (container) {
+              this.renderChipsForContainer(container, bindings);
+            }
+          });
+
           this.updateTocFieldsVisibility();
           this.updateTransFieldsVisibility();
           this.updateAiFieldsVisibility();
@@ -14073,6 +15038,20 @@
         }
 
         this.keybindings = kbToSave;
+        if (kbToSave && kbToSave.settings && kbToSave.settings.enable_vim !== undefined) {
+          const wantVim = kbToSave.settings.enable_vim === true || kbToSave.settings.enable_vim === 'true';
+          if (typeof VimMode !== 'undefined') {
+            VimMode.enabled = wantVim;
+            if (VimMode.badgeEl) {
+              VimMode.badgeEl.innerText = wantVim ? 'ON' : 'OFF';
+              VimMode.badgeEl.classList.toggle('active', wantVim);
+            }
+            if (this.mode === 'edit' || this.mode === 'split') {
+              if (wantVim) VimMode.activate();
+              else VimMode.deactivate();
+            }
+          }
+        }
         if (kbToSave && kbToSave.theme) {
           this.applyTheme(kbToSave.theme);
         }

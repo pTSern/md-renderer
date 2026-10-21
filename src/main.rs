@@ -1078,6 +1078,9 @@ fn main() {
     }
 
     let log_path = init_logger();
+    std::panic::set_hook(Box::new(|info| {
+        log_error!("FATAL PANIC: {}", info);
+    }));
     log_info!("Application starting up. Log file initialized at: {}", log_path.display());
     if let Some(ref init_p) = initial_path_arg {
         log_info!("Initial file path argument: {:?}", init_p);
@@ -1182,6 +1185,7 @@ fn main() {
                         }
 
                         "close_window" => {
+                            log_info!("close_window IPC received. Exiting.");
                             std::process::exit(0);
                         }
 
@@ -1959,8 +1963,11 @@ fn main() {
                 event: WindowEvent::CloseRequested,
                 ..
             } => {
-                log_info!("Window close requested. Exiting application.");
+                log_info!("WindowEvent::CloseRequested. Exiting application.");
                 *control_flow = ControlFlow::Exit;
+            }
+            Event::LoopDestroyed => {
+                log_info!("EventLoop LoopDestroyed. Exiting.");
             }
 
             Event::WindowEvent {
