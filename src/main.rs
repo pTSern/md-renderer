@@ -2,7 +2,8 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
+use std::io::Write;
 use serde::{Deserialize, Serialize};
 use tao::{
     dpi::LogicalSize,
@@ -79,6 +80,125 @@ fn url_decode(s: &str) -> String {
     String::from_utf8_lossy(&bytes).into_owned()
 }
 
+static LOG_FILE_PATH: OnceLock<PathBuf> = OnceLock::new();
+
+fn init_logger() -> PathBuf {
+    let mut chosen_path = None;
+
+    // 1. Try next to current executable (e.g. dist/mdviewer/mdviewer.log)
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(parent) = exe.parent() {
+            let candidate = parent.join("mdviewer.log");
+            if std::fs::OpenOptions::new().create(true).append(true).open(&candidate).is_ok() {
+                chosen_path = Some(candidate);
+            }
+        }
+    }
+
+    // 2. Try current working directory
+    if chosen_path.is_none() {
+        if let Ok(cwd) = std::env::current_dir() {
+            let candidate = cwd.join("mdviewer.log");
+            if std::fs::OpenOptions::new().create(true).append(true).open(&candidate).is_ok() {
+                chosen_path = Some(candidate);
+            }
+        }
+    }
+
+    // 3. Fallback to %APPDATA%\mdviewer\mdviewer.log (or ~/.config/mdviewer/mdviewer.log)
+    if chosen_path.is_none() {
+        #[cfg(target_os = "windows")]
+        let appdata = std::env::var_os("APPDATA")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from(r"C:\ProgramData"));
+        #[cfg(not(target_os = "windows"))]
+        let appdata = std::env::var_os("HOME")
+            .map(|h| PathBuf::from(h).join(".config"))
+            .unwrap_or_else(|| PathBuf::from("/tmp"));
+
+        let log_dir = appdata.join("mdviewer");
+        let _ = fs::create_dir_all(&log_dir);
+        chosen_path = Some(log_dir.join("mdviewer.log"));
+    }
+
+    let final_path = chosen_path.unwrap();
+    let _ = LOG_FILE_PATH.set(final_path.clone());
+
+    log_raw(&format!(
+        "\n======================================================\n[START] MDViewer Session Started at {}\nExe: {:?}\nCwd: {:?}\nLog file: {}\n======================================================",
+        get_current_timestamp(),
+        std::env::current_exe().unwrap_or_default(),
+        std::env::current_dir().unwrap_or_default(),
+        final_path.display()
+    ));
+
+    final_path
+}
+
+fn get_current_timestamp() -> String {
+    #[cfg(target_os = "windows")]
+    {
+        #[repr(C)]
+        struct SystemTime {
+            year: u16,
+            month: u16,
+            day_of_week: u16,
+            day: u16,
+            hour: u16,
+            minute: u16,
+            second: u16,
+            milliseconds: u16,
+        }
+        unsafe extern "system" {
+            fn GetLocalTime(lpSystemTime: *mut SystemTime);
+        }
+        unsafe {
+            let mut st: SystemTime = std::mem::zeroed();
+            GetLocalTime(&mut st);
+            format!(
+                "{:04}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}",
+                st.year, st.month, st.day, st.hour, st.minute, st.second, st.milliseconds
+            )
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        format!("{:?}", std::time::SystemTime::now())
+    }
+}
+
+fn log_raw(msg: &str) {
+    if let Some(path) = LOG_FILE_PATH.get() {
+        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
+            let _ = writeln!(f, "{}", msg);
+            let _ = f.flush();
+        }
+    }
+    #[cfg(debug_assertions)]
+    eprintln!("{}", msg);
+}
+
+macro_rules! log_info {
+    ($($arg:tt)*) => {
+        let msg = format!("[{}] [INFO] {}", get_current_timestamp(), format_args!($($arg)*));
+        log_raw(&msg);
+    };
+}
+
+macro_rules! log_warn {
+    ($($arg:tt)*) => {
+        let msg = format!("[{}] [WARN] {}", get_current_timestamp(), format_args!($($arg)*));
+        log_raw(&msg);
+    };
+}
+
+macro_rules! log_error {
+    ($($arg:tt)*) => {
+        let msg = format!("[{}] [ERROR] {}", get_current_timestamp(), format_args!($($arg)*));
+        log_raw(&msg);
+    };
+}
+
 fn normalize_file_path(raw: &str) -> PathBuf {
     let mut s = raw.trim();
     if s.starts_with('<') && s.ends_with('>') && s.len() >= 2 {
@@ -106,7 +226,83 @@ fn normalize_file_path(raw: &str) -> PathBuf {
     } else {
         cleaned.replace('/', "\\")
     };
-    PathBuf::from(path_str)
+    let pb = PathBuf::from(path_str);
+    if pb.is_relative() {
+        if let Ok(cwd) = std::env::current_dir() {
+            return cwd.join(pb);
+        }
+    }
+    pb
+}
+
+fn safe_write_file(path: &Path, content: &str) -> std::io::Result<()> {
+    if path.is_dir() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::PermissionDenied,
+            format!("Path is a directory, not a file: {}", path.display()),
+        ));
+    }
+
+    // Ensure parent directories exist
+    if let Some(parent) = path.parent() {
+        if !parent.as_os_str().is_empty() && !parent.exists() {
+            fs::create_dir_all(parent)?;
+        }
+    }
+
+    // Strip read-only attribute if file already exists
+    if let Ok(meta) = fs::metadata(path) {
+        let mut perms = meta.permissions();
+        if perms.readonly() {
+            log_warn!("Target file {:?} has read-only attribute; clearing attribute before save", path);
+            perms.set_readonly(false);
+            let _ = fs::set_permissions(path, perms);
+        }
+    }
+
+    // Attempt direct write first
+    match fs::write(path, content.as_bytes()) {
+        Ok(_) => Ok(()),
+        Err(err) => {
+            log_warn!("Direct fs::write failed for {:?}: {}. Retrying with atomic temporary replacement...", path, err);
+
+            // Wait a brief moment to overcome transient file locks (antivirus, indexer, sync)
+            std::thread::sleep(std::time::Duration::from_millis(80));
+
+            // Re-check read-only permissions
+            if let Ok(meta) = fs::metadata(path) {
+                let mut perms = meta.permissions();
+                if perms.readonly() {
+                    perms.set_readonly(false);
+                    let _ = fs::set_permissions(path, perms);
+                }
+            }
+
+            // Atomic temp file write & rename
+            if let Some(parent) = path.parent() {
+                let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("document");
+                let temp_name = format!(".~{}.tmp.{}", filename, std::process::id());
+                let temp_path = parent.join(temp_name);
+                if fs::write(&temp_path, content.as_bytes()).is_ok() {
+                    if fs::rename(&temp_path, path).is_ok() {
+                        log_info!("Atomic save succeeded via temporary file for {:?}", path);
+                        return Ok(());
+                    }
+                    let _ = fs::remove_file(&temp_path);
+                }
+            }
+
+            // Fallback: OpenOptions truncate write
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(path)?;
+            file.write_all(content.as_bytes())?;
+            file.flush()?;
+            Ok(())
+        }
+    }
 }
 
 fn open_in_explorer(p: &Path) {
@@ -136,6 +332,19 @@ fn open_in_explorer(p: &Path) {
             p
         };
         let _ = std::process::Command::new("xdg-open").arg(target).spawn();
+    }
+}
+
+fn open_file_with_default_app(p: &Path) {
+    #[cfg(target_os = "windows")]
+    {
+        let _ = std::process::Command::new("explorer")
+            .raw_arg(format!(r#""{}""#, p.display()))
+            .spawn();
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = std::process::Command::new("xdg-open").arg(p).spawn();
     }
 }
 
@@ -176,14 +385,14 @@ fn validate_or_fallback_keybindings(read_res: Result<String, std::io::Error>) ->
                 Ok(_) => (content, None),
                 Err(e) => {
                     let msg = format!("'keybindings.json' is corrupted ({}). Reverted to default settings.", e);
-                    eprintln!("[WARN] {}", msg);
+                    log_warn!("{}", msg);
                     (DEFAULT_KEYBINDINGS.to_string(), Some(msg))
                 }
             }
         }
         Err(e) => {
             let msg = format!("Failed to read 'keybindings.json' ({}). Reverted to default settings.", e);
-            eprintln!("[WARN] {}", msg);
+            log_warn!("{}", msg);
             (DEFAULT_KEYBINDINGS.to_string(), Some(msg))
         }
     }
@@ -853,11 +1062,17 @@ fn run_ipc_server(proxy: EventLoopProxy<AppEvent>) {
 }
 
 fn main() {
-    let initial_path_arg = std::env::args().nth(1).map(PathBuf::from);
+    let initial_path_arg = std::env::args().nth(1).map(|s| PathBuf::from(resolve_target_path(Path::new(&s))));
 
     // If an instance is already running, pass arguments to it and exit immediately
     if try_send_to_existing_instance(initial_path_arg.as_deref()) {
         return;
+    }
+
+    let log_path = init_logger();
+    log_info!("Application starting up. Log file initialized at: {}", log_path.display());
+    if let Some(ref init_p) = initial_path_arg {
+        log_info!("Initial file path argument: {:?}", init_p);
     }
 
     let event_loop: EventLoop<AppEvent> = EventLoopBuilder::<AppEvent>::with_user_event().build();
@@ -1039,6 +1254,7 @@ fn main() {
                                 .add_filter("All Files (*.*)", &["*"])
                                 .pick_file()
                             {
+                                log_info!("FileDialog selected file: {:?}", path);
                                 match fs::read_to_string(&path) {
                                     Ok(content) => {
                                         let name = path
@@ -1059,6 +1275,7 @@ fn main() {
                                         );
                                     }
                                     Err(e) => {
+                                        log_error!("Failed to open file {:?}: {}", path, e);
                                         send_to_webview(
                                             wv,
                                             &IpcResponse {
@@ -1078,8 +1295,10 @@ fn main() {
                         "save_file" => {
                             if let (Some(path_str), Some(content)) = (request.path, request.content) {
                                 let path = normalize_file_path(&path_str);
-                                match fs::write(&path, content) {
+                                log_info!("Handling 'save_file' request for path: {:?} ({} bytes)", path, content.len());
+                                match safe_write_file(&path, &content) {
                                     Ok(_) => {
+                                        log_info!("File saved successfully to {:?}", path);
                                         let name = path
                                             .file_name()
                                             .and_then(|n| n.to_str())
@@ -1089,7 +1308,7 @@ fn main() {
                                             wv,
                                             &IpcResponse {
                                                 response_type: "file_saved",
-                                                path: Some(path_str),
+                                                path: Some(path.to_string_lossy().to_string()),
                                                 name: Some(name),
                                                 content: None,
                                                 message: None,
@@ -1098,6 +1317,7 @@ fn main() {
                                         );
                                     }
                                     Err(e) => {
+                                        log_error!("Failed to save file to {:?}: {}", path, e);
                                         send_to_webview(
                                             wv,
                                             &IpcResponse {
@@ -1105,7 +1325,7 @@ fn main() {
                                                 path: None,
                                                 name: None,
                                                 content: None,
-                                                message: Some(format!("Failed to save file: {}", e)),
+                                                message: Some(format!("Failed to save file to '{}': {}", path.display(), e)),
                                                 json: None,
                                             },
                                         );
@@ -1117,6 +1337,7 @@ fn main() {
                         "save_file_as" => {
                             if let Some(content) = request.content {
                                 let default_name = request.default_name.unwrap_or_else(|| "document.md".to_string());
+                                log_info!("Handling 'save_file_as' request (default name: {})", default_name);
                                 let dialog = rfd::FileDialog::new()
                                     .add_filter("All Supported Documents (*.md, *.json, *.toml, *.txt)", &["md", "markdown", "json", "toml", "txt"])
                                     .add_filter("Markdown (*.md)", &["md", "markdown"])
@@ -1126,8 +1347,10 @@ fn main() {
                                     .set_file_name(&default_name);
 
                                 if let Some(path) = dialog.save_file() {
-                                    match fs::write(&path, content) {
+                                    log_info!("FileDialog selected save path: {:?} ({} bytes)", path, content.len());
+                                    match safe_write_file(&path, &content) {
                                         Ok(_) => {
+                                            log_info!("File saved as successfully to {:?}", path);
                                             let name = path
                                                 .file_name()
                                                 .and_then(|n| n.to_str())
@@ -1146,6 +1369,7 @@ fn main() {
                                             );
                                         }
                                         Err(e) => {
+                                            log_error!("Failed to save file as to {:?}: {}", path, e);
                                             send_to_webview(
                                                 wv,
                                                 &IpcResponse {
@@ -1153,13 +1377,25 @@ fn main() {
                                                     path: None,
                                                     name: None,
                                                     content: None,
-                                                    message: Some(format!("Failed to save file: {}", e)),
+                                                    message: Some(format!("Failed to save file to '{}': {}", path.display(), e)),
                                                     json: None,
                                                 },
                                             );
                                         }
                                     }
+                                } else {
+                                    log_info!("FileDialog save_as cancelled by user");
                                 }
+                            }
+                        }
+
+                        "open_log_file" => {
+                            if let Some(log_path) = LOG_FILE_PATH.get() {
+                                log_info!("Handling 'open_log_file' request: {:?}", log_path);
+                                if !log_path.exists() {
+                                    let _ = safe_write_file(log_path, "");
+                                }
+                                open_file_with_default_app(log_path);
                             }
                         }
 
@@ -1169,7 +1405,7 @@ fn main() {
                                     Ok(_) => {
                                         let user_cfg = get_user_config_path();
                                         if let Err(e) = fs::write(&user_cfg, &json_content) {
-                                            eprintln!("[ERROR] Failed to save keybindings to {:?}: {}", user_cfg, e);
+                                            log_error!("Failed to save keybindings to {:?}: {}", user_cfg, e);
                                             send_to_webview(
                                                 wv,
                                                 &IpcResponse {
@@ -1224,7 +1460,7 @@ fn main() {
                         "reset_default_keybindings" => {
                             let user_cfg = get_user_config_path();
                             if let Err(e) = fs::write(&user_cfg, DEFAULT_KEYBINDINGS) {
-                                eprintln!("[ERROR] Failed to write default keybindings to {:?}: {}", user_cfg, e);
+                                log_error!("Failed to write default keybindings to {:?}: {}", user_cfg, e);
                             }
                             if let Some(exe_cfg) = get_exe_dir_config_path() {
                                 let _ = fs::write(exe_cfg, DEFAULT_KEYBINDINGS);
@@ -1583,6 +1819,7 @@ fn main() {
             }
 
             Event::UserEvent(AppEvent::OpenFile(path)) => {
+                log_info!("Event Loop OpenFile requested for: {:?}", path);
                 window_arc.set_minimized(false);
                 window_arc.set_focus();
 
@@ -1615,6 +1852,7 @@ fn main() {
                 event: WindowEvent::CloseRequested,
                 ..
             } => {
+                log_info!("Window close requested. Exiting application.");
                 *control_flow = ControlFlow::Exit;
             }
 
@@ -1622,9 +1860,15 @@ fn main() {
                 event: WindowEvent::DroppedFile(path),
                 ..
             } => {
-                if path.exists() {
-                    if let Ok(content) = fs::read_to_string(&path) {
-                        let name = path
+                let abs_path = if path.is_relative() {
+                    std::env::current_dir().map(|cwd| cwd.join(&path)).unwrap_or(path)
+                } else {
+                    path
+                };
+                log_info!("Window event DroppedFile: {:?}", abs_path);
+                if abs_path.exists() {
+                    if let Ok(content) = fs::read_to_string(&abs_path) {
+                        let name = abs_path
                             .file_name()
                             .and_then(|n| n.to_str())
                             .unwrap_or("Untitled.md")
@@ -1635,7 +1879,7 @@ fn main() {
                                 wv,
                                 &IpcResponse {
                                     response_type: "file_opened",
-                                    path: Some(path.to_string_lossy().to_string()),
+                                    path: Some(abs_path.to_string_lossy().to_string()),
                                     name: Some(name),
                                     content: Some(content),
                                     message: None,
@@ -1773,5 +2017,57 @@ mod tests {
 
         let p4 = normalize_file_path("<C:\\Users\\Wild Boar PC\\doc.md>");
         assert_eq!(p4, PathBuf::from("C:\\Users\\Wild Boar PC\\doc.md"));
+    }
+
+    #[test]
+    fn test_safe_write_file_new_and_overwrite() {
+        let temp_dir = std::env::temp_dir().join(format!("mdviewer_test_{}", std::process::id()));
+        let _ = fs::create_dir_all(&temp_dir);
+        let test_file = temp_dir.join("test_write.md");
+
+        assert!(safe_write_file(&test_file, "# Initial Content").is_ok());
+        assert_eq!(fs::read_to_string(&test_file).unwrap(), "# Initial Content");
+
+        assert!(safe_write_file(&test_file, "# Updated Content").is_ok());
+        assert_eq!(fs::read_to_string(&test_file).unwrap(), "# Updated Content");
+
+        let _ = fs::remove_file(&test_file);
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_safe_write_file_readonly_attribute() {
+        let temp_dir = std::env::temp_dir().join(format!("mdviewer_ro_test_{}", std::process::id()));
+        let _ = fs::create_dir_all(&temp_dir);
+        let test_file = temp_dir.join("readonly_test.md");
+
+        // Write initial file
+        assert!(safe_write_file(&test_file, "original").is_ok());
+
+        // Mark file read-only
+        let mut perms = fs::metadata(&test_file).unwrap().permissions();
+        perms.set_readonly(true);
+        fs::set_permissions(&test_file, perms).unwrap();
+
+        // Standard fs::write would fail with os error 5 (Access is denied)
+        // safe_write_file must strip read-only attribute and succeed
+        let write_res = safe_write_file(&test_file, "modified content");
+        assert!(write_res.is_ok(), "safe_write_file should succeed even if file was read-only");
+        assert_eq!(fs::read_to_string(&test_file).unwrap(), "modified content");
+
+        let _ = fs::remove_file(&test_file);
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_safe_write_file_directory_error() {
+        let temp_dir = std::env::temp_dir().join(format!("mdviewer_dir_test_{}", std::process::id()));
+        let _ = fs::create_dir_all(&temp_dir);
+
+        let res = safe_write_file(&temp_dir, "should fail");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().kind(), std::io::ErrorKind::PermissionDenied);
+
+        let _ = fs::remove_dir_all(&temp_dir);
     }
 }

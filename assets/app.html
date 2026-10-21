@@ -3503,6 +3503,16 @@
         </div>
         <span class="tool-badge" id="tool-badge-theme">Dark</span>
       </div>
+
+      <!-- 7. Application Log File -->
+      <div class="tools-item" id="btn-open-log" title="Open MDViewer Log File">
+        <span class="tool-icon" style="font-size:14px;">📜</span>
+        <div class="tool-info">
+          <span class="tool-name">Application Log</span>
+          <span class="tool-desc">View mdviewer.log file on disk</span>
+        </div>
+        <span class="tool-badge" id="tool-badge-log">LOG</span>
+      </div>
     </div>
   </div>
 
@@ -12403,6 +12413,12 @@
             this.switchFile(existingIdx);
             return;
           }
+        } else if (name) {
+          // If path is null (e.g. from DOM drop), check if active file already has this name and a valid path
+          const activeFile = this.files[this.activeFileIndex];
+          if (activeFile && activeFile.name === name && activeFile.path) {
+            return;
+          }
         }
 
         const newFile = {
@@ -12750,8 +12766,18 @@
           file.name = name;
           file.isDirty = false;
         }
+        if (this.statusSaveEl) {
+          this.statusSaveEl.innerText = '✓ Saved';
+          this.statusSaveEl.style.color = 'var(--success)';
+          setTimeout(() => {
+            if (this.statusSaveEl && !file?.isDirty) {
+              this.statusSaveEl.style.color = '';
+            }
+          }, 2000);
+        }
         this.renderTabs();
         this.loadActiveFileIntoEditor();
+        this.showToast(`Saved ${name}`);
       },
 
       markDirty() {
@@ -12883,11 +12909,11 @@
           if (e.dataTransfer && e.dataTransfer.files.length > 0) {
             for (let i = 0; i < e.dataTransfer.files.length; i++) {
               const file = e.dataTransfer.files[i];
+              const hasFullPath = file.path && (file.path.includes('/') || file.path.includes('\\'));
+              const targetPath = hasFullPath ? file.path : null;
               const reader = new FileReader();
               reader.onload = (event) => {
-                // If webview provides path, use it, else file.name
-                const filePath = file.path || file.name;
-                App.openNewFile(filePath, file.name, event.target.result);
+                App.openNewFile(targetPath, file.name, event.target.result);
               };
               reader.readAsText(file);
             }
@@ -12956,7 +12982,7 @@
               e.preventDefault();
               SearchEngine.openFloating();
               return;
-            } else if (e.key === 's') {
+            } else if (e.key.toLowerCase() === 's') {
               e.preventDefault();
               if (e.shiftKey) App.saveAs();
               else App.save();
@@ -13877,7 +13903,8 @@
       save() {
         const file = this.files[this.activeFileIndex];
         if (!file) return;
-        if (file.path) {
+        const hasDir = file.path && (file.path.includes('/') || file.path.includes('\\'));
+        if (hasDir) {
           this.sendIpc('save_file', { path: file.path, content: this.editorEl.value });
         } else {
           this.saveAs();
@@ -13888,6 +13915,14 @@
         const file = this.files[this.activeFileIndex];
         const defaultName = file ? file.name : 'document.md';
         this.sendIpc('save_file_as', { content: this.editorEl.value, defaultName });
+      },
+
+      saveFile() {
+        this.save();
+      },
+
+      saveFileAs() {
+        this.saveAs();
       },
 
       copyCode(btn) {
@@ -14400,6 +14435,14 @@
         if (btnVim) {
           btnVim.addEventListener('click', () => {
             VimMode.toggle();
+          });
+        }
+
+        const btnOpenLog = document.getElementById('btn-open-log');
+        if (btnOpenLog) {
+          btnOpenLog.addEventListener('click', () => {
+            this.sendIpc('open_log_file', {});
+            this.closeToolsMenu();
           });
         }
 
