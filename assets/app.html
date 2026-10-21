@@ -1267,18 +1267,39 @@
       box-shadow: 0 0 0 1px var(--accent);
     }
     .agent-textarea {
-      flex: 1;
+      flex: 1 1 100%;
       background: transparent;
       border: none;
       outline: none;
-      resize: none;
+      resize: vertical !important;
       color: var(--text-primary);
       font-family: var(--font-ui);
       font-size: 12px;
       line-height: 1.4;
-      min-height: 24px;
-      max-height: 140px;
-      padding: 2px 4px;
+      height: 58px;
+      min-height: 36px;
+      max-height: 360px;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box;
+      padding: 4px 6px;
+      overflow-y: auto;
+    }
+    .agent-file-picker-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: var(--bg-card);
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .agent-file-picker-item:hover {
+      background: var(--bg-tertiary) !important;
+      border-color: var(--accent) !important;
     }
     .agent-send-btn {
       background: var(--accent);
@@ -3450,6 +3471,38 @@
       animation: toolsPopupFadeIn 0.15s ease-out;
     }
 
+    /* Android and Compact Viewport Centering */
+    @media (max-width: 768px), (orientation: portrait) {
+      .tools-popup {
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: translate(-50%, -50%) !important;
+        width: 88vw !important;
+        max-width: 360px !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75) !important;
+        animation: toolsPopupFadeInMobile 0.15s ease-out !important;
+      }
+    }
+
+    body.is-android .tools-popup {
+      top: 50% !important;
+      left: 50% !important;
+      right: auto !important;
+      bottom: auto !important;
+      transform: translate(-50%, -50%) !important;
+      width: 88vw !important;
+      max-width: 360px !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75) !important;
+      animation: toolsPopupFadeInMobile 0.15s ease-out !important;
+    }
+
+    @keyframes toolsPopupFadeInMobile {
+      from { opacity: 0; transform: translate(-50%, -52%) scale(0.96); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
     @keyframes toolsPopupFadeIn {
       from { opacity: 0; transform: translateY(-8px) scale(0.98); }
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -3867,7 +3920,7 @@
         </div>
         <div class="agent-actions-group">
           <button class="agent-icon-btn" id="btn-agent-new-chat" title="New Chat Session (+ New Chat)">＋</button>
-          <button class="agent-icon-btn" id="btn-agent-clear" title="Clear Messages in Current Chat">🗑️</button>
+          <button class="agent-icon-btn" id="btn-agent-clear" title="Delete Current Chat Session">🗑️</button>
           <button class="agent-icon-btn" id="btn-agent-settings" title="AI Agent Settings">⚙️</button>
           <button class="agent-icon-btn" id="btn-agent-close" title="Close AI Assistant (Ctrl+Alt+A / Esc)">✕</button>
         </div>
@@ -4038,6 +4091,48 @@
       <div class="sync-modal-footer">
         <button class="btn btn-secondary" id="sync-btn-keep">Keep Local Version</button>
         <button class="btn btn-primary" id="sync-btn-reload">Reload from Disk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Agent Chat Deletion Confirmation Modal -->
+  <div class="sync-modal-overlay" id="agent-confirm-modal" style="display:none; z-index: 100050;">
+    <div class="sync-modal-box" style="width: 380px;">
+      <div class="sync-modal-header">
+        <span class="sync-modal-icon">🗑️</span>
+        <span class="sync-modal-title">Delete Chat</span>
+      </div>
+      <div class="sync-modal-body" style="padding: 16px 18px;">
+        <p style="margin: 0; font-size: 13px; color: var(--text-primary); font-weight: 500;">
+          Are you sure you want to delete this chat?
+        </p>
+        <div id="agent-delete-chat-name" style="font-size: 12px; color: var(--text-muted); font-style: italic; word-break: break-all;"></div>
+      </div>
+      <div class="sync-modal-footer" style="padding: 10px 18px;">
+        <button class="btn btn-secondary" id="btn-agent-delete-no" style="padding: 5px 16px;">No</button>
+        <button class="btn btn-primary" id="btn-agent-delete-yes" style="padding: 5px 16px; background: #e06c75; border-color: #e06c75; color: #fff;">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Agent File Picker Modal -->
+  <div class="sync-modal-overlay" id="agent-file-picker-modal" style="display:none; z-index: 100050;">
+    <div class="sync-modal-box" style="width: 460px; max-height: 80vh;">
+      <div class="sync-modal-header" style="justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="sync-modal-icon">📄</span>
+          <span class="sync-modal-title">Select Context Document</span>
+        </div>
+        <button class="tools-popup-close" onclick="AiAgent.closeFilePicker()" title="Close">✕</button>
+      </div>
+      <div style="padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-card);">
+        <input type="text" id="agent-file-search-input" class="kb-input-box" placeholder="Search opened files by name or path..." style="width: 100%; box-sizing: border-box; text-align: left; padding: 7px 10px; font-size: 12px;">
+      </div>
+      <div id="agent-file-picker-list" style="padding: 8px 12px; display:flex; flex-direction:column; gap:4px; max-height: 320px; overflow-y: auto;">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="sync-modal-footer" style="padding: 8px 16px;">
+        <button class="btn btn-secondary" onclick="AiAgent.closeFilePicker()">Cancel</button>
       </div>
     </div>
   </div>
@@ -4990,6 +5085,18 @@
                 <option value="false">false (Manual Toggle Only)</option>
                 <option value="true">true (Auto-Open)</option>
               </select>
+            </div>
+
+            <!-- Prompt Input Box Height -->
+            <div class="kb-row">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Prompt Input Box Height</span>
+                <span class="kb-row-desc">Height in pixels of AI prompt input box (default: 58px)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="number" min="36" max="360" class="kb-input-box" data-cat="ai_agent" data-key="prompt_height" id="kb-ai-prompt-height" placeholder="58" style="width:80px; text-align:left;">
+                <span style="font-size:11px; color:var(--text-muted);">px</span>
+              </div>
             </div>
           </div>
         </div>
@@ -10791,6 +10898,7 @@
       currentReqId: null,
       sessions: [],
       activeSessionId: null,
+      currentContextKey: null,
 
       getConfig() {
         const kb = (this.app && this.app.keybindings && this.app.keybindings.ai_agent)
@@ -10808,8 +10916,38 @@
           side_tab: Object.assign({ position: 'right', width_percent: 28 }, kb.side_tab || {}),
           floating_window: Object.assign({ position: 'center', width_percent: 45, height_percent: 70 }, kb.floating_window || {}),
           open_on_startup: !!kb.open_on_startup,
-          default_scope: kb.default_scope || 'current_file'
+          default_scope: kb.default_scope || 'current_file',
+          prompt_height: kb.prompt_height !== undefined ? parseInt(kb.prompt_height, 10) : 58
         };
+      },
+
+      getPromptHeight() {
+        const cfg = this.getConfig();
+        const raw = parseInt(cfg.prompt_height, 10);
+        return (!isNaN(raw) && raw >= 36 && raw <= 360) ? raw : 58;
+      },
+
+      applyPromptHeight(h) {
+        const height = h || this.getPromptHeight();
+        const promptInput = document.getElementById('agent-prompt-input');
+        if (promptInput) {
+          promptInput.style.height = `${height}px`;
+        }
+        const settingInput = document.getElementById('kb-ai-prompt-height');
+        if (settingInput) {
+          settingInput.value = height;
+        }
+      },
+
+      savePromptHeight(h) {
+        const validH = Math.max(36, Math.min(360, Math.round(h)));
+        if (this.app) {
+          if (!this.app.keybindings) this.app.keybindings = {};
+          if (!this.app.keybindings.ai_agent) this.app.keybindings.ai_agent = {};
+          this.app.keybindings.ai_agent.prompt_height = validH;
+          this.app.sendIpc('save_keybindings', { json: JSON.stringify(this.app.keybindings, null, 2) });
+        }
+        this.applyPromptHeight(validH);
       },
 
       init(appInstance) {
@@ -10835,7 +10973,7 @@
           btnNewChat.addEventListener('click', () => this.newSession());
         }
         if (btnClear) {
-          btnClear.addEventListener('click', () => this.clearCurrentSession());
+          btnClear.addEventListener('click', () => this.promptDeleteActiveChat());
         }
         if (btnSettings) {
           btnSettings.addEventListener('click', () => this.openSettings());
@@ -10851,11 +10989,13 @@
         }
         if (scopeSelect) {
           scopeSelect.addEventListener('change', (e) => {
-            const s = this.getActiveSession();
-            if (s) {
-              s.scope = e.target.value;
-              this.saveChats();
+            const val = e.target.value;
+            if (val === '__select_file_picker__') {
+              this.renderContextScopeSelect();
+              this.openFilePicker();
+              return;
             }
+            this.setContextKey(val);
           });
         }
         if (promptInput) {
@@ -10870,13 +11010,51 @@
               }
             }
           });
-          promptInput.addEventListener('input', () => {
-            promptInput.style.height = 'auto';
-            promptInput.style.height = Math.min(140, Math.max(24, promptInput.scrollHeight)) + 'px';
+          promptInput.addEventListener('mouseup', () => {
+            const curH = promptInput.offsetHeight;
+            if (curH && Math.abs(curH - this.getPromptHeight()) >= 2) {
+              this.savePromptHeight(curH);
+            }
+          });
+        }
+
+        // Delete Chat confirmation modal handlers
+        const btnDeleteYes = document.getElementById('btn-agent-delete-yes');
+        const btnDeleteNo = document.getElementById('btn-agent-delete-no');
+        const confirmModal = document.getElementById('agent-confirm-modal');
+        if (btnDeleteYes) {
+          btnDeleteYes.addEventListener('click', () => this.confirmDeleteActiveChat());
+        }
+        if (btnDeleteNo) {
+          btnDeleteNo.addEventListener('click', () => this.cancelDeleteActiveChat());
+        }
+        if (confirmModal) {
+          confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) this.cancelDeleteActiveChat();
+          });
+        }
+
+        // File picker modal handlers
+        const filePickerModal = document.getElementById('agent-file-picker-modal');
+        const searchInput = document.getElementById('agent-file-search-input');
+        if (filePickerModal) {
+          filePickerModal.addEventListener('click', (e) => {
+            if (e.target === filePickerModal) this.closeFilePicker();
+          });
+        }
+        if (searchInput) {
+          searchInput.addEventListener('input', (e) => {
+            this.renderFilePickerList(e.target.value);
+          });
+          searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              this.closeFilePicker();
+            }
           });
         }
 
         this.setupResizers();
+        this.applyPromptHeight();
 
         // Load persisted chats from backend
         this.app.sendIpc('get_ai_chats', {});
@@ -10971,6 +11149,7 @@
 
       applyConfig() {
         this.applyLayout();
+        this.applyPromptHeight();
         const cfg = this.getConfig();
         const modelBadge = document.getElementById('agent-model-badge');
         if (modelBadge) {
@@ -11001,63 +11180,60 @@
 
           sidebar.style.width = `${w}%`;
           sidebar.style.height = `${h}%`;
-          sidebar.style.order = '';
 
-          if (pos === 'top') {
-            sidebar.style.left = '50%';
-            sidebar.style.top = 'calc(var(--titlebar-h) + var(--toolbar-h) + 20px)';
-            sidebar.style.bottom = 'auto';
-            sidebar.style.transform = 'translateX(-50%)';
-          } else if (pos === 'bottom') {
-            sidebar.style.left = '50%';
-            sidebar.style.top = 'auto';
-            sidebar.style.bottom = 'calc(var(--statusbar-h) + 20px)';
-            sidebar.style.transform = 'translateX(-50%)';
+          if (pos === 'left') {
+            sidebar.classList.add('pos-left');
+            sidebar.style.left = '20px';
+            sidebar.style.right = 'auto';
+            sidebar.style.top = '50%';
+            sidebar.style.transform = 'translateY(-50%)';
+          } else if (pos === 'right') {
+            sidebar.classList.add('pos-right');
+            sidebar.style.right = '20px';
+            sidebar.style.left = 'auto';
+            sidebar.style.top = '50%';
+            sidebar.style.transform = 'translateY(-50%)';
           } else {
             sidebar.classList.add('pos-center');
             sidebar.style.left = '50%';
+            sidebar.style.right = 'auto';
             sidebar.style.top = '50%';
-            sidebar.style.bottom = 'auto';
             sidebar.style.transform = 'translate(-50%, -50%)';
           }
 
+          if (backdrop) backdrop.style.display = 'block';
           if (resizerL) resizerL.style.display = 'none';
           if (resizerR) resizerR.style.display = 'none';
-
-          if (backdrop) {
-            backdrop.style.display = this.isOpen ? 'block' : 'none';
-          }
         } else {
-          // Side Tab mode
+          // side_tab mode
           sidebar.classList.add('agent-mode-side');
           const sideCfg = cfg.side_tab;
-          const w = Math.min(60, Math.max(15, sideCfg.width_percent || 28));
+          const w = Math.min(50, Math.max(15, sideCfg.width_percent || 28));
           const pos = sideCfg.position || 'right';
 
           sidebar.style.width = `${w}%`;
           sidebar.style.height = '100%';
-          sidebar.style.position = '';
-          sidebar.style.left = '';
-          sidebar.style.top = '';
-          sidebar.style.bottom = '';
-          sidebar.style.transform = '';
+          sidebar.style.top = '0';
+          sidebar.style.transform = 'none';
 
+          const mainContent = document.querySelector('.main-content');
           if (pos === 'left') {
             sidebar.classList.add('pos-left');
-            sidebar.style.order = '-2';
-            if (resizerL) resizerL.style.display = 'none';
+            sidebar.style.left = '0';
+            sidebar.style.right = 'auto';
+            sidebar.style.order = '-1';
             if (resizerR) resizerR.style.display = 'block';
+            if (resizerL) resizerL.style.display = 'none';
           } else {
             sidebar.classList.add('pos-right');
-            sidebar.style.order = '11';
+            sidebar.style.right = '0';
+            sidebar.style.left = 'auto';
+            sidebar.style.order = '10';
             if (resizerL) resizerL.style.display = 'block';
             if (resizerR) resizerR.style.display = 'none';
           }
 
-          if (backdrop) {
-            const isCompact = window.innerWidth <= 768 || document.body.classList.contains('is-compact-screen');
-            backdrop.style.display = (this.isOpen && isCompact) ? 'block' : 'none';
-          }
+          if (backdrop) backdrop.style.display = 'none';
         }
       },
 
@@ -11081,6 +11257,8 @@
         if (sidebar) sidebar.style.display = 'flex';
         if (btn) btn.classList.add('active');
 
+        this.syncContextWithActiveFile();
+        this.renderContextScopeSelect();
         this.renderSessionSelect();
         this.renderMessages();
 
@@ -11100,42 +11278,285 @@
         if (btn) btn.classList.remove('active');
       },
 
+      syncContextWithActiveFile() {
+        const curFile = (this.app && this.app.files) ? this.app.files[this.app.activeFileIndex] : null;
+        if (curFile) {
+          const key = 'file:' + (curFile.path || curFile.name);
+          if (!this.currentContextKey || this.currentContextKey.startsWith('file:')) {
+            this.currentContextKey = key;
+          }
+        } else if (!this.currentContextKey) {
+          this.currentContextKey = 'no_context';
+        }
+      },
+
+      onActiveFileChanged(newFile) {
+        if (!newFile) return;
+        const newKey = 'file:' + (newFile.path || newFile.name);
+        this.setContextKey(newKey);
+      },
+
+      setContextKey(key) {
+        this.currentContextKey = key;
+        const contextSessions = this.getSessionsForCurrentContext();
+        if (contextSessions.length === 0) {
+          const newS = {
+            id: 'chat_' + Date.now(),
+            title: 'Chat 1',
+            contextKey: this.currentContextKey,
+            scope: this.currentContextKey.startsWith('file:') ? 'current_file' : this.currentContextKey,
+            messages: []
+          };
+          this.sessions.push(newS);
+          this.activeSessionId = newS.id;
+        } else {
+          const exists = contextSessions.find(x => x.id === this.activeSessionId);
+          if (!exists) {
+            this.activeSessionId = contextSessions[0].id;
+          }
+        }
+        this.renderContextScopeSelect();
+        this.renderSessionSelect();
+        this.renderMessages();
+        this.saveChats();
+      },
+
+      renderContextScopeSelect() {
+        const scopeSelect = document.getElementById('agent-context-scope');
+        if (!scopeSelect) return;
+        const files = (this.app && this.app.files) ? this.app.files : [];
+        scopeSelect.innerHTML = '';
+
+        if (!this.currentContextKey) {
+          this.syncContextWithActiveFile();
+        }
+
+        const isTooMany = files.length > 6;
+        if (!isTooMany) {
+          files.forEach(f => {
+            const opt = document.createElement('option');
+            const fileKey = 'file:' + (f.path || f.name);
+            opt.value = fileKey;
+            opt.innerText = f.name;
+            if (fileKey === this.currentContextKey) opt.selected = true;
+            scopeSelect.appendChild(opt);
+          });
+        } else {
+          // Show current file if selected
+          if (this.currentContextKey && this.currentContextKey.startsWith('file:')) {
+            const curKey = this.currentContextKey.slice(5);
+            const match = files.find(f => (f.path === curKey || f.name === curKey));
+            if (match) {
+              const opt = document.createElement('option');
+              opt.value = this.currentContextKey;
+              opt.innerText = match.name;
+              opt.selected = true;
+              scopeSelect.appendChild(opt);
+            }
+          }
+          const pickerOpt = document.createElement('option');
+          pickerOpt.value = '__select_file_picker__';
+          pickerOpt.innerText = `🔍 Select File... (${files.length} open)`;
+          scopeSelect.appendChild(pickerOpt);
+        }
+
+        const optAll = document.createElement('option');
+        optAll.value = 'all_open_files';
+        optAll.innerText = 'All Open Files';
+        if (this.currentContextKey === 'all_open_files') optAll.selected = true;
+        scopeSelect.appendChild(optAll);
+
+        const optGeneral = document.createElement('option');
+        optGeneral.value = 'no_context';
+        optGeneral.innerText = 'General';
+        if (this.currentContextKey === 'no_context') optGeneral.selected = true;
+        scopeSelect.appendChild(optGeneral);
+
+        if (!scopeSelect.value) {
+          scopeSelect.value = this.currentContextKey;
+        }
+      },
+
+      openFilePicker() {
+        const modal = document.getElementById('agent-file-picker-modal');
+        const searchInput = document.getElementById('agent-file-search-input');
+        if (!modal) return;
+        if (searchInput) {
+          searchInput.value = '';
+        }
+        this.renderFilePickerList('');
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        if (searchInput) {
+          setTimeout(() => searchInput.focus(), 60);
+        }
+      },
+
+      closeFilePicker() {
+        const modal = document.getElementById('agent-file-picker-modal');
+        if (modal) {
+          modal.classList.remove('show');
+          modal.style.display = 'none';
+        }
+      },
+
+      renderFilePickerList(filterText) {
+        const list = document.getElementById('agent-file-picker-list');
+        if (!list) return;
+        list.innerHTML = '';
+
+        const q = (filterText || '').toLowerCase().trim();
+        const files = (this.app && this.app.files) ? this.app.files : [];
+        const activeIdx = (this.app) ? this.app.activeFileIndex : -1;
+
+        const filtered = files.filter(f => {
+          if (!q) return true;
+          const nameMatch = (f.name || '').toLowerCase().includes(q);
+          const pathMatch = (f.path || '').toLowerCase().includes(q);
+          return nameMatch || pathMatch;
+        });
+
+        if (filtered.length === 0) {
+          list.innerHTML = `<div style="padding:16px; text-align:center; color:var(--text-muted); font-size:12px;">No matching open files found</div>`;
+          return;
+        }
+
+        filtered.forEach(f => {
+          const item = document.createElement('div');
+          item.className = 'agent-file-picker-item';
+          const isCur = (this.app && this.app.files[activeIdx] === f);
+          const key = 'file:' + (f.path || f.name);
+          const isSelected = (this.currentContextKey === key);
+
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+              <span style="font-weight:600; font-size:12.5px; color:${isSelected ? 'var(--accent)' : 'var(--text-primary)'};">${escapeHtml(f.name)}</span>
+              <div style="display:flex; align-items:center; gap:4px;">
+                ${isCur ? '<span style="font-size:10px; padding:1px 5px; border-radius:3px; background:var(--accent-glow); color:var(--accent); font-weight:600;">Active Tab</span>' : ''}
+                ${isSelected ? '<span style="font-size:11px; color:var(--accent);">✓</span>' : ''}
+              </div>
+            </div>
+            <span style="font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">located at ${escapeHtml(f.path || '(Untitled in memory)')}</span>
+          `;
+
+          item.addEventListener('click', () => {
+            this.closeFilePicker();
+            this.setContextKey(key);
+          });
+
+          list.appendChild(item);
+        });
+      },
+
+      promptDeleteActiveChat() {
+        const s = this.getActiveSession();
+        if (!s) return;
+        const modal = document.getElementById('agent-confirm-modal');
+        const nameEl = document.getElementById('agent-delete-chat-name');
+        if (nameEl) {
+          nameEl.innerText = `"${s.title}" (${s.messages ? s.messages.length : 0} messages)`;
+        }
+        if (modal) {
+          modal.classList.add('show');
+          modal.style.display = 'flex';
+        }
+      },
+
+      confirmDeleteActiveChat() {
+        const modal = document.getElementById('agent-confirm-modal');
+        if (modal) {
+          modal.classList.remove('show');
+          modal.style.display = 'none';
+        }
+
+        const s = this.getActiveSession();
+        if (!s) return;
+
+        const doomedId = s.id;
+        this.sessions = this.sessions.filter(x => x.id !== doomedId);
+
+        const remaining = this.getSessionsForCurrentContext();
+        if (remaining.length > 0) {
+          this.activeSessionId = remaining[0].id;
+        } else {
+          const newS = {
+            id: 'chat_' + Date.now(),
+            title: 'Chat 1',
+            contextKey: this.currentContextKey,
+            scope: this.currentContextKey.startsWith('file:') ? 'current_file' : this.currentContextKey,
+            messages: []
+          };
+          this.sessions.push(newS);
+          this.activeSessionId = newS.id;
+        }
+
+        this.renderSessionSelect();
+        this.renderMessages();
+        this.saveChats();
+        if (this.app) this.app.showToast('Chat deleted');
+      },
+
+      cancelDeleteActiveChat() {
+        const modal = document.getElementById('agent-confirm-modal');
+        if (modal) {
+          modal.classList.remove('show');
+          modal.style.display = 'none';
+        }
+      },
+
       onChatsDataReceived(jsonStr) {
         try {
           const data = JSON.parse(jsonStr || '[]');
           if (Array.isArray(data) && data.length > 0) {
             this.sessions = data;
-            this.activeSessionId = this.sessions[0].id;
+            this.sessions.forEach(s => {
+              if (!s.contextKey) {
+                if (s.scope === 'all_open_files') s.contextKey = 'all_open_files';
+                else if (s.scope === 'no_context') s.contextKey = 'no_context';
+                else if (s.filePath) s.contextKey = 'file:' + s.filePath;
+                else {
+                  const curFile = (this.app && this.app.files) ? this.app.files[this.app.activeFileIndex] : null;
+                  s.contextKey = curFile ? ('file:' + (curFile.path || curFile.name)) : 'no_context';
+                }
+              }
+            });
           } else {
-            this.initDefaultSession();
+            this.sessions = [];
           }
         } catch (_) {
-          this.initDefaultSession();
+          this.sessions = [];
         }
+        this.syncContextWithActiveFile();
+        this.renderContextScopeSelect();
         this.renderSessionSelect();
         this.renderMessages();
       },
 
-      initDefaultSession() {
-        const cfg = this.getConfig();
-        const defaultSession = {
-          id: 'chat_' + Date.now(),
-          title: 'Chat 1',
-          scope: cfg.default_scope || 'current_file',
-          messages: []
-        };
-        this.sessions = [defaultSession];
-        this.activeSessionId = defaultSession.id;
+      getSessionsForCurrentContext() {
+        if (!this.currentContextKey) {
+          this.syncContextWithActiveFile();
+        }
+        return this.sessions.filter(s => (s.contextKey || 'no_context') === this.currentContextKey);
       },
 
       getActiveSession() {
-        let s = this.sessions.find(x => x.id === this.activeSessionId);
+        let s = this.sessions.find(x => x.id === this.activeSessionId && (x.contextKey || 'no_context') === this.currentContextKey);
         if (!s) {
-          if (this.sessions.length === 0) {
-            this.initDefaultSession();
+          const contextSessions = this.getSessionsForCurrentContext();
+          if (contextSessions.length === 0) {
+            s = {
+              id: 'chat_' + Date.now(),
+              title: 'Chat 1',
+              contextKey: this.currentContextKey,
+              scope: this.currentContextKey.startsWith('file:') ? 'current_file' : this.currentContextKey,
+              messages: []
+            };
+            this.sessions.push(s);
+            this.activeSessionId = s.id;
+          } else {
+            s = contextSessions[0];
+            this.activeSessionId = s.id;
           }
-          s = this.sessions[0];
-          this.activeSessionId = s.id;
         }
         return s;
       },
@@ -11147,15 +11568,16 @@
       },
 
       newSession() {
-        const cfg = this.getConfig();
-        const num = this.sessions.length + 1;
+        const contextSessions = this.getSessionsForCurrentContext();
+        const num = contextSessions.length + 1;
         const s = {
-          id: 'chat_' + Date.now(),
+          id: 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
           title: `Chat ${num}`,
-          scope: cfg.default_scope || 'current_file',
+          contextKey: this.currentContextKey,
+          scope: this.currentContextKey.startsWith('file:') ? 'current_file' : this.currentContextKey,
           messages: []
         };
-        this.sessions.unshift(s);
+        this.sessions.push(s);
         this.activeSessionId = s.id;
         this.renderSessionSelect();
         this.renderMessages();
@@ -11166,30 +11588,15 @@
 
       switchSession(sessionId) {
         this.activeSessionId = sessionId;
-        const s = this.getActiveSession();
-        const scopeSelect = document.getElementById('agent-context-scope');
-        if (scopeSelect && s) {
-          scopeSelect.value = s.scope || 'current_file';
-        }
         this.renderMessages();
-      },
-
-      clearCurrentSession() {
-        const s = this.getActiveSession();
-        if (!s) return;
-        if (s.messages.length === 0) return;
-        if (confirm(`Clear all messages in "${s.title}"?`)) {
-          s.messages = [];
-          this.renderMessages();
-          this.saveChats();
-        }
       },
 
       renderSessionSelect() {
         const select = document.getElementById('agent-session-select');
         if (!select) return;
         select.innerHTML = '';
-        this.sessions.forEach((s) => {
+        const contextSessions = this.getSessionsForCurrentContext();
+        contextSessions.forEach((s) => {
           const opt = document.createElement('option');
           opt.value = s.id;
           const count = s.messages ? s.messages.length : 0;
@@ -11232,7 +11639,6 @@
           if (msg.role === 'user') {
             bubble.innerText = msg.content;
           } else {
-            // Render assistant markdown with SimpleMarkdown
             const renderedHtml = (typeof SimpleMarkdown !== 'undefined')
               ? SimpleMarkdown.render(msg.content)
               : msg.content.replace(/\n/g, '<br>');
@@ -11247,7 +11653,7 @@
             actions.className = 'agent-msg-actions';
             actions.innerHTML = `
               <button class="agent-msg-action-btn" title="Copy text to clipboard" onclick="AiAgent.copyMessage(${idx})">📋 Copy</button>
-              <button class="agent-msg-action-btn" title="Replace entire active document" onclick="AiAgent.replaceDoc(${idx})">📝 Replace Doc</button>
+              <button class="agent-msg-action-btn" title="Replace entire document" onclick="AiAgent.replaceDoc(${idx})">📝 Replace Doc</button>
               <button class="agent-msg-action-btn" title="Insert at cursor or end of file" onclick="AiAgent.insertDoc(${idx})">📥 Insert</button>
               <button class="agent-msg-action-btn" title="Open response in new document tab" onclick="AiAgent.openNewTab(${idx})">📑 New Tab</button>
             `;
@@ -11266,8 +11672,7 @@
         if (input) {
           input.value = cmd;
           input.focus();
-          input.style.height = 'auto';
-          input.style.height = Math.min(140, Math.max(24, input.scrollHeight)) + 'px';
+          input.style.height = this.getPromptHeight() + 'px';
         }
       },
 
@@ -11284,16 +11689,23 @@
         const s = this.getActiveSession();
         if (!s || !s.messages[index]) return;
         const text = s.messages[index].content;
-        if (!confirm('Replace current document content with AI response?')) return;
+        if (!confirm('Replace document content with AI response?')) return;
         if (this.app && this.app.files) {
-          const file = this.app.files[this.app.activeFileIndex];
+          let file = null;
+          if (s.contextKey && s.contextKey.startsWith('file:')) {
+            const targetId = s.contextKey.slice(5);
+            file = this.app.files.find(f => (f.path === targetId || f.name === targetId));
+          }
+          if (!file) file = this.app.files[this.app.activeFileIndex];
           if (file) {
             file.content = text;
             file.isDirty = true;
-            this.app.editorEl.value = text;
+            if (this.app.files[this.app.activeFileIndex] === file) {
+              this.app.editorEl.value = text;
+            }
             this.app.renderMarkdown();
             this.app.renderTabs();
-            this.app.showToast('Document replaced');
+            this.app.showToast(`Document "${file.name}" replaced`);
           }
         }
       },
@@ -11303,19 +11715,29 @@
         if (!s || !s.messages[index]) return;
         const text = s.messages[index].content;
         if (this.app && this.app.files) {
-          const file = this.app.files[this.app.activeFileIndex];
+          let file = null;
+          if (s.contextKey && s.contextKey.startsWith('file:')) {
+            const targetId = s.contextKey.slice(5);
+            file = this.app.files.find(f => (f.path === targetId || f.name === targetId));
+          }
+          if (!file) file = this.app.files[this.app.activeFileIndex];
           if (file) {
-            const ed = this.app.editorEl;
-            const start = ed.selectionStart || ed.value.length;
-            const end = ed.selectionEnd || ed.value.length;
-            const cur = ed.value;
-            const updated = cur.substring(0, start) + '\n\n' + text + '\n\n' + cur.substring(end);
-            file.content = updated;
-            file.isDirty = true;
-            ed.value = updated;
+            if (this.app.files[this.app.activeFileIndex] === file) {
+              const ed = this.app.editorEl;
+              const start = ed.selectionStart || ed.value.length;
+              const end = ed.selectionEnd || ed.value.length;
+              const cur = ed.value;
+              const updated = cur.substring(0, start) + '\n\n' + text + '\n\n' + cur.substring(end);
+              file.content = updated;
+              file.isDirty = true;
+              ed.value = updated;
+            } else {
+              file.content = (file.content || '') + '\n\n' + text + '\n\n';
+              file.isDirty = true;
+            }
             this.app.renderMarkdown();
             this.app.renderTabs();
-            this.app.showToast('Inserted into document');
+            this.app.showToast(`Inserted into "${file.name}"`);
           }
         }
       },
@@ -11330,17 +11752,22 @@
         }
       },
 
-      buildContextPrompt(scope) {
-        if (scope === 'no_context' || !this.app) return '';
-        if (scope === 'all_open_files') {
+      buildContextPrompt(contextKey) {
+        if (!contextKey || contextKey === 'no_context' || !this.app) return '';
+        if (contextKey === 'all_open_files') {
           let docs = [];
           this.app.files.forEach((f, i) => {
             const isCur = i === this.app.activeFileIndex ? ' (Active Document)' : '';
             docs.push(`### File: ${f.name}${isCur}\n\`\`\`markdown\n${f.content || ''}\n\`\`\``);
           });
           return `Here are the currently open Markdown documents in the workspace:\n\n${docs.join('\n\n')}\n\n`;
+        } else if (contextKey.startsWith('file:')) {
+          const targetId = contextKey.slice(5);
+          let file = this.app.files.find(f => (f.path === targetId || f.name === targetId));
+          if (!file) file = this.app.files[this.app.activeFileIndex];
+          if (!file) return '';
+          return `Here is the current Markdown document (${file.name}):\n\n\`\`\`markdown\n${file.content || ''}\n\`\`\``;
         } else {
-          // current_file
           const file = this.app.files[this.app.activeFileIndex];
           if (!file) return '';
           return `Here is the current Markdown document (${file.name}):\n\n\`\`\`markdown\n${file.content || ''}\n\`\`\``;
@@ -11355,7 +11782,7 @@
         if (!rawText) return;
 
         input.value = '';
-        input.style.height = '24px';
+        input.style.height = this.getPromptHeight() + 'px';
 
         const s = this.getActiveSession();
         if (!s) return;
@@ -11391,8 +11818,8 @@
           effectiveUserPrompt = `Please generate high-quality, clean markdown content according to these requirements: ${prompt || 'Continue writing or expanding the document with relevant sections'}`;
         }
 
-        const scope = s.scope || 'current_file';
-        const contextStr = this.buildContextPrompt(scope);
+        const contextKey = s.contextKey || this.currentContextKey;
+        const contextStr = this.buildContextPrompt(contextKey);
 
         const systemPrompt = "You are an intelligent, helpful AI assistant built directly into MDViewer, a lightweight and powerful Markdown viewer and editor. You produce clear, well-structured, formatted Markdown responses. When generating code, diagrams (Mermaid), or documents, use appropriate markdown fences.";
 
@@ -12280,6 +12707,18 @@
           popup.style.display = 'flex';
           if (overlay) overlay.style.display = 'block';
           if (btn) btn.classList.add('active');
+
+          if (!this._toolsAutoCloseBound) {
+            this._toolsAutoCloseBound = true;
+            const list = popup.querySelector('.tools-popup-list');
+            if (list) {
+              list.addEventListener('click', (e) => {
+                if (e.target.closest('.tools-item')) {
+                  this.closeToolsMenu();
+                }
+              });
+            }
+          }
         }
       },
 
@@ -13002,6 +13441,9 @@
       },
 
       init() {
+        if (window.AndroidBridge || /Android/i.test(navigator.userAgent)) {
+          document.body.classList.add('is-android');
+        }
         SmoothScroller.attach(this.previewPaneEl, {
           onStep: () => {
             if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && this.mode === 'preview') {
@@ -13383,6 +13825,9 @@
           } else {
             this.checkFilesSync();
           }
+          if (typeof AiAgent !== 'undefined') {
+            AiAgent.onActiveFileChanged(targetFile);
+          }
         }
       },
 
@@ -13437,6 +13882,10 @@
         const structGroup = document.getElementById('structured-view-mode');
         if (structGroup) {
           structGroup.style.display = (fileType === 'json' || fileType === 'toml') ? 'inline-flex' : 'none';
+        }
+
+        if (typeof AiAgent !== 'undefined') {
+          AiAgent.renderContextScopeSelect();
         }
       },
 
