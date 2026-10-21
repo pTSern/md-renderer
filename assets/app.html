@@ -14138,13 +14138,20 @@
       },
 
       onFileSaved(path, name, mtime = null) {
-        const file = this.files[this.activeFileIndex];
+        let file = this.files.find(f => f.path === path);
+        if (!file) {
+          file = this.files[this.activeFileIndex];
+        }
         if (file) {
           file.path = path;
           file.name = name;
+          if (file === this.files[this.activeFileIndex]) {
+            file.content = this.editorEl.value;
+          }
           file.isDirty = false;
           if (mtime) file.mtime = mtime;
           delete file.externalChange;
+          this.saveFileCursorState(file);
         }
         if (this.statusSaveEl) {
           this.statusSaveEl.innerText = '✓ Saved';
@@ -14155,14 +14162,19 @@
             }
           }, 2000);
         }
+        const activeFile = this.files[this.activeFileIndex];
+        const title = `${activeFile && activeFile.isDirty ? '● ' : ''}${activeFile ? activeFile.name : name} - MDViewer`;
+        document.title = title;
+        this.sendIpc('set_title', { title });
         this.renderTabs();
-        this.loadActiveFileIntoEditor();
+        this.renderMarkdown();
         this.showToast(`Saved ${name}`);
       },
 
       markDirty() {
         const file = this.files[this.activeFileIndex];
         if (file) {
+          file.content = this.editorEl.value;
           if (file.translation && file.translation.isTranslated) {
             file.translation.isTranslated = false;
             file.translation.translatedHtml = null;
@@ -15611,6 +15623,7 @@
       save() {
         const file = this.files[this.activeFileIndex];
         if (!file) return;
+        file.content = this.editorEl.value;
         const hasDir = file.path && (file.path.includes('/') || file.path.includes('\\'));
         if (hasDir) {
           this.sendIpc('save_file', { path: file.path, content: this.editorEl.value });
@@ -15621,6 +15634,9 @@
 
       saveAs() {
         const file = this.files[this.activeFileIndex];
+        if (file) {
+          file.content = this.editorEl.value;
+        }
         const defaultName = file ? file.name : 'document.md';
         this.sendIpc('save_file_as', { content: this.editorEl.value, defaultName });
       },
@@ -16192,6 +16208,10 @@
       setupEditorEvents() {
         let timer = null;
         this.editorEl.addEventListener('input', () => {
+          const file = this.files[this.activeFileIndex];
+          if (file) {
+            file.content = this.editorEl.value;
+          }
           this.markDirty();
           this.updateEditor();
           clearTimeout(timer);
