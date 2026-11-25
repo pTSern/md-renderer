@@ -1,16 +1,64 @@
 {
   "preview": {
     "enable_cursor": true,
-    "scroll_down": "j",
-    "scroll_up": "k",
-    "scroll_right": "l",
-    "scroll_left": "h",
-    "prev_file": "Alt+Shift+H",
-    "next_file": "Alt+Shift+L",
-    "close_app": "Ctrl+q",
-    "save_file": "w",
-    "cycle_mode": "Shift+Tab",
-    "toggle_toc": "Alt+O"
+    "scroll_down": [
+      { "key": "j", "mode": "normal" },
+      { "key": "ArrowDown", "mode": "all" }
+    ],
+    "scroll_up": [
+      { "key": "k", "mode": "normal" },
+      { "key": "ArrowUp", "mode": "all" }
+    ],
+    "scroll_right": [
+      { "key": "l", "mode": "normal" },
+      { "key": "ArrowRight", "mode": "all" }
+    ],
+    "scroll_left": [
+      { "key": "h", "mode": "normal" },
+      { "key": "ArrowLeft", "mode": "all" }
+    ],
+    "word_next": [
+      { "key": "w", "mode": "normal" }
+    ],
+    "word_prev": [
+      { "key": "b", "mode": "normal" }
+    ],
+    "line_start": [
+      { "key": "0", "mode": "normal" }
+    ],
+    "line_end": [
+      { "key": "$", "mode": "normal" }
+    ],
+    "scroll_line_down": [
+      { "key": "Ctrl+e", "mode": "all" }
+    ],
+    "scroll_line_up": [
+      { "key": "Ctrl+y", "mode": "all" }
+    ],
+    "fast_scroll_down": [
+      { "key": "Ctrl+d", "mode": "all" }
+    ],
+    "fast_scroll_up": [
+      { "key": "Ctrl+u", "mode": "all" }
+    ],
+    "prev_file": [
+      { "key": "Alt+Shift+H", "mode": "all" }
+    ],
+    "next_file": [
+      { "key": "Alt+Shift+L", "mode": "all" }
+    ],
+    "close_app": [
+      { "key": "Ctrl+q", "mode": "all" }
+    ],
+    "save_file": [
+      { "key": "Ctrl+s", "mode": "all" }
+    ],
+    "cycle_mode": [
+      { "key": "Shift+Tab", "mode": "all" }
+    ],
+    "toggle_toc": [
+      { "key": "Alt+O", "mode": "all" }
+    ]
   },
   "toc": {
     "mode": "side_tab",
@@ -78,13 +126,17 @@
       "height_percent": 70
     },
     "open_on_startup": false,
-    "default_scope": "current_file"
+    "default_scope": "current_file",
+    "prompt_height": 58
   },
   "settings": {
+    "enable_vim": true,
     "middle_click_close_tab": true,
     "is_copy_to_yank": true,
     "scroll_step_y": 60,
     "scroll_step_x": 60,
-    "max_fps": 60
+    "max_fps": 60,
+    "tab_spaces": 4,
+    "json_collapse_level": "2"
   }
 }

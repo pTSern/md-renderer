@@ -17,6 +17,18 @@
       { "key": "h", "mode": "normal" },
       { "key": "ArrowLeft", "mode": "all" }
     ],
+    "word_next": [
+      { "key": "w", "mode": "normal" }
+    ],
+    "word_prev": [
+      { "key": "b", "mode": "normal" }
+    ],
+    "line_start": [
+      { "key": "0", "mode": "normal" }
+    ],
+    "line_end": [
+      { "key": "$", "mode": "normal" }
+    ],
     "scroll_line_down": [
       { "key": "Ctrl+e", "mode": "all" }
     ],
@@ -39,7 +51,6 @@
       { "key": "Ctrl+q", "mode": "all" }
     ],
     "save_file": [
-      { "key": "w", "mode": "normal" },
       { "key": "Ctrl+s", "mode": "all" }
     ],
     "cycle_mode": [

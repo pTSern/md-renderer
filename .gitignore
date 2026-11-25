@@ -36,3 +36,15 @@ $RECYCLE.BIN/
 *.userosscache
 *.sln.docstates
 dist/
+
+# Android / Gradle build artifacts
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.cxx/
+android/captures/
+*.apk
+*.aab
+*.ap_
+

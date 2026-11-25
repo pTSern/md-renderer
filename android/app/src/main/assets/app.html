@@ -769,6 +769,38 @@
       transition: background 0.08s ease;
     }
 
+    /* Harder Word Highlight (layered on top of light soft line highlight) */
+    .preview-word-cursor {
+      background: rgba(88, 166, 255, 0.36);
+      color: #ffffff;
+      border-radius: 3px;
+      outline: 1.5px solid #58a6ff;
+      box-shadow: 0 0 8px rgba(88, 166, 255, 0.45);
+      padding: 0 2px;
+      margin: 0 -2px;
+      transition: background 0.08s ease, outline-color 0.08s ease, box-shadow 0.08s ease;
+    }
+    [data-theme="light"] .preview-word-cursor {
+      background: rgba(37, 99, 235, 0.28);
+      color: #0f172a;
+      outline-color: #2563eb;
+      box-shadow: 0 0 6px rgba(37, 99, 235, 0.32);
+    }
+
+    /* Extra-Hard Selected Word Highlight ('v' on focused word -> translate only that word) */
+    .preview-word-cursor.preview-word-selected {
+      background: rgba(245, 158, 11, 0.56);
+      color: #ffffff;
+      outline: 2px solid #fbbf24;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.65);
+    }
+    [data-theme="light"] .preview-word-cursor.preview-word-selected {
+      background: rgba(245, 158, 11, 0.46);
+      color: #111827;
+      outline-color: #d97706;
+      box-shadow: 0 0 10px rgba(217, 119, 6, 0.42);
+    }
+
     /* Sleek UI Toast notification */
     .app-toast {
       position: fixed;
@@ -1604,6 +1636,146 @@
     [data-theme="light"] .tok-prop { color: #be185d; }
 
     /* =========================================================================
+       MARKDOWN CAROUSEL BLOCKS (````carousel + <!-- slide -->)
+       ========================================================================= */
+    .md-carousel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 20px 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      outline: none;
+    }
+    .md-carousel:focus-visible {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .md-carousel-header {
+      background: var(--bg-secondary);
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+    .md-carousel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .md-carousel-badge {
+      background: var(--accent-glow);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+    .md-carousel-counter {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+    .md-carousel-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .md-carousel-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 3px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      transition: all 0.14s ease;
+      user-select: none;
+    }
+    .md-carousel-btn:hover {
+      background: var(--border);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .md-carousel-btn:active {
+      transform: scale(0.96);
+    }
+    .md-carousel-viewport {
+      position: relative;
+      padding: 16px 18px;
+      background: var(--bg-primary);
+      min-height: 80px;
+      touch-action: pan-y;
+    }
+    .md-carousel-slide {
+      display: none;
+      animation: mdCarouselFadeIn 0.18s ease;
+    }
+    .md-carousel-slide.active {
+      display: block;
+    }
+    .md-carousel-slide > :first-child {
+      margin-top: 0 !important;
+    }
+    .md-carousel-slide > :last-child {
+      margin-bottom: 0 !important;
+    }
+    @keyframes mdCarouselFadeIn {
+      from { opacity: 0; transform: translateX(8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .md-carousel-footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      user-select: none;
+    }
+    .md-carousel-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .md-carousel-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-muted);
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .md-carousel-dot:hover {
+      border-color: var(--accent);
+      transform: scale(1.15);
+    }
+    .md-carousel-dot.active {
+      width: 22px;
+      border-radius: 5px;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* =========================================================================
        RESIZABLE DIAGRAM CARDS & DRAGGABLE CANVAS (DIAGRAMS.NET STYLE)
        ========================================================================= */
     .diagram-card {
@@ -1633,13 +1805,15 @@
       position: absolute;
       bottom: 2px;
       right: 2px;
-      width: 12px;
-      height: 12px;
-      pointer-events: none;
+      width: 18px;
+      height: 18px;
+      pointer-events: auto;
+      cursor: nwse-resize;
+      touch-action: none;
       background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
       border-bottom-right-radius: 4px;
-      opacity: 0.75;
-      z-index: 10;
+      opacity: 0.78;
+      z-index: 15;
     }
 
     .diagram-header {
@@ -1798,6 +1972,8 @@
       background-size: 20px 20px;
       cursor: grab;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
     }
     .dyn-graph-viewport.is-panning {
       cursor: grabbing !important;
@@ -1874,6 +2050,7 @@
       z-index: 1;
       pointer-events: auto;
       box-sizing: border-box;
+      touch-action: none;
       transition: border-color 0.15s, background-color 0.15s;
     }
     [data-theme="light"] .dyn-subgraph-cluster {
@@ -1901,6 +2078,8 @@
       gap: 5px;
       cursor: grab;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
       background: var(--bg-secondary);
       padding: 2px 9px;
       border-radius: 6px;
@@ -1920,6 +2099,8 @@
       z-index: 10;
       cursor: grab;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -3092,6 +3273,34 @@
       .preview-pane {
         padding: 16px 14px !important;
       }
+
+      /* Android / Touch Diagram & Carousel UX */
+      .diagram-header {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 6px 8px;
+      }
+      .diagram-hint {
+        display: none;
+      }
+      .diagram-controls {
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .diagram-zoom-btn {
+        min-height: 26px;
+        padding: 4px 8px;
+        font-size: 11.5px;
+      }
+      .diagram-resize-handle {
+        width: 24px;
+        height: 24px;
+      }
+      .selection-translate-pill {
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        touch-action: manipulation;
+      }
     }
 
     /* =========================================================================
@@ -3700,13 +3909,13 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Open
       </button>
-      <button class="btn btn-primary" id="btn-save" title="Save File (Ctrl+S / w)">
+      <button class="btn btn-primary" id="btn-save" title="Save File (Ctrl+S)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save
       </button>
 
       <div class="dropdown">
-        <button class="btn" id="btn-insert" title="Insert Diagrams">
+        <button class="btn" id="btn-insert" title="Insert Diagrams &amp; Blocks">
           <span>Insert ▾</span>
         </button>
         <div class="dropdown-content" id="dropdown-diagrams">
@@ -3717,6 +3926,8 @@
           <div class="dropdown-item" data-template="mermaid-sequence">📊 Mermaid: Sequence Flow</div>
           <div class="dropdown-item" data-template="mermaid-flowchart">📊 Mermaid: Flowchart</div>
           <div class="dropdown-item" data-template="mermaid-class">📊 Mermaid: Class Diagram</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" data-template="carousel">🎠 Carousel Slides</div>
         </div>
       </div>
     </div>
@@ -3973,7 +4184,7 @@
   <footer class="statusbar">
     <div class="statusbar-left">
       <span id="status-vim-badge" class="vim-badge normal" style="display:none;">-- NORMAL --</span>
-      <span id="status-mode">MODE: PREVIEW (NVIM: j/k/h/l)</span>
+      <span id="status-mode">MODE: PREVIEW (NVIM: j/k/w/b/0/$/v)</span>
       <span id="status-cursor">Ln 1, Col 1</span>
       <!-- Vim Search Bar (Triggered by / in Vim Mode) -->
       <div id="status-vim-search" class="vim-status-search" style="display:none;">
@@ -4256,6 +4467,50 @@
               <div class="kb-row-actions">
                 <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.scroll_right', 'Scroll Right')">+ Add</button>
                 <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.scroll_right')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="word_next" data-name="Next Word (w)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Next Word (w)</span>
+                <span class="kb-row-desc">Jump cursor to next word in preview</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-word_next"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.word_next', 'Next Word (w)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.word_next')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="word_prev" data-name="Previous Word (b)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Previous Word (b)</span>
+                <span class="kb-row-desc">Jump cursor to previous word in preview</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-word_prev"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.word_prev', 'Previous Word (b)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.word_prev')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="line_start" data-name="First Word of Line (0)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">First Word of Line (0)</span>
+                <span class="kb-row-desc">Jump to first word of active line</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-line_start"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.line_start', 'First Word of Line (0)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.line_start')">✕ Clear</button>
+              </div>
+            </div>
+            <div class="kb-chip-row" data-cat="preview" data-key="line_end" data-name="Last Word of Line ($)">
+              <div class="kb-row-info">
+                <span class="kb-row-label">Last Word of Line ($)</span>
+                <span class="kb-row-desc">Jump to last word of active line</span>
+              </div>
+              <div class="kb-chips-container" id="kb-chips-preview-line_end"></div>
+              <div class="kb-row-actions">
+                <button class="kb-btn-add" onclick="App.openKeyRecorderModal('preview.line_end', 'Last Word of Line ($)')">+ Add</button>
+                <button class="kb-btn-clear" onclick="App.clearKeybindingChips('preview.line_end')">✕ Clear</button>
               </div>
             </div>
             <!-- Neovim scrolling actions -->
@@ -5201,7 +5456,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.min.js" defer></script>
 
   <script>
     /* =========================================================================
@@ -5551,14 +5806,33 @@
           isDragging: false,
           startX: 0,
           startY: 0,
+          isPinching: false,
+          pinchStartDist: 0,
+          pinchStartScale: 1.0,
+          pinchStartMidX: 0,
+          pinchStartMidY: 0,
+          pinchStartPanX: 0,
+          pinchStartPanY: 0,
+          touchMoved: false,
+          touchStartClientX: 0,
+          touchStartClientY: 0,
+          lastTapTime: 0,
+          lastTapX: 0,
+          lastTapY: 0,
           svgWidth: 400,
           svgHeight: 250,
           cleanup: null
         };
 
+        const isDynActiveTarget = (target) => {
+          const dynVp = target && target.closest ? target.closest('.dyn-graph-viewport') : null;
+          return Boolean(dynVp && dynVp.style.display !== 'none');
+        };
+
         const onMouseDown = (e) => {
           if (e.button !== 0 && e.button !== 1) return;
-          if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
+          if (isDynActiveTarget(e.target)) return;
+          if (e.target.closest('.diagram-controls') || e.target.closest('button') || e.target.closest('.diagram-resize-handle')) return;
           e.preventDefault();
           e.stopPropagation();
 
@@ -5583,6 +5857,7 @@
         };
 
         const onWheel = (e) => {
+          if (isDynActiveTarget(e.target)) return;
           e.preventDefault();
           e.stopPropagation();
 
@@ -5601,9 +5876,140 @@
         };
 
         const onDblClick = (e) => {
+          if (isDynActiveTarget(e.target)) return;
           if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
           e.preventDefault();
           this.fit(cardId);
+        };
+
+        const getTouchDist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+        const onTouchStart = (e) => {
+          if (isDynActiveTarget(e.target)) return;
+          if (e.target.closest('.diagram-controls') || e.target.closest('button') || e.target.closest('.diagram-resize-handle')) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (e.touches.length === 1) {
+            const t = e.touches[0];
+            state.isPinching = false;
+            state.isDragging = true;
+            state.touchMoved = false;
+            state.touchStartClientX = t.clientX;
+            state.touchStartClientY = t.clientY;
+            state.startX = t.clientX - state.panX;
+            state.startY = t.clientY - state.panY;
+            body.classList.add('is-panning');
+          } else if (e.touches.length >= 2) {
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const rect = body.getBoundingClientRect();
+            state.isDragging = false;
+            state.isPinching = true;
+            state.touchMoved = true;
+            state.pinchStartDist = Math.max(getTouchDist(t1, t2), 1);
+            state.pinchStartScale = state.scale;
+            state.pinchStartMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            state.pinchStartMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+            state.pinchStartPanX = state.panX;
+            state.pinchStartPanY = state.panY;
+            body.classList.add('is-panning');
+          }
+        };
+
+        const onTouchMove = (e) => {
+          if (!state.isDragging && !state.isPinching) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (state.isPinching && e.touches.length >= 2) {
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const rect = body.getBoundingClientRect();
+            const curDist = getTouchDist(t1, t2);
+            const curMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            const curMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+            const ratio = curDist / state.pinchStartDist;
+            const newScale = Math.min(Math.max(Math.round(state.pinchStartScale * ratio * 100) / 100, 0.15), 5.0);
+            const scaleRatio = newScale / state.pinchStartScale;
+            state.panX = Math.round(curMidX - (state.pinchStartMidX - state.pinchStartPanX) * scaleRatio);
+            state.panY = Math.round(curMidY - (state.pinchStartMidY - state.pinchStartPanY) * scaleRatio);
+            state.scale = newScale;
+            this.applyTransform(state);
+          } else if (state.isDragging && e.touches.length === 1) {
+            const t = e.touches[0];
+            if (Math.hypot(t.clientX - state.touchStartClientX, t.clientY - state.touchStartClientY) > 8) {
+              state.touchMoved = true;
+            }
+            state.panX = Math.round(t.clientX - state.startX);
+            state.panY = Math.round(t.clientY - state.startY);
+            this.applyTransform(state);
+          }
+        };
+
+        const onTouchEnd = (e) => {
+          if (!state.isDragging && !state.isPinching) return;
+          e.stopPropagation();
+
+          if (e.touches.length === 1) {
+            // Smooth transition from 2-finger pinch back to 1-finger pan
+            const t = e.touches[0];
+            state.isPinching = false;
+            state.isDragging = true;
+            state.touchMoved = true;
+            state.startX = t.clientX - state.panX;
+            state.startY = t.clientY - state.panY;
+            return;
+          }
+
+          const wasTap = state.isDragging && !state.isPinching && !state.touchMoved;
+          state.isDragging = false;
+          state.isPinching = false;
+          body.classList.remove('is-panning');
+
+          if (wasTap && e.changedTouches && e.changedTouches.length === 1) {
+            const t = e.changedTouches[0];
+            const now = Date.now();
+            if (now - state.lastTapTime < 320 && Math.hypot(t.clientX - state.lastTapX, t.clientY - state.lastTapY) < 30) {
+              state.lastTapTime = 0;
+              this.fit(cardId);
+            } else {
+              state.lastTapTime = now;
+              state.lastTapX = t.clientX;
+              state.lastTapY = t.clientY;
+            }
+          }
+        };
+
+        // Touch & Mouse Corner Resize Handle for Android + Desktop
+        const resizeHandle = card.querySelector('.diagram-resize-handle');
+        let isResizingCard = false;
+        let resizeStartY = 0;
+        let resizeStartH = 0;
+
+        const onResizeStart = (clientY, e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          isResizingCard = true;
+          resizeStartY = clientY;
+          resizeStartH = card.getBoundingClientRect().height;
+        };
+        const onResizeMove = (clientY, e) => {
+          if (!isResizingCard) return;
+          e.preventDefault();
+          const nextH = Math.max(180, Math.min(window.innerHeight * 0.9, Math.round(resizeStartH + (clientY - resizeStartY))));
+          card.style.height = nextH + 'px';
+        };
+        const onResizeEnd = () => {
+          isResizingCard = false;
+        };
+        const onHandleMouseDown = (e) => onResizeStart(e.clientY, e);
+        const onHandleTouchStart = (e) => {
+          if (e.touches && e.touches.length === 1) onResizeStart(e.touches[0].clientY, e);
+        };
+        const onResizeMouseMove = (e) => onResizeMove(e.clientY, e);
+        const onResizeTouchMove = (e) => {
+          if (isResizingCard && e.touches && e.touches.length === 1) onResizeMove(e.touches[0].clientY, e);
         };
 
         body.addEventListener('mousedown', onMouseDown);
@@ -5611,10 +6017,24 @@
         window.addEventListener('mouseup', onMouseUp);
         body.addEventListener('wheel', onWheel, { passive: false });
         body.addEventListener('dblclick', onDblClick);
+        body.addEventListener('touchstart', onTouchStart, { passive: false });
+        body.addEventListener('touchmove', onTouchMove, { passive: false });
+        body.addEventListener('touchend', onTouchEnd, { passive: false });
+        body.addEventListener('touchcancel', onTouchEnd, { passive: false });
+
+        if (resizeHandle) {
+          resizeHandle.addEventListener('mousedown', onHandleMouseDown);
+          resizeHandle.addEventListener('touchstart', onHandleTouchStart, { passive: false });
+          window.addEventListener('mousemove', onResizeMouseMove);
+          window.addEventListener('mouseup', onResizeEnd);
+          window.addEventListener('touchmove', onResizeTouchMove, { passive: false });
+          window.addEventListener('touchend', onResizeEnd);
+          window.addEventListener('touchcancel', onResizeEnd);
+        }
 
         const ro = new ResizeObserver(() => {
           const cur = this.instances.get(cardId);
-          if (cur && !cur.isDragging) {
+          if (cur && !cur.isDragging && !cur.isPinching) {
             this.applyTransform(cur);
           }
         });
@@ -5626,6 +6046,19 @@
           window.removeEventListener('mouseup', onMouseUp);
           body.removeEventListener('wheel', onWheel);
           body.removeEventListener('dblclick', onDblClick);
+          body.removeEventListener('touchstart', onTouchStart);
+          body.removeEventListener('touchmove', onTouchMove);
+          body.removeEventListener('touchend', onTouchEnd);
+          body.removeEventListener('touchcancel', onTouchEnd);
+          if (resizeHandle) {
+            resizeHandle.removeEventListener('mousedown', onHandleMouseDown);
+            resizeHandle.removeEventListener('touchstart', onHandleTouchStart);
+            window.removeEventListener('mousemove', onResizeMouseMove);
+            window.removeEventListener('mouseup', onResizeEnd);
+            window.removeEventListener('touchmove', onResizeTouchMove);
+            window.removeEventListener('touchend', onResizeEnd);
+            window.removeEventListener('touchcancel', onResizeEnd);
+          }
           ro.disconnect();
         };
 
@@ -5781,6 +6214,19 @@
           isDragging: false,
           startX: 0,
           startY: 0,
+          isPinching: false,
+          pinchStartDist: 0,
+          pinchStartScale: 1.0,
+          pinchStartMidX: 0,
+          pinchStartMidY: 0,
+          pinchStartPanX: 0,
+          pinchStartPanY: 0,
+          touchMoved: false,
+          touchStartClientX: 0,
+          touchStartClientY: 0,
+          lastTapTime: 0,
+          lastTapX: 0,
+          lastTapY: 0,
           svgWidth: 400,
           svgHeight: 250,
           cleanup: null
@@ -5829,11 +6275,112 @@
           this.fitModal();
         };
 
+        const getTouchDist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+        const onTouchStart = (e) => {
+          if (e.target.closest('.diagram-controls') || e.target.closest('button')) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (e.touches.length === 1) {
+            const t = e.touches[0];
+            modalState.isPinching = false;
+            modalState.isDragging = true;
+            modalState.touchMoved = false;
+            modalState.touchStartClientX = t.clientX;
+            modalState.touchStartClientY = t.clientY;
+            modalState.startX = t.clientX - modalState.panX;
+            modalState.startY = t.clientY - modalState.panY;
+            modalBody.classList.add('is-panning');
+          } else if (e.touches.length >= 2) {
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const rect = modalBody.getBoundingClientRect();
+            modalState.isDragging = false;
+            modalState.isPinching = true;
+            modalState.touchMoved = true;
+            modalState.pinchStartDist = Math.max(getTouchDist(t1, t2), 1);
+            modalState.pinchStartScale = modalState.scale;
+            modalState.pinchStartMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            modalState.pinchStartMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+            modalState.pinchStartPanX = modalState.panX;
+            modalState.pinchStartPanY = modalState.panY;
+            modalBody.classList.add('is-panning');
+          }
+        };
+
+        const onTouchMove = (e) => {
+          if (!modalState.isDragging && !modalState.isPinching) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (modalState.isPinching && e.touches.length >= 2) {
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const rect = modalBody.getBoundingClientRect();
+            const curDist = getTouchDist(t1, t2);
+            const curMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            const curMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+            const ratio = curDist / modalState.pinchStartDist;
+            const newScale = Math.min(Math.max(Math.round(modalState.pinchStartScale * ratio * 100) / 100, 0.15), 6.0);
+            const scaleRatio = newScale / modalState.pinchStartScale;
+            modalState.panX = Math.round(curMidX - (modalState.pinchStartMidX - modalState.pinchStartPanX) * scaleRatio);
+            modalState.panY = Math.round(curMidY - (modalState.pinchStartMidY - modalState.pinchStartPanY) * scaleRatio);
+            modalState.scale = newScale;
+            this.applyModalTransform(modalState);
+          } else if (modalState.isDragging && e.touches.length === 1) {
+            const t = e.touches[0];
+            if (Math.hypot(t.clientX - modalState.touchStartClientX, t.clientY - modalState.touchStartClientY) > 8) {
+              modalState.touchMoved = true;
+            }
+            modalState.panX = Math.round(t.clientX - modalState.startX);
+            modalState.panY = Math.round(t.clientY - modalState.startY);
+            this.applyModalTransform(modalState);
+          }
+        };
+
+        const onTouchEnd = (e) => {
+          if (!modalState.isDragging && !modalState.isPinching) return;
+          e.stopPropagation();
+
+          if (e.touches.length === 1) {
+            const t = e.touches[0];
+            modalState.isPinching = false;
+            modalState.isDragging = true;
+            modalState.touchMoved = true;
+            modalState.startX = t.clientX - modalState.panX;
+            modalState.startY = t.clientY - modalState.panY;
+            return;
+          }
+
+          const wasTap = modalState.isDragging && !modalState.isPinching && !modalState.touchMoved;
+          modalState.isDragging = false;
+          modalState.isPinching = false;
+          modalBody.classList.remove('is-panning');
+
+          if (wasTap && e.changedTouches && e.changedTouches.length === 1) {
+            const t = e.changedTouches[0];
+            const now = Date.now();
+            if (now - modalState.lastTapTime < 320 && Math.hypot(t.clientX - modalState.lastTapX, t.clientY - modalState.lastTapY) < 30) {
+              modalState.lastTapTime = 0;
+              this.fitModal();
+            } else {
+              modalState.lastTapTime = now;
+              modalState.lastTapX = t.clientX;
+              modalState.lastTapY = t.clientY;
+            }
+          }
+        };
+
         modalBody.addEventListener('mousedown', onMouseDown);
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
         modalBody.addEventListener('wheel', onWheel, { passive: false });
         modalBody.addEventListener('dblclick', onDblClick);
+        modalBody.addEventListener('touchstart', onTouchStart, { passive: false });
+        modalBody.addEventListener('touchmove', onTouchMove, { passive: false });
+        modalBody.addEventListener('touchend', onTouchEnd, { passive: false });
+        modalBody.addEventListener('touchcancel', onTouchEnd, { passive: false });
 
         modalState.cleanup = () => {
           modalBody.removeEventListener('mousedown', onMouseDown);
@@ -5841,6 +6388,10 @@
           window.removeEventListener('mouseup', onMouseUp);
           modalBody.removeEventListener('wheel', onWheel);
           modalBody.removeEventListener('dblclick', onDblClick);
+          modalBody.removeEventListener('touchstart', onTouchStart);
+          modalBody.removeEventListener('touchmove', onTouchMove);
+          modalBody.removeEventListener('touchend', onTouchEnd);
+          modalBody.removeEventListener('touchcancel', onTouchEnd);
         };
 
         this.modalInstance = modalState;
@@ -5932,7 +6483,9 @@
       canRender(code) {
         if (!code) return false;
         const trimmed = code.trim();
-        return /^(?:flowchart|graph)/i.test(trimmed);
+        // Let native Mermaid 12+ render new @{ shape: ... } syntax directly
+        if (/@\{/.test(trimmed)) return false;
+        return /^(?:flowchart|graph)\s/i.test(trimmed);
       },
 
       cacheParsed(blockId, parsed) {
@@ -6404,8 +6957,9 @@
           }
 
           // 3. Panning World
-          if (e.target === viewport || e.target.closest('.dyn-svg-overlay') || e.target === world || e.target.closest('.dyn-subgraph-cluster')) {
+          if (e.target === viewport || e.target.closest('.dyn-svg-overlay') || e.target === world || e.target.closest('.dyn-subgraph-cluster') || e.target.closest('.dyn-edge-label-wrap')) {
             e.preventDefault();
+            e.stopPropagation();
             state.isPanningWorld = true;
             state.startPanX = e.clientX - state.panX;
             state.startPanY = e.clientY - state.panY;
@@ -6495,7 +7049,199 @@
 
         const onDblClick = (e) => {
           if (e.target.closest('.dyn-node-box') || e.target.closest('.dyn-subgraph-header')) return;
+          e.stopPropagation();
           this.fit(blockId);
+        };
+
+        // Full Touch Support (1-finger node/subgraph/world drag + 2-finger pinch zoom/pan + double-tap fit)
+        let isPinching = false;
+        let pinchStartDist = 0;
+        let pinchStartScale = 1.0;
+        let pinchStartMidX = 0;
+        let pinchStartMidY = 0;
+        let pinchStartPanX = 0;
+        let pinchStartPanY = 0;
+        let touchMoved = false;
+        let touchStartClientX = 0;
+        let touchStartClientY = 0;
+        let lastTapTime = 0;
+        let lastTapX = 0;
+        let lastTapY = 0;
+        const getTouchDist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+        const onTouchStart = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (e.touches.length >= 2) {
+            onMouseUp();
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const rect = viewport.getBoundingClientRect();
+            isPinching = true;
+            touchMoved = true;
+            pinchStartDist = Math.max(getTouchDist(t1, t2), 1);
+            pinchStartScale = state.scale;
+            pinchStartMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            pinchStartMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+            pinchStartPanX = state.panX;
+            pinchStartPanY = state.panY;
+            viewport.classList.add('is-panning');
+            return;
+          }
+
+          if (e.touches.length !== 1) return;
+          const t = e.touches[0];
+          isPinching = false;
+          touchMoved = false;
+          touchStartClientX = t.clientX;
+          touchStartClientY = t.clientY;
+
+          // 1. Touch drag individual node box
+          const nodeEl = e.target.closest('.dyn-node-box');
+          if (nodeEl) {
+            const nodeId = nodeEl.getAttribute('data-node-id');
+            const node = state.nodes.get(nodeId);
+            if (node) {
+              nodeEl.classList.add('is-dragging');
+              state.draggingNode = {
+                node,
+                startX: t.clientX,
+                startY: t.clientY,
+                origX: node.x,
+                origY: node.y
+              };
+              nodeEl.parentElement.appendChild(nodeEl);
+            }
+            return;
+          }
+
+          // 2. Touch drag subgraph header
+          const headerEl = e.target.closest('.dyn-subgraph-header');
+          if (headerEl) {
+            const sgId = headerEl.getAttribute('data-subgraph-id');
+            const sg = state.subgraphs.get(sgId);
+            if (sg) {
+              const clusterEl = document.getElementById(`subgraph-${blockId}-${sg.id}`);
+              if (clusterEl) clusterEl.classList.add('is-dragging');
+              state.draggingSubgraph = {
+                sg,
+                clusterEl,
+                startX: t.clientX,
+                startY: t.clientY,
+                memberNodes: (sg.nodeIds || []).map(id => {
+                  const n = state.nodes.get(id);
+                  return n ? { node: n, origX: n.x, origY: n.y } : null;
+                }).filter(Boolean)
+              };
+            }
+            return;
+          }
+
+          // 3. Touch pan world dimension
+          state.isPanningWorld = true;
+          state.startPanX = t.clientX - state.panX;
+          state.startPanY = t.clientY - state.panY;
+          viewport.classList.add('is-panning');
+        };
+
+        const onTouchMove = (e) => {
+          if (!isPinching && !state.draggingNode && !state.draggingSubgraph && !state.isPanningWorld) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (isPinching && e.touches.length >= 2) {
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const rect = viewport.getBoundingClientRect();
+            const curDist = getTouchDist(t1, t2);
+            const curMidX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            const curMidY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+            const ratio = curDist / pinchStartDist;
+            const newScale = Math.min(Math.max(Math.round(pinchStartScale * ratio * 100) / 100, 0.2), 3.0);
+            const scaleRatio = newScale / pinchStartScale;
+            state.panX = Math.round(curMidX - (pinchStartMidX - pinchStartPanX) * scaleRatio);
+            state.panY = Math.round(curMidY - (pinchStartMidY - pinchStartPanY) * scaleRatio);
+            state.scale = newScale;
+            this.applyWorldTransform(state);
+            return;
+          }
+
+          if (e.touches.length !== 1) return;
+          const t = e.touches[0];
+          if (Math.hypot(t.clientX - touchStartClientX, t.clientY - touchStartClientY) > 8) {
+            touchMoved = true;
+          }
+
+          if (state.draggingNode) {
+            const dx = (t.clientX - state.draggingNode.startX) / state.scale;
+            const dy = (t.clientY - state.draggingNode.startY) / state.scale;
+            const n = state.draggingNode.node;
+            n.x = Math.round(state.draggingNode.origX + dx);
+            n.y = Math.round(state.draggingNode.origY + dy);
+            if (n.el) {
+              n.el.style.left = n.x + 'px';
+              n.el.style.top = n.y + 'px';
+            }
+            this.updateConnections(state);
+            this.updateSubgraphClusters(state);
+            return;
+          }
+
+          if (state.draggingSubgraph) {
+            const dx = (t.clientX - state.draggingSubgraph.startX) / state.scale;
+            const dy = (t.clientY - state.draggingSubgraph.startY) / state.scale;
+            state.draggingSubgraph.memberNodes.forEach(item => {
+              const n = item.node;
+              n.x = Math.round(item.origX + dx);
+              n.y = Math.round(item.origY + dy);
+              if (n.el) {
+                n.el.style.left = n.x + 'px';
+                n.el.style.top = n.y + 'px';
+              }
+            });
+            this.updateConnections(state);
+            this.updateSubgraphClusters(state);
+            return;
+          }
+
+          if (state.isPanningWorld) {
+            state.panX = Math.round(t.clientX - state.startPanX);
+            state.panY = Math.round(t.clientY - state.startPanY);
+            this.applyWorldTransform(state);
+          }
+        };
+
+        const onTouchEnd = (e) => {
+          if (!isPinching && !state.draggingNode && !state.draggingSubgraph && !state.isPanningWorld) return;
+          e.stopPropagation();
+
+          if (e.touches.length === 1 && isPinching) {
+            const t = e.touches[0];
+            isPinching = false;
+            state.isPanningWorld = true;
+            touchMoved = true;
+            state.startPanX = t.clientX - state.panX;
+            state.startPanY = t.clientY - state.panY;
+            return;
+          }
+
+          const wasBgTap = state.isPanningWorld && !isPinching && !touchMoved;
+          isPinching = false;
+          onMouseUp();
+
+          if (wasBgTap && e.changedTouches && e.changedTouches.length === 1) {
+            const t = e.changedTouches[0];
+            const now = Date.now();
+            if (now - lastTapTime < 320 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 30) {
+              lastTapTime = 0;
+              this.fit(blockId);
+            } else {
+              lastTapTime = now;
+              lastTapX = t.clientX;
+              lastTapY = t.clientY;
+            }
+          }
         };
 
         viewport.addEventListener('mousedown', onMouseDown);
@@ -6503,6 +7249,10 @@
         window.addEventListener('mouseup', onMouseUp);
         viewport.addEventListener('wheel', onWheel, { passive: false });
         viewport.addEventListener('dblclick', onDblClick);
+        viewport.addEventListener('touchstart', onTouchStart, { passive: false });
+        viewport.addEventListener('touchmove', onTouchMove, { passive: false });
+        viewport.addEventListener('touchend', onTouchEnd, { passive: false });
+        viewport.addEventListener('touchcancel', onTouchEnd, { passive: false });
 
         state.cleanup = () => {
           viewport.removeEventListener('mousedown', onMouseDown);
@@ -6510,6 +7260,10 @@
           window.removeEventListener('mouseup', onMouseUp);
           viewport.removeEventListener('wheel', onWheel);
           viewport.removeEventListener('dblclick', onDblClick);
+          viewport.removeEventListener('touchstart', onTouchStart);
+          viewport.removeEventListener('touchmove', onTouchMove);
+          viewport.removeEventListener('touchend', onTouchEnd);
+          viewport.removeEventListener('touchcancel', onTouchEnd);
         };
 
         this.instances.set(blockId, state);
@@ -6754,14 +7508,206 @@
     };
 
     /* =========================================================================
+       4.5. CAROUSEL CONTROLLER (INTERACTIVE SLIDES + SWIPE + DIAGRAM RE-SYNC)
+       ========================================================================= */
+    const CarouselManager = {
+      splitSlides(rawCode) {
+        const lines = String(rawCode || '').split(/\r?\n/);
+        const slides = [];
+        let buf = [];
+        let innerFenceChar = '';
+        let innerFenceLen = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const trimmed = line.trim();
+
+          if (!innerFenceChar) {
+            const openM = trimmed.match(/^([`~]{3,})\s*(.*)$/);
+            if (openM && !(openM[1][0] === '`' && openM[2].includes('`'))) {
+              innerFenceChar = openM[1][0];
+              innerFenceLen = openM[1].length;
+              buf.push(line);
+              continue;
+            }
+            if (/^<!--\s*slide\s*-->$/i.test(trimmed)) {
+              slides.push(buf.join('\n').trim());
+              buf = [];
+              continue;
+            }
+          } else {
+            const closeM = trimmed.match(/^([`~]{3,})\s*$/);
+            if (closeM && closeM[1][0] === innerFenceChar && closeM[1].length >= innerFenceLen) {
+              innerFenceChar = '';
+              innerFenceLen = 0;
+            }
+          }
+          buf.push(line);
+        }
+        slides.push(buf.join('\n').trim());
+
+        const nonEmpty = slides.filter(s => s.length > 0);
+        return nonEmpty.length > 0 ? nonEmpty : [''];
+      },
+
+      goTo(carouselId, index) {
+        const root = document.getElementById(carouselId);
+        if (!root) return;
+        const slideEls = Array.from(root.querySelectorAll(':scope > .md-carousel-viewport > .md-carousel-slides > .md-carousel-slide'));
+        const count = slideEls.length;
+        if (count === 0) return;
+
+        const targetIdx = ((index % count) + count) % count;
+        root.setAttribute('data-active-slide', String(targetIdx));
+
+        slideEls.forEach((el, i) => {
+          el.classList.toggle('active', i === targetIdx);
+        });
+
+        const dotsWrap = document.getElementById('carousel-dots-' + carouselId);
+        if (dotsWrap) {
+          const dots = dotsWrap.querySelectorAll('.md-carousel-dot');
+          dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === targetIdx);
+            dot.setAttribute('aria-current', i === targetIdx ? 'true' : 'false');
+          });
+        }
+
+        const counterEl = document.getElementById('carousel-counter-' + carouselId);
+        if (counterEl) {
+          counterEl.textContent = `${targetIdx + 1} / ${count}`;
+        }
+
+        this.refreshSlideContent(slideEls[targetIdx]);
+      },
+
+      step(carouselId, delta) {
+        const root = document.getElementById(carouselId);
+        if (!root) return;
+        const cur = parseInt(root.getAttribute('data-active-slide') || '0', 10) || 0;
+        this.goTo(carouselId, cur + delta);
+      },
+
+      refreshSlideContent(slideEl) {
+        if (!slideEl) return;
+
+        // 1. Lazily render any unrendered Mermaid diagrams inside newly active slide
+        if (window.mermaid) {
+          const pendingMermaid = Array.from(slideEl.querySelectorAll('.mermaid')).filter(el => !el.querySelector('svg'));
+          if (pendingMermaid.length > 0) {
+            window.mermaid.run({ nodes: pendingMermaid }).then(() => {
+              pendingMermaid.forEach(mNode => {
+                if (typeof App !== 'undefined' && App.fixMermaidSvgClamping) {
+                  App.fixMermaidSvgClamping(mNode);
+                }
+              });
+              DiagramPanZoom.initAll(slideEl);
+            }).catch(e => {
+              console.error('Carousel mermaid render error:', e);
+              DiagramPanZoom.initAll(slideEl);
+            });
+          }
+        }
+
+        // 2. Re-measure / re-center diagrams inside newly visible slide
+        setTimeout(() => {
+          const cards = slideEl.querySelectorAll('.diagram-card');
+          cards.forEach(card => {
+            const dynState = DynamicGraphRenderer.instances.get(card.id);
+            if (dynState) {
+              DynamicGraphRenderer.measureBoxes(dynState);
+              DynamicGraphRenderer.updateConnections(dynState);
+              DynamicGraphRenderer.updateSubgraphClusters(dynState);
+              DynamicGraphRenderer.fit(card.id);
+            } else {
+              const pzState = DiagramPanZoom.instances.get(card.id);
+              if (pzState) {
+                DiagramPanZoom.centerDiagram(pzState);
+              } else {
+                DiagramPanZoom.init(card.id);
+              }
+            }
+          });
+          if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && typeof App !== 'undefined' && App.mode === 'preview') {
+            PreviewCursor.updateCursorGeometry();
+          }
+        }, 35);
+      },
+
+      initAll(container) {
+        const carousels = (container || document).querySelectorAll('.md-carousel');
+        carousels.forEach(root => {
+          if (root.getAttribute('data-carousel-init') === 'true') return;
+          root.setAttribute('data-carousel-init', 'true');
+
+          const carouselId = root.id;
+          const viewport = root.querySelector(':scope > .md-carousel-viewport');
+
+          if (viewport) {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let swipeEligible = false;
+
+            viewport.addEventListener('touchstart', (e) => {
+              if (!e.touches || e.touches.length !== 1) {
+                swipeEligible = false;
+                return;
+              }
+              // Never hijack touch interactions inside interactive diagrams or scrollable code boxes
+              if (e.target.closest('.diagram-card, .diagram-body, .dyn-graph-viewport, button, a, input, select')) {
+                swipeEligible = false;
+                return;
+              }
+              const codeWrap = e.target.closest('.code-content-wrapper');
+              if (codeWrap && codeWrap.scrollWidth > codeWrap.clientWidth + 4) {
+                swipeEligible = false;
+                return;
+              }
+              swipeEligible = true;
+              touchStartX = e.touches[0].clientX;
+              touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            viewport.addEventListener('touchend', (e) => {
+              if (!swipeEligible || !e.changedTouches || e.changedTouches.length !== 1) return;
+              swipeEligible = false;
+              const dx = e.changedTouches[0].clientX - touchStartX;
+              const dy = e.changedTouches[0].clientY - touchStartY;
+              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                this.step(carouselId, dx < 0 ? 1 : -1);
+              }
+            }, { passive: true });
+          }
+
+          root.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              e.stopPropagation();
+              this.step(carouselId, -1);
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              e.stopPropagation();
+              this.step(carouselId, 1);
+            }
+          });
+        });
+      }
+    };
+
+    /* =========================================================================
        5. MARKDOWN PARSER
        ========================================================================= */
     const SimpleMarkdown = {
-      render(md) {
+      render(md, options = {}) {
         if (!md) return '';
+        const suppressLineAttr = Boolean(options && options.suppressLineAttr);
+        const lineAttrFor = (n) => suppressLineAttr ? '' : ` data-line="${n}"`;
+
         let out = '';
         const lines = md.split(/\r?\n/);
         let inCode = false;
+        let fenceChar = '';
+        let fenceLen = 0;
         let codeLang = '';
         let codeBuffer = [];
         let codeStartLine = 1;
@@ -6779,7 +7725,7 @@
         }
         function flushTable() {
           if (inTable && tableRows.length > 0) {
-            out += `<table data-line="${tableStartLine}">\n`;
+            out += `<table${lineAttrFor(tableStartLine)}>\n`;
             tableRows.forEach((row, i) => {
               const tag = i === 0 ? 'th' : 'td';
               out += '  <tr>' + row.map(c => `<${tag}>${SimpleMarkdown.inline(c.trim())}</${tag}>`).join('') + '</tr>\n';
@@ -6793,31 +7739,44 @@
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           const lineNum = i + 1;
-          if (line.trim().startsWith('```')) {
-            flushList();
-            flushTable();
-            if (!inCode) {
+          const trimmed = line.trim();
+
+          if (!inCode) {
+            const openMatch = trimmed.match(/^([`~]{3,})\s*(.*)$/);
+            if (openMatch && !(openMatch[1][0] === '`' && openMatch[2].includes('`'))) {
+              flushList();
+              flushTable();
               inCode = true;
-              codeLang = line.trim().substring(3).trim().toLowerCase();
+              fenceChar = openMatch[1][0];
+              fenceLen = openMatch[1].length;
+              codeLang = (openMatch[2].trim().split(/\s+/)[0] || '').toLowerCase();
               codeStartLine = lineNum;
               codeBuffer = [];
-            } else {
-              inCode = false;
-              const rawCode = codeBuffer.join('\n');
-              out += SimpleMarkdown.renderCodeBlock(codeLang, rawCode, codeStartLine);
-              codeBuffer = [];
+              continue;
             }
-            continue;
-          }
-
-          if (inCode) {
+          } else {
+            const closeMatch = trimmed.match(/^([`~]{3,})\s*$/);
+            if (closeMatch && closeMatch[1][0] === fenceChar && closeMatch[1].length >= fenceLen) {
+              inCode = false;
+              fenceChar = '';
+              fenceLen = 0;
+              const rawCode = codeBuffer.join('\n');
+              out += SimpleMarkdown.renderCodeBlock(codeLang, rawCode, codeStartLine, suppressLineAttr);
+              codeBuffer = [];
+              continue;
+            }
             codeBuffer.push(line);
             continue;
           }
 
-          if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+          // Skip standalone HTML comments outside code blocks
+          if (/^<!--[\s\S]*-->$/.test(trimmed)) {
+            continue;
+          }
+
+          if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
             flushList();
-            const cells = line.trim().slice(1, -1).split('|');
+            const cells = trimmed.slice(1, -1).split('|');
             if (!cells.every(c => /^[\s-:]+$/.test(c))) {
               if (!inTable) tableStartLine = lineNum;
               inTable = true;
@@ -6828,7 +7787,7 @@
             flushTable();
           }
 
-          if (!line.trim()) {
+          if (!trimmed) {
             flushList();
             out += '\n';
             continue;
@@ -6840,7 +7799,7 @@
             const level = hMatch[1].length;
             const text = SimpleMarkdown.inline(hMatch[2]);
             const id = hMatch[2].toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-            out += `<h${level} id="${id}" data-line="${lineNum}">${text}</h${level}>\n`;
+            out += `<h${level} id="${id}"${lineAttrFor(lineNum)}>${text}</h${level}>\n`;
             continue;
           }
 
@@ -6849,19 +7808,19 @@
             flushList();
             const type = alertMatch[1].toLowerCase();
             const extra = alertMatch[2] ? `<p>${SimpleMarkdown.inline(alertMatch[2])}</p>` : '';
-            out += `<div class="callout ${type}" data-line="${lineNum}"><div class="callout-title">${type}</div>${extra}</div>\n`;
+            out += `<div class="callout ${type}"${lineAttrFor(lineNum)}><div class="callout-title">${type}</div>${extra}</div>\n`;
             continue;
           }
 
           if (line.startsWith('>')) {
             flushList();
-            out += `<blockquote data-line="${lineNum}">${SimpleMarkdown.inline(line.replace(/^>\s*/, ''))}</blockquote>\n`;
+            out += `<blockquote${lineAttrFor(lineNum)}>${SimpleMarkdown.inline(line.replace(/^>\s*/, ''))}</blockquote>\n`;
             continue;
           }
 
-          if (/^(\*\*\*|---|___)$/.test(line.trim())) {
+          if (/^(\*\*\*|---|___)$/.test(trimmed)) {
             flushList();
-            out += `<hr data-line="${lineNum}">\n`;
+            out += `<hr${lineAttrFor(lineNum)}>\n`;
             continue;
           }
 
@@ -6874,7 +7833,7 @@
               out += '<ul class="task-list" style="list-style:none; padding-left:4px;">\n';
             }
             const checked = taskMatch[2].toLowerCase() === 'x' ? 'checked' : '';
-            out += `<li data-line="${lineNum}"><input type="checkbox" ${checked} disabled> ${SimpleMarkdown.inline(taskMatch[3])}</li>\n`;
+            out += `<li${lineAttrFor(lineNum)}><input type="checkbox" ${checked} disabled> ${SimpleMarkdown.inline(taskMatch[3])}</li>\n`;
             continue;
           }
 
@@ -6886,7 +7845,7 @@
               listType = 'ul';
               out += '<ul>\n';
             }
-            out += `<li data-line="${lineNum}">${SimpleMarkdown.inline(ulMatch[2])}</li>\n`;
+            out += `<li${lineAttrFor(lineNum)}>${SimpleMarkdown.inline(ulMatch[2])}</li>\n`;
             continue;
           }
 
@@ -6898,12 +7857,16 @@
               listType = 'ol';
               out += '<ol>\n';
             }
-            out += `<li data-line="${lineNum}">${SimpleMarkdown.inline(olMatch[2])}</li>\n`;
+            out += `<li${lineAttrFor(lineNum)}>${SimpleMarkdown.inline(olMatch[2])}</li>\n`;
             continue;
           }
 
           flushList();
-          out += `<p data-line="${lineNum}">${SimpleMarkdown.inline(line)}</p>\n`;
+          out += `<p${lineAttrFor(lineNum)}>${SimpleMarkdown.inline(line)}</p>\n`;
+        }
+
+        if (inCode) {
+          out += SimpleMarkdown.renderCodeBlock(codeLang, codeBuffer.join('\n'), codeStartLine, suppressLineAttr);
         }
 
         flushList();
@@ -6967,9 +7930,48 @@
         return s;
       },
 
-      renderCodeBlock(lang, code, lineNum = 1) {
+      renderCodeBlock(lang, code, lineNum = 1, suppressLineAttr = false) {
         const blockId = 'diag-' + Math.random().toString(36).substr(2, 9);
-        const lineAttr = lineNum ? ` data-line="${lineNum}"` : '';
+        const lineAttr = (!suppressLineAttr && lineNum) ? ` data-line="${lineNum}"` : '';
+
+        // 0. Interactive Carousel Block (````carousel + <!-- slide -->)
+        if (lang === 'carousel') {
+          const carouselId = 'carousel-' + Math.random().toString(36).substr(2, 9);
+          const slides = CarouselManager.splitSlides(code);
+          const slidesHtml = slides.map((slideMd, idx) => {
+            const innerHtml = SimpleMarkdown.render(slideMd, { suppressLineAttr: true });
+            return `<div class="md-carousel-slide${idx === 0 ? ' active' : ''}" data-slide-index="${idx}">${innerHtml}</div>`;
+          }).join('\n');
+          const dotsHtml = slides.map((_, idx) =>
+            `<button class="md-carousel-dot${idx === 0 ? ' active' : ''}" type="button" onclick="CarouselManager.goTo('${carouselId}', ${idx})" aria-label="Slide ${idx + 1}" aria-current="${idx === 0 ? 'true' : 'false'}"></button>`
+          ).join('');
+          const navDisabled = slides.length <= 1 ? ' style="display:none;"' : '';
+
+          return `
+            <div class="md-carousel" id="${carouselId}" data-slide-count="${slides.length}" data-active-slide="0"${lineAttr} tabindex="0">
+              <div class="md-carousel-header">
+                <div class="md-carousel-title">
+                  <span class="md-carousel-badge">CAROUSEL</span>
+                  <span class="md-carousel-counter" id="carousel-counter-${carouselId}">1 / ${slides.length}</span>
+                </div>
+                <div class="md-carousel-controls"${navDisabled}>
+                  <button class="md-carousel-btn" type="button" onclick="CarouselManager.step('${carouselId}', -1)" title="Previous slide">‹ Prev</button>
+                  <button class="md-carousel-btn" type="button" onclick="CarouselManager.step('${carouselId}', 1)" title="Next slide">Next ›</button>
+                </div>
+              </div>
+              <div class="md-carousel-viewport" id="carousel-viewport-${carouselId}">
+                <div class="md-carousel-slides">
+                  ${slidesHtml}
+                </div>
+              </div>
+              <div class="md-carousel-footer"${navDisabled}>
+                <div class="md-carousel-dots" id="carousel-dots-${carouselId}">
+                  ${dotsHtml}
+                </div>
+              </div>
+            </div>
+          `;
+        }
 
         // 1. Packet / UDP diagram
         if (lang === 'udp' || lang === 'packet' || lang === 'bytefield' || lang === 'rfc') {
@@ -9084,6 +10086,11 @@
       visualAnchor: 0,
       mode: 'NORMAL', // 'NORMAL' or 'VISUAL'
       blocks: [],
+      wordIndex: -1, // -1 = line-only soft highlight, >=0 = word focused on active block
+      wordSelected: false, // true when 'v' selected current word for translation
+      wordText: '',
+      _activeWordSpan: null,
+      _lastDoubleTapAt: 0,
       _initialized: false,
 
       init(app) {
@@ -9094,14 +10101,84 @@
         if (!this._initialized && this.app && this.app.previewEl) {
           this._initialized = true;
 
-          // Click on preview element moves cursor
+          // Click on preview element moves cursor (and dismisses line visual selection on tap away)
           this.app.previewEl.addEventListener('click', (e) => {
+            if (Date.now() - (this._lastDoubleTapAt || 0) < 420) return;
             if (!this.isEnabled() || this.app.mode !== 'preview') return;
+            if (e.target.closest('button, a, input, select, .diagram-controls, .md-carousel-header, .md-carousel-footer')) return;
             const block = e.target.closest('[data-line]');
             if (block) {
+              if (this.mode === 'VISUAL') {
+                this.mode = 'NORMAL';
+              }
+              this.clearWordFocus(true);
               this.setIndexByElement(block);
             }
           });
+
+          // Android / Touch double-tap on a Preview line selects that line & shows the translate icon
+          let tapActive = false;
+          let tapMoved = false;
+          let tapStartX = 0;
+          let tapStartY = 0;
+          let lastTapTime = 0;
+          let lastTapBlock = null;
+          let lastTapX = 0;
+          let lastTapY = 0;
+
+          this.app.previewEl.addEventListener('touchstart', (e) => {
+            if (!e.touches || e.touches.length !== 1) {
+              tapActive = false;
+              return;
+            }
+            if (e.target.closest('.diagram-card, .md-carousel-header, .md-carousel-footer, button, a, input, select, .code-copy-btn')) {
+              tapActive = false;
+              return;
+            }
+            tapActive = true;
+            tapMoved = false;
+            tapStartX = e.touches[0].clientX;
+            tapStartY = e.touches[0].clientY;
+          }, { passive: true });
+
+          this.app.previewEl.addEventListener('touchmove', (e) => {
+            if (!tapActive || !e.touches || e.touches.length !== 1) return;
+            if (Math.hypot(e.touches[0].clientX - tapStartX, e.touches[0].clientY - tapStartY) > 16) {
+              tapMoved = true;
+            }
+          }, { passive: true });
+
+          this.app.previewEl.addEventListener('touchend', (e) => {
+            if (!tapActive || tapMoved || !e.changedTouches || e.changedTouches.length !== 1) {
+              tapActive = false;
+              return;
+            }
+            tapActive = false;
+            if (this.app.mode !== 'preview') return;
+            if (e.target.closest('.diagram-card, .md-carousel-header, .md-carousel-footer, button, a, input, select, .code-copy-btn')) return;
+
+            const block = e.target.closest('[data-line]');
+            if (!block) return;
+
+            const t = e.changedTouches[0];
+            const now = Date.now();
+            if (lastTapBlock === block && (now - lastTapTime) <= 380 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) <= 44) {
+              lastTapTime = 0;
+              lastTapBlock = null;
+              e.preventDefault();
+              try {
+                const sel = window.getSelection();
+                if (sel) sel.removeAllRanges();
+              } catch (_) {}
+              this._lastDoubleTapAt = now;
+              this.selectLineForTranslate(block);
+            } else {
+              lastTapTime = now;
+              lastTapBlock = block;
+              lastTapX = t.clientX;
+              lastTapY = t.clientY;
+            }
+          }, { passive: false });
 
           // Smooth scrolling updates cursor position
           if (this.app.previewPaneEl) {
@@ -9117,6 +10194,37 @@
         this.render();
       },
 
+      selectLineForTranslate(block) {
+        if (!block) return;
+        if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isOpen) {
+          TranslationPopover.close();
+        }
+        this.refreshBlocks();
+        const idx = this.blocks.indexOf(block);
+        if (idx === -1) return;
+
+        this.clearWordFocus(true);
+        this.currentIndex = idx;
+        this.visualAnchor = idx;
+        this.mode = 'VISUAL';
+
+        if (this.isEnabled()) {
+          this.render();
+        } else {
+          // Even if cursor is disabled in settings, highlight line and show translate icon on Android double-tap
+          this.clearHighlights();
+          block.classList.add('preview-visual-block');
+          if (typeof TranslationPopover !== 'undefined') {
+            const vText = this.getSelectedText();
+            const vRect = block.getBoundingClientRect();
+            const vRange = this.getSelectedVisualRange();
+            if (vText && vRect && vText.trim().length > 0) {
+              TranslationPopover.showForVisualSelection(vRect, vText, vRange);
+            }
+          }
+        }
+      },
+
       isEnabled() {
         if (!this.app || !this.app.keybindings) return true;
         const p = this.app.keybindings.preview;
@@ -9128,7 +10236,8 @@
 
       refreshBlocks() {
         if (!this.app || !this.app.previewEl) return [];
-        this.blocks = Array.from(this.app.previewEl.querySelectorAll('[data-line]'));
+        this.blocks = Array.from(this.app.previewEl.querySelectorAll('[data-line]'))
+          .filter(el => !el.closest('.md-carousel-slide:not(.active)'));
         if (this.blocks.length === 0) {
           this.currentIndex = 0;
           return [];
@@ -9142,7 +10251,268 @@
         return this.blocks;
       },
 
+      getBlockWords(block) {
+        if (!block) return [];
+        if (block.classList.contains('diagram-card') || block.tagName === 'HR') return [];
+
+        const words = [];
+        let wordRe;
+        try {
+          wordRe = new RegExp("[\\p{L}\\p{N}_]+(?:['’\\-][\\p{L}\\p{N}_]+)*", 'gu');
+        } catch (_) {
+          wordRe = /[A-Za-z0-9_\u00C0-\u024F\u1E00-\u1EFF]+(?:['’-][A-Za-z0-9_\u00C0-\u024F\u1E00-\u1EFF]+)*/g;
+        }
+
+        const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
+          acceptNode(node) {
+            if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            if (parent.closest('.diagram-card, .md-carousel-header, .md-carousel-footer, .md-carousel-slide:not(.active), .code-box-header, .code-line-numbers, button, svg, script, style')) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+
+        let textNode;
+        while ((textNode = walker.nextNode())) {
+          const val = textNode.nodeValue;
+          wordRe.lastIndex = 0;
+          let m;
+          while ((m = wordRe.exec(val)) !== null) {
+            words.push({
+              node: textNode,
+              start: m.index,
+              end: m.index + m[0].length,
+              text: m[0]
+            });
+          }
+        }
+        return words;
+      },
+
+      clearWordHighlight() {
+        if (this._activeWordSpan && this._activeWordSpan.parentNode) {
+          const parent = this._activeWordSpan.parentNode;
+          const textNode = document.createTextNode(this._activeWordSpan.textContent || '');
+          parent.replaceChild(textNode, this._activeWordSpan);
+          parent.normalize();
+        }
+        this._activeWordSpan = null;
+
+        if (this.app && this.app.previewEl) {
+          const leftover = this.app.previewEl.querySelectorAll('.preview-word-cursor');
+          leftover.forEach(span => {
+            if (span.parentNode) {
+              const p = span.parentNode;
+              p.replaceChild(document.createTextNode(span.textContent || ''), span);
+              p.normalize();
+            }
+          });
+        }
+      },
+
+      clearWordFocus(skipRender = false) {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
+        if (!skipRender) {
+          this.render();
+        }
+      },
+
+      applyWordHighlight() {
+        this.clearWordHighlight();
+        if (this.wordIndex < 0 || !this.blocks[this.currentIndex]) {
+          this.wordText = '';
+          return null;
+        }
+        const curBlock = this.blocks[this.currentIndex];
+        const words = this.getBlockWords(curBlock);
+        if (words.length === 0) {
+          this.wordIndex = -1;
+          this.wordSelected = false;
+          this.wordText = '';
+          return null;
+        }
+
+        this.wordIndex = Math.max(0, Math.min(words.length - 1, this.wordIndex));
+        const target = words[this.wordIndex];
+
+        try {
+          let node = target.node;
+          if (target.end < node.nodeValue.length) {
+            node.splitText(target.end);
+          }
+          const wordNode = target.start > 0 ? node.splitText(target.start) : node;
+          const span = document.createElement('span');
+          span.className = this.wordSelected ? 'preview-word-cursor preview-word-selected' : 'preview-word-cursor';
+          wordNode.parentNode.insertBefore(span, wordNode);
+          span.appendChild(wordNode);
+
+          this._activeWordSpan = span;
+          this.wordText = target.text;
+          this.scrollWordIntoView(span);
+
+          return {
+            span,
+            text: target.text,
+            index: this.wordIndex,
+            total: words.length
+          };
+        } catch (err) {
+          console.error('Word highlight failed:', err);
+          this._activeWordSpan = null;
+          this.wordText = target.text;
+          return { span: null, text: target.text, index: this.wordIndex, total: words.length };
+        }
+      },
+
+      scrollWordIntoView(spanEl) {
+        if (!spanEl || !this.app || !this.app.previewPaneEl) return;
+        const pane = this.app.previewPaneEl;
+        const paneRect = pane.getBoundingClientRect();
+        const wordRect = spanEl.getBoundingClientRect();
+        const margin = 64;
+        const scroller = SmoothScroller.get(pane);
+
+        let deltaY = 0;
+        let deltaX = 0;
+        if (wordRect.top < paneRect.top + margin) {
+          deltaY = wordRect.top - (paneRect.top + margin);
+        } else if (wordRect.bottom > paneRect.bottom - margin) {
+          deltaY = wordRect.bottom - (paneRect.bottom - margin);
+        }
+        if (wordRect.left < paneRect.left + 28) {
+          deltaX = wordRect.left - (paneRect.left + 28);
+        } else if (wordRect.right > paneRect.right - 28) {
+          deltaX = wordRect.right - (paneRect.right - 28);
+        }
+
+        if (Math.abs(deltaY) > 1 || Math.abs(deltaX) > 1) {
+          if (scroller) scroller.scrollBy(deltaY, deltaX);
+          else pane.scrollBy({ top: deltaY, left: deltaX, behavior: 'auto' });
+        }
+      },
+
+      moveWord(delta) {
+        if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isOpen) {
+          TranslationPopover.close();
+        }
+        this.clearWordHighlight();
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return false;
+
+        if (this.mode === 'VISUAL') {
+          this.mode = 'NORMAL';
+        }
+        this.wordSelected = false;
+
+        const curWords = this.getBlockWords(this.blocks[this.currentIndex]);
+
+        if (delta > 0) {
+          if (curWords.length > 0 && this.wordIndex < 0) {
+            this.wordIndex = 0;
+          } else if (curWords.length > 0 && this.wordIndex + 1 < curWords.length) {
+            this.wordIndex += 1;
+          } else {
+            let found = false;
+            for (let i = this.currentIndex + 1; i < this.blocks.length; i++) {
+              const nextWords = this.getBlockWords(this.blocks[i]);
+              if (nextWords.length > 0) {
+                this.currentIndex = i;
+                this.wordIndex = 0;
+                found = true;
+                break;
+              }
+            }
+            if (!found && curWords.length > 0) {
+              this.wordIndex = curWords.length - 1;
+            }
+          }
+        } else if (delta < 0) {
+          if (curWords.length > 0 && this.wordIndex > 0) {
+            this.wordIndex -= 1;
+          } else {
+            let found = false;
+            for (let i = this.currentIndex - 1; i >= 0; i--) {
+              const prevWords = this.getBlockWords(this.blocks[i]);
+              if (prevWords.length > 0) {
+                this.currentIndex = i;
+                this.wordIndex = prevWords.length - 1;
+                found = true;
+                break;
+              }
+            }
+            if (!found && curWords.length > 0) {
+              this.wordIndex = 0;
+            }
+          }
+        }
+
+        this.scrollCurrentIntoView();
+        this.render();
+        return true;
+      },
+
+      jumpToFirstWord() {
+        if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isOpen) {
+          TranslationPopover.close();
+        }
+        this.clearWordHighlight();
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return false;
+        if (this.mode === 'VISUAL') this.mode = 'NORMAL';
+        this.wordSelected = false;
+
+        const curWords = this.getBlockWords(this.blocks[this.currentIndex]);
+        this.wordIndex = curWords.length > 0 ? 0 : -1;
+        this.scrollCurrentIntoView();
+        this.render();
+        return curWords.length > 0;
+      },
+
+      jumpToLastWord() {
+        if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isOpen) {
+          TranslationPopover.close();
+        }
+        this.clearWordHighlight();
+        this.refreshBlocks();
+        if (this.blocks.length === 0) return false;
+        if (this.mode === 'VISUAL') this.mode = 'NORMAL';
+        this.wordSelected = false;
+
+        const curWords = this.getBlockWords(this.blocks[this.currentIndex]);
+        this.wordIndex = curWords.length > 0 ? (curWords.length - 1) : -1;
+        this.scrollCurrentIntoView();
+        this.render();
+        return curWords.length > 0;
+      },
+
+      selectCurrentWordAndTranslate() {
+        if (this.wordIndex < 0) return false;
+        this.mode = 'NORMAL';
+        this.wordSelected = true;
+        this.render();
+
+        if (this.wordText && typeof TranslationPopover !== 'undefined') {
+          TranslationPopover.currentText = this.wordText;
+          TranslationPopover.isEditor = false;
+          TranslationPopover.isVisualPreview = false;
+          TranslationPopover.visualRange = null;
+          TranslationPopover.openPopover();
+          return true;
+        }
+        return false;
+      },
+
       setMode(newMode) {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         this.mode = newMode;
         if (newMode === 'VISUAL') {
           this.visualAnchor = this.currentIndex;
@@ -9159,6 +10529,10 @@
       },
 
       move(delta) {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         this.refreshBlocks();
         if (this.blocks.length === 0) return false;
         const oldIndex = this.currentIndex;
@@ -9169,6 +10543,10 @@
       },
 
       jumpToStart() {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         this.refreshBlocks();
         if (this.blocks.length === 0) return;
         this.currentIndex = 0;
@@ -9180,6 +10558,10 @@
       },
 
       jumpToEnd() {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         this.refreshBlocks();
         if (this.blocks.length === 0) return;
         this.currentIndex = this.blocks.length - 1;
@@ -9204,6 +10586,10 @@
       },
 
       jumpToLine(targetLine) {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         this.refreshBlocks();
         if (this.blocks.length === 0) return;
 
@@ -9233,6 +10619,10 @@
       },
 
       setIndexByElement(el) {
+        this.clearWordHighlight();
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         this.refreshBlocks();
         const idx = this.blocks.indexOf(el);
         if (idx !== -1) {
@@ -9289,9 +10679,25 @@
           return;
         }
 
-        const curBlock = this.blocks[this.currentIndex];
         const pane = this.app.previewPaneEl;
         const paneRect = pane.getBoundingClientRect();
+
+        if (this.mode === 'NORMAL' && this._activeWordSpan && this._activeWordSpan.isConnected) {
+          const wordRect = this._activeWordSpan.getBoundingClientRect();
+          if (wordRect.width > 0 && wordRect.height > 0) {
+            const top = wordRect.top - paneRect.top + pane.scrollTop;
+            const left = wordRect.left - paneRect.left + pane.scrollLeft;
+            const height = Math.min(28, Math.max(16, wordRect.height + 2));
+            this.cursorEl.style.display = 'block';
+            this.cursorEl.className = this.wordSelected ? 'preview-cursor visual' : 'preview-cursor normal';
+            this.cursorEl.style.transform = `translate(${Math.max(0, Math.round(left - 4))}px, ${Math.round(top - 1)}px)`;
+            this.cursorEl.style.height = Math.round(height) + 'px';
+            this.cursorEl.style.width = '4px';
+            return;
+          }
+        }
+
+        const curBlock = this.blocks[this.currentIndex];
         const blockRect = curBlock.getBoundingClientRect();
 
         const top = blockRect.top - paneRect.top + pane.scrollTop;
@@ -9322,6 +10728,7 @@
 
         this.clearHighlights();
 
+        let wordInfo = null;
         if (this.mode === 'VISUAL') {
           const minIdx = Math.min(this.visualAnchor, this.currentIndex);
           const maxIdx = Math.max(this.visualAnchor, this.currentIndex);
@@ -9334,13 +10741,16 @@
             const vText = this.getSelectedText();
             const vRect = this.getSelectedVisualRect();
             const vRange = this.getSelectedVisualRange();
-            if (vText && vRect && vText.trim().length > 1) {
+            if (vText && vRect && vText.trim().length > 0) {
               TranslationPopover.showForVisualSelection(vRect, vText, vRange);
             }
           }
         } else {
           if (this.blocks[this.currentIndex]) {
             this.blocks[this.currentIndex].classList.add('preview-active-block');
+          }
+          if (this.wordIndex >= 0) {
+            wordInfo = this.applyWordHighlight();
           }
           if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isVisualPreview) {
             TranslationPopover.hidePill();
@@ -9351,14 +10761,21 @@
 
         const curLine = this.getCurrentLine();
         if (this.app.statusCursorEl) {
-          this.app.statusCursorEl.textContent = `Ln ${curLine}, Col 1`;
+          if (wordInfo) {
+            this.app.statusCursorEl.textContent = `Ln ${curLine}, W ${wordInfo.index + 1}/${wordInfo.total}`;
+          } else {
+            this.app.statusCursorEl.textContent = `Ln ${curLine}, Col 1`;
+          }
         }
 
         const badgeEl = document.getElementById('status-vim-badge');
         if (badgeEl) {
-          if (typeof VimMode !== 'undefined' && VimMode.enabled) {
+          if ((typeof VimMode !== 'undefined' && VimMode.enabled) || this.wordIndex >= 0 || this.mode === 'VISUAL') {
             badgeEl.style.display = 'inline-block';
-            if (this.mode === 'VISUAL') {
+            if (this.wordSelected) {
+              badgeEl.className = 'vim-badge visual';
+              badgeEl.textContent = '-- VISUAL WORD --';
+            } else if (this.mode === 'VISUAL') {
               badgeEl.className = 'vim-badge visual';
               badgeEl.textContent = '-- VISUAL --';
             } else {
@@ -9372,6 +10789,7 @@
       },
 
       clearHighlights() {
+        this.clearWordHighlight();
         if (!this.app || !this.app.previewEl) return;
         const actives = this.app.previewEl.querySelectorAll('.preview-active-block, .preview-visual-block');
         actives.forEach(el => {
@@ -9383,6 +10801,9 @@
         if (this.cursorEl) this.cursorEl.style.display = 'none';
         this.clearHighlights();
         this.mode = 'NORMAL';
+        this.wordIndex = -1;
+        this.wordSelected = false;
+        this.wordText = '';
         if (typeof TranslationPopover !== 'undefined' && TranslationPopover.isVisualPreview) {
           TranslationPopover.hidePill();
         }
@@ -9459,6 +10880,27 @@
       yankSelected() {
         this.refreshBlocks();
         if (this.blocks.length === 0) return;
+
+        // If a word is focused in NORMAL mode, yank ONLY that word
+        if (this.mode === 'NORMAL' && this.wordIndex >= 0 && this.wordText) {
+          const wordToCopy = this.wordText;
+          if (typeof VimMode !== 'undefined') {
+            VimMode.register = { text: wordToCopy, isLine: false };
+          }
+          const copyToYank = (this.app && this.app.keybindings && this.app.keybindings.settings && this.app.keybindings.settings.is_copy_to_yank !== undefined)
+            ? (this.app.keybindings.settings.is_copy_to_yank === true || this.app.keybindings.settings.is_copy_to_yank === 'true')
+            : true;
+          if (copyToYank) {
+            navigator.clipboard.writeText(wordToCopy).then(() => {
+              this.app.showToast(`Yanked word "${wordToCopy}"`);
+            }).catch(() => {
+              this.app.showToast(`Yanked word "${wordToCopy}"`);
+            });
+          } else {
+            this.app.showToast(`Yanked word "${wordToCopy}" (Vim only)`);
+          }
+          return;
+        }
 
         let textToCopy = '';
         let lineCount = 1;
@@ -10224,6 +11666,12 @@
         this.popoverEl = document.getElementById('translation-popover');
 
         if (this.pillEl) {
+          this.pillEl.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+          });
+          this.pillEl.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+          }, { passive: true });
           this.pillEl.addEventListener('click', (e) => {
             e.stopPropagation();
             this.openPopover();
@@ -10434,10 +11882,14 @@
 
       showPill(rect) {
         if (!this.pillEl) return;
-        const x = Math.min(window.innerWidth - 100, Math.max(10, rect.left + (rect.width / 2) - 40));
-        const y = Math.max(40, rect.top - 32);
-        this.pillEl.style.left = `${x}px`;
-        this.pillEl.style.top = `${y}px`;
+        const pillEstWidth = 112;
+        const x = Math.min(window.innerWidth - pillEstWidth - 10, Math.max(10, rect.left + (rect.width / 2) - (pillEstWidth / 2)));
+        const paneEl = this.app && this.app.previewPaneEl ? this.app.previewPaneEl : null;
+        const minTop = paneEl ? Math.max(44, paneEl.getBoundingClientRect().top + 6) : 44;
+        const aboveY = rect.top - 38;
+        const y = aboveY >= minTop ? aboveY : Math.min(window.innerHeight - 48, Math.max(minTop, rect.bottom + 8));
+        this.pillEl.style.left = `${Math.round(x)}px`;
+        this.pillEl.style.top = `${Math.round(y)}px`;
         this.pillEl.style.display = 'inline-flex';
       },
 
@@ -10460,6 +11912,9 @@
           this.isEditor = false;
           this.isVisualPreview = true;
           this.visualRange = PreviewCursor.getSelectedVisualRange();
+        } else if (this.app && this.app.mode === 'preview' && typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && PreviewCursor.wordIndex >= 0 && PreviewCursor.wordText) {
+          PreviewCursor.selectCurrentWordAndTranslate();
+          return;
         } else if (this.app && this.app.editorEl) {
           const start = this.app.editorEl.selectionStart;
           const end = this.app.editorEl.selectionEnd;
@@ -10525,9 +11980,14 @@
           this.popoverEl.classList.remove('show');
         }
         this.isOpen = false;
+        this._closedAt = Date.now();
         this.hidePill();
         this.isVisualPreview = false;
         this.visualRange = null;
+        if (typeof PreviewCursor !== 'undefined' && PreviewCursor.wordSelected) {
+          PreviewCursor.wordSelected = false;
+          PreviewCursor.render();
+        }
       },
 
       async execute() {
@@ -11643,6 +13103,9 @@
               ? SimpleMarkdown.render(msg.content)
               : msg.content.replace(/\n/g, '<br>');
             bubble.innerHTML = `<div class="markdown-body">${renderedHtml}</div>`;
+            if (typeof CarouselManager !== 'undefined') {
+              CarouselManager.initAll(bubble);
+            }
           }
 
           msgEl.appendChild(bubble);
@@ -12786,6 +14249,18 @@
             { key: "h", mode: "normal" },
             { key: "ArrowLeft", mode: "all" }
           ],
+          word_next: [
+            { key: "w", mode: "normal" }
+          ],
+          word_prev: [
+            { key: "b", mode: "normal" }
+          ],
+          line_start: [
+            { key: "0", mode: "normal" }
+          ],
+          line_end: [
+            { key: "$", mode: "normal" }
+          ],
           scroll_line_down: [
             { key: "Ctrl+e", mode: "all" }
           ],
@@ -12808,7 +14283,6 @@
             { key: "Ctrl+q", mode: "all" }
           ],
           save_file: [
-            { key: "w", mode: "normal" },
             { key: "Ctrl+s", mode: "all" }
           ],
           cycle_mode: [
@@ -12916,6 +14390,18 @@
             { key: "h", mode: "normal" },
             { key: "ArrowLeft", mode: "all" }
           ],
+          word_next: [
+            { key: "w", mode: "normal" }
+          ],
+          word_prev: [
+            { key: "b", mode: "normal" }
+          ],
+          line_start: [
+            { key: "0", mode: "normal" }
+          ],
+          line_end: [
+            { key: "$", mode: "normal" }
+          ],
           scroll_line_down: [
             { key: "Ctrl+e", mode: "all" }
           ],
@@ -12938,7 +14424,6 @@
             { key: "Ctrl+q", mode: "all" }
           ],
           save_file: [
-            { key: "w", mode: "normal" },
             { key: "Ctrl+s", mode: "all" }
           ],
           cycle_mode: [
@@ -13141,11 +14626,13 @@
 
         if ((e.ctrlKey || false) !== wantsCtrl) return false;
         if ((e.altKey || false) !== wantsAlt) return false;
-        if ((e.shiftKey || false) !== wantsShift) return false;
         if ((e.metaKey || false) !== wantsMeta) return false;
 
         const mainParts = parts.filter(p => !['ctrl', 'control', 'alt', 'shift', 'meta', 'cmd'].includes(p));
         if (mainParts.length === 0) return false;
+
+        const isShiftedSymbol = mainParts.length === 1 && /^[~!@#$%^&*()_+{}|:"<>?]$/.test(mainParts[0]);
+        if (!isShiftedSymbol && (e.shiftKey || false) !== wantsShift) return false;
 
         if (wantsTab) {
           if (mainParts.length === 1 && mainParts[0] === 'tab') {
@@ -13410,6 +14897,25 @@
       kbTextareaEl: document.getElementById('kb-textarea'),
       modalScale: 1.0,
 
+      getMermaidConfig(themeName) {
+        const effectiveTheme = themeName || document.body.getAttribute('data-theme') || 'dark';
+        return {
+          startOnLoad: false,
+          securityLevel: 'loose',
+          theme: effectiveTheme === 'light' ? 'default' : 'dark',
+          fontFamily: 'var(--font-ui)',
+          flowchart: {
+            htmlLabels: true,
+            padding: 22,
+            curve: 'basis'
+          },
+          themeVariables: {
+            fontFamily: 'var(--font-ui)',
+            fontSize: '13px'
+          }
+        };
+      },
+
       fixMermaidSvgClamping(container) {
         if (!container) return;
         const svg = container.querySelector('svg');
@@ -13419,18 +14925,20 @@
         const isFlowchart = role.startsWith('flowchart') || svg.classList.contains('flowchart') || !!svg.querySelector('.flowchart-link');
         if (!isFlowchart) return;
 
-        const nodes = container.querySelectorAll('.node.flowchart-label');
+        const nodes = container.querySelectorAll('.node.flowchart-label, g.node');
         nodes.forEach(node => {
           if (node.getAttribute('data-clamping-fixed')) return;
           node.setAttribute('data-clamping-fixed', 'true');
-          const rect = node.querySelector('rect.basic, rect.label-container');
-          if (rect) {
-            const h = parseFloat(rect.getAttribute('height') || '0');
-            const y = parseFloat(rect.getAttribute('y') || '0');
-            if (h > 0 && h < 32) {
-              const extra = 8;
-              rect.setAttribute('height', (h + extra).toString());
-              rect.setAttribute('y', (y - extra / 2).toString());
+          if (node.classList.contains('flowchart-label')) {
+            const rect = node.querySelector('rect.basic, rect.label-container');
+            if (rect) {
+              const h = parseFloat(rect.getAttribute('height') || '0');
+              const y = parseFloat(rect.getAttribute('y') || '0');
+              if (h > 0 && h < 32) {
+                const extra = 8;
+                rect.setAttribute('height', (h + extra).toString());
+                rect.setAttribute('y', (y - extra / 2).toString());
+              }
             }
           }
           const fo = node.querySelector('foreignObject');
@@ -13473,21 +14981,10 @@
         const initMermaid = () => {
           if (window.mermaid && !window._mermaidInitialized) {
             window._mermaidInitialized = true;
-            mermaid.initialize({
-              startOnLoad: false,
-              theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'dark',
-              fontFamily: 'var(--font-ui)',
-              flowchart: {
-                htmlLabels: true,
-                padding: 22,
-                curve: 'basis'
-              },
-              themeVariables: {
-                fontFamily: 'var(--font-ui)',
-                fontSize: '13px'
-              }
-            });
-            const mermaidNodes = this.previewEl ? this.previewEl.querySelectorAll('.mermaid') : [];
+            mermaid.initialize(this.getMermaidConfig());
+            const mermaidNodes = this.previewEl
+              ? Array.from(this.previewEl.querySelectorAll('.mermaid')).filter(el => !el.closest('.md-carousel-slide:not(.active)'))
+              : [];
             if (mermaidNodes.length > 0) {
               mermaid.run({ nodes: mermaidNodes }).then(() => {
                 mermaidNodes.forEach(mNode => this.fixMermaidSvgClamping(mNode));
@@ -14248,12 +15745,18 @@
           TableOfContents.build();
         }
 
+        // Initialize Interactive Carousels
+        if (typeof CarouselManager !== 'undefined') {
+          CarouselManager.initAll(this.previewEl);
+        }
+
         // Initialize Dynamic Box Flowcharts (nexus-graph style)
         DynamicGraphRenderer.initAll(this.previewEl);
 
         if (window.mermaid) {
           try {
-            const mermaidNodes = this.previewEl.querySelectorAll('.mermaid');
+            const mermaidNodes = Array.from(this.previewEl.querySelectorAll('.mermaid'))
+              .filter(el => !el.closest('.md-carousel-slide:not(.active)'));
             if (mermaidNodes.length > 0) {
               mermaid.run({ nodes: mermaidNodes }).then(() => {
                 mermaidNodes.forEach(mNode => this.fixMermaidSvgClamping(mNode));
@@ -14336,16 +15839,16 @@
         window.addEventListener('keydown', (e) => {
           // Global shortcut: Cycle mode between Preview -> Split -> Edit
           const kb = (this.keybindings && this.keybindings.preview) || {};
-          const cycleBinding = kb.cycle_mode || 'Shift+Tab';
-          if (this.matchesCombo(e, cycleBinding) || (e.key === 'Tab' && e.shiftKey)) {
+          const cycleBinding = kb.cycle_mode || this.defaultKeybindings.preview.cycle_mode;
+          if (this.matchesAction(e, cycleBinding, 'normal') || (e.key === 'Tab' && e.shiftKey)) {
             e.preventDefault();
             this.cycleMode();
             return;
           }
 
           // Global shortcut: Toggle Outline / TOC
-          const tocBinding = kb.toggle_toc || 'Alt+O';
-          if (this.matchesCombo(e, tocBinding) || (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o')) {
+          const tocBinding = kb.toggle_toc || this.defaultKeybindings.preview.toggle_toc;
+          if (this.matchesAction(e, tocBinding, 'normal') || (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o')) {
             e.preventDefault();
             TableOfContents.toggle();
             return;
@@ -14580,82 +16083,136 @@
               return;
             }
 
-            // Visual mode toggle & controls in Preview mode
-            if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
-              if (e.key === 'v' || e.key === 'V') {
-                e.preventDefault();
+            // Visual mode & word navigation in Preview mode (when Vim Mode is enabled: y/t/etc.)
+          }
+
+          // Global Preview Cursor controls (active across Preview tab whenever PreviewCursor is enabled)
+          if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            const wordNextBind = kb.word_next || this.defaultKeybindings.preview.word_next;
+            const wordPrevBind = kb.word_prev || this.defaultKeybindings.preview.word_prev;
+            const lineStartBind = kb.line_start || this.defaultKeybindings.preview.line_start;
+            const lineEndBind = kb.line_end || this.defaultKeybindings.preview.line_end;
+
+            // Word navigation: w (next word), b (prev word), 0 (first word of line), $ (last word of line)
+            if (this.matchesAction(e, wordNextBind, 'normal') || (e.key === 'w' && !e.shiftKey)) {
+              e.preventDefault();
+              PreviewCursor.moveWord(1);
+              return;
+            }
+            if (this.matchesAction(e, wordPrevBind, 'normal') || (e.key === 'b' && !e.shiftKey)) {
+              e.preventDefault();
+              PreviewCursor.moveWord(-1);
+              return;
+            }
+            if (this.matchesAction(e, lineStartBind, 'normal') || (e.key === '0' && !e.shiftKey)) {
+              e.preventDefault();
+              PreviewCursor.jumpToFirstWord();
+              return;
+            }
+            if (this.matchesAction(e, lineEndBind, 'normal') || e.key === '$') {
+              e.preventDefault();
+              PreviewCursor.jumpToLastWord();
+              return;
+            }
+
+            // 'v': If a word is focused via w/b/0/$, select ONLY that word (harder highlight) & open translation popup.
+            // Otherwise toggle whole-line VISUAL selection. 'V' always toggles whole-line VISUAL selection.
+            if (e.key === 'v' && !e.shiftKey) {
+              e.preventDefault();
+              if (PreviewCursor.mode === 'NORMAL' && PreviewCursor.wordIndex >= 0) {
+                PreviewCursor.selectCurrentWordAndTranslate();
+              } else {
                 PreviewCursor.toggleVisual();
+              }
+              return;
+            }
+            if (e.key === 'V') {
+              e.preventDefault();
+              PreviewCursor.toggleVisual();
+              return;
+            }
+
+            // Escape clears word focus in NORMAL mode (after popover is closed)
+            if (e.key === 'Escape' && PreviewCursor.mode === 'NORMAL' && PreviewCursor.wordIndex >= 0) {
+              const popoverJustClosed = typeof TranslationPopover !== 'undefined' && (TranslationPopover.isOpen || (Date.now() - (TranslationPopover._closedAt || 0) < 80));
+              if (!popoverJustClosed) {
+                e.preventDefault();
+                PreviewCursor.clearWordFocus();
                 return;
               }
+            }
 
-              // In VISUAL mode
-              if (PreviewCursor.mode === 'VISUAL') {
-                if (e.key === 'Escape' || (e.ctrlKey && e.key === '[')) {
-                  e.preventDefault();
-                  PreviewCursor.setMode('NORMAL');
-                  return;
-                }
-                if (e.key === 'y') {
-                  e.preventDefault();
-                  PreviewCursor.yankSelected();
-                  return;
-                }
-                if (e.key === 't' || e.key === 'T') {
-                  e.preventDefault();
-                  const text = PreviewCursor.getSelectedText();
-                  if (text && typeof TranslationPopover !== 'undefined') {
-                    TranslationPopover.currentText = text;
-                    TranslationPopover.isEditor = false;
-                    TranslationPopover.isVisualPreview = true;
-                    TranslationPopover.visualRange = PreviewCursor.getSelectedVisualRange();
-                    TranslationPopover.openPopover();
-                  }
-                  return;
-                }
-                if (e.key === (kb.scroll_down || 'j') || e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  const moved = PreviewCursor.move(1);
-                  if (!moved) {
-                    if (scroller) scroller.scrollBy(stepY, 0);
-                    else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
-                  }
-                  return;
-                }
-                if (e.key === (kb.scroll_up || 'k') || e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  const moved = PreviewCursor.move(-1);
-                  if (!moved) {
-                    if (scroller) scroller.scrollBy(-stepY, 0);
-                    else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
-                  }
-                  return;
-                }
-                if (e.key === 'G') {
-                  e.preventDefault();
-                  PreviewCursor.jumpToEnd();
-                  return;
-                }
-                if (e.key === 'g' && !e.shiftKey) {
-                  if (this._previewG) {
-                    this._previewG = false;
-                    e.preventDefault();
-                    PreviewCursor.jumpToStart();
-                  } else {
-                    this._previewG = true;
-                    setTimeout(() => { this._previewG = false; }, 400);
-                  }
-                  return;
-                }
+            // In VISUAL mode
+            if (PreviewCursor.mode === 'VISUAL') {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                PreviewCursor.setMode('NORMAL');
+                return;
               }
-
-              // In NORMAL mode: 'y' yanks active line, 't' translates active line
               if (e.key === 'y') {
                 e.preventDefault();
                 PreviewCursor.yankSelected();
                 return;
               }
-              if (e.key === 't') {
+              if (e.key === 't' || e.key === 'T') {
                 e.preventDefault();
+                const text = PreviewCursor.getSelectedText();
+                if (text && typeof TranslationPopover !== 'undefined') {
+                  TranslationPopover.currentText = text;
+                  TranslationPopover.isEditor = false;
+                  TranslationPopover.isVisualPreview = true;
+                  TranslationPopover.visualRange = PreviewCursor.getSelectedVisualRange();
+                  TranslationPopover.openPopover();
+                }
+                return;
+              }
+              if (this.matchesAction(e, kb.scroll_down || this.defaultKeybindings.preview.scroll_down, 'normal') || e.key === 'j' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                const moved = PreviewCursor.move(1);
+                if (!moved) {
+                  if (scroller) scroller.scrollBy(stepY, 0);
+                  else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
+                }
+                return;
+              }
+              if (this.matchesAction(e, kb.scroll_up || this.defaultKeybindings.preview.scroll_up, 'normal') || e.key === 'k' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const moved = PreviewCursor.move(-1);
+                if (!moved) {
+                  if (scroller) scroller.scrollBy(-stepY, 0);
+                  else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
+                }
+                return;
+              }
+              if (e.key === 'G') {
+                e.preventDefault();
+                PreviewCursor.jumpToEnd();
+                return;
+              }
+              if (e.key === 'g' && !e.shiftKey) {
+                if (this._previewG) {
+                  this._previewG = false;
+                  e.preventDefault();
+                  PreviewCursor.jumpToStart();
+                } else {
+                  this._previewG = true;
+                  setTimeout(() => { this._previewG = false; }, 400);
+                }
+                return;
+              }
+            }
+
+            // In NORMAL mode: 'y' yanks active word/line, 't' translates active word/line
+            if (e.key === 'y') {
+              e.preventDefault();
+              PreviewCursor.yankSelected();
+              return;
+            }
+            if (e.key === 't') {
+              e.preventDefault();
+              if (PreviewCursor.wordIndex >= 0) {
+                PreviewCursor.selectCurrentWordAndTranslate();
+              } else {
                 const text = PreviewCursor.getSelectedText();
                 if (text && typeof TranslationPopover !== 'undefined') {
                   TranslationPopover.currentText = text;
@@ -14664,14 +16221,21 @@
                   TranslationPopover.visualRange = { startLine: PreviewCursor.getCurrentLine(), endLine: PreviewCursor.getCurrentLine() };
                   TranslationPopover.openPopover();
                 }
-                return;
               }
+              return;
             }
           }
 
-          // Single-key navigation (j, k, l, h, w, gg, G)
+          // Ctrl+[ exits VISUAL mode
+          if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled() && PreviewCursor.mode === 'VISUAL' && e.ctrlKey && e.key === '[') {
+            e.preventDefault();
+            PreviewCursor.setMode('NORMAL');
+            return;
+          }
+
+          // Single-key navigation (j, k, l, h, gg, G) & custom save_file binding
           if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-            if (e.key === (kb.scroll_down || 'j') || e.key === 'ArrowDown') {
+            if (this.matchesAction(e, kb.scroll_down || this.defaultKeybindings.preview.scroll_down) || e.key === 'j' || e.key === 'ArrowDown') {
               e.preventDefault();
               if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
                 const moved = PreviewCursor.move(1);
@@ -14683,7 +16247,7 @@
                 if (scroller) scroller.scrollBy(stepY, 0);
                 else this.previewPaneEl.scrollBy({ top: stepY, behavior: 'auto' });
               }
-            } else if (e.key === (kb.scroll_up || 'k') || e.key === 'ArrowUp') {
+            } else if (this.matchesAction(e, kb.scroll_up || this.defaultKeybindings.preview.scroll_up) || e.key === 'k' || e.key === 'ArrowUp') {
               e.preventDefault();
               if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
                 const moved = PreviewCursor.move(-1);
@@ -14695,15 +16259,15 @@
                 if (scroller) scroller.scrollBy(-stepY, 0);
                 else this.previewPaneEl.scrollBy({ top: -stepY, behavior: 'auto' });
               }
-            } else if (e.key === (kb.scroll_right || 'l')) {
+            } else if (this.matchesAction(e, kb.scroll_right || this.defaultKeybindings.preview.scroll_right) || e.key === 'l' || e.key === 'ArrowRight') {
               e.preventDefault();
               if (scroller) scroller.scrollBy(0, stepX);
               else this.previewPaneEl.scrollBy({ left: stepX, behavior: 'auto' });
-            } else if (e.key === (kb.scroll_left || 'h')) {
+            } else if (this.matchesAction(e, kb.scroll_left || this.defaultKeybindings.preview.scroll_left) || e.key === 'h' || e.key === 'ArrowLeft') {
               e.preventDefault();
               if (scroller) scroller.scrollBy(0, -stepX);
               else this.previewPaneEl.scrollBy({ left: -stepX, behavior: 'auto' });
-            } else if (e.key === (kb.save_file || 'w')) {
+            } else if (kb.save_file && this.matchesAction(e, kb.save_file) && e.key !== 'w') {
               e.preventDefault();
               this.save();
             } else if (e.key === 'G') {
@@ -14977,6 +16541,26 @@
         try {
           const parsed = JSON.parse(jsonStr);
           if (parsed && (parsed.preview || parsed.toc || parsed.theme || parsed.fonts || parsed.translation || parsed.ai_agent || parsed.settings)) {
+            // Auto-migrate legacy 'w' save_file binding to word_next navigation
+            if (parsed.preview) {
+              if (parsed.preview.save_file !== undefined) {
+                const saveList = this.normalizeBindingList(parsed.preview.save_file)
+                  .filter(b => String(b.key || '').trim().toLowerCase() !== 'w');
+                parsed.preview.save_file = saveList.length > 0 ? saveList : [{ key: 'Ctrl+s', mode: 'all' }];
+              }
+              if (parsed.preview.word_next === undefined) {
+                parsed.preview.word_next = [{ key: 'w', mode: 'normal' }];
+              }
+              if (parsed.preview.word_prev === undefined) {
+                parsed.preview.word_prev = [{ key: 'b', mode: 'normal' }];
+              }
+              if (parsed.preview.line_start === undefined) {
+                parsed.preview.line_start = [{ key: '0', mode: 'normal' }];
+              }
+              if (parsed.preview.line_end === undefined) {
+                parsed.preview.line_end = [{ key: '$', mode: 'normal' }];
+              }
+            }
             this.keybindings = parsed;
             if (this.keybindings.theme) {
               this.applyTheme(this.keybindings.theme);
@@ -15580,7 +17164,8 @@
         if (currentFile) {
           currentFile.mode = mode;
         }
-        document.body.className = `mode-${mode}`;
+        document.body.classList.remove('mode-preview', 'mode-split', 'mode-edit');
+        document.body.classList.add(`mode-${mode}`);
         document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
         const btn = document.getElementById(`mode-${mode}`);
         if (btn) btn.classList.add('active');
@@ -15592,7 +17177,7 @@
             document.activeElement.blur();
           }
           window.focus();
-          this.statusModeEl.innerText = 'MODE: PREVIEW (NVIM: j/k/h/l)';
+          this.statusModeEl.innerText = 'MODE: PREVIEW (NVIM: j/k/w/b/0/$/v)';
           this.renderMarkdown();
           if (typeof PreviewCursor !== 'undefined' && PreviewCursor.isEnabled()) {
             PreviewCursor.init(this);
@@ -16198,7 +17783,15 @@
 
         window.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
-            this.diagramModalEl.classList.remove('show');
+            if (this.diagramModalEl && this.diagramModalEl.classList.contains('show')) {
+              this.diagramModalEl.classList.remove('show');
+              if (DiagramPanZoom.modalInstance && DiagramPanZoom.modalInstance.cleanup) {
+                DiagramPanZoom.modalInstance.cleanup();
+                DiagramPanZoom.modalInstance = null;
+              }
+              const canvas = document.getElementById('modal-canvas');
+              if (canvas) canvas.innerHTML = '';
+            }
             this.closeKeybindingsModal();
             this.closeToolsMenu();
           }
@@ -16334,19 +17927,7 @@
           if (iconTheme) iconTheme.innerText = next === 'dark' ? '🌙' : '☀️';
           this.updateToolsMenuBadges();
           if (window.mermaid) {
-            mermaid.initialize({
-              theme: next === 'dark' ? 'dark' : 'default',
-              fontFamily: 'var(--font-ui)',
-              flowchart: {
-                htmlLabels: true,
-                padding: 22,
-                curve: 'basis'
-              },
-              themeVariables: {
-                fontFamily: 'var(--font-ui)',
-                fontSize: '13px'
-              }
-            });
+            mermaid.initialize(this.getMermaidConfig(next));
             this.renderMarkdown();
           }
         });
@@ -16551,6 +18132,22 @@ classDiagram
         +uint16 checksum
     }
 \`\`\`\n`;
+            break;
+          case 'carousel':
+            snippet = `\n\`\`\`\`carousel
+### Slide 1: Overview
+Use \`<!-- slide -->\` comments to separate slides inside a \`carousel\` block.
+<!-- slide -->
+\`\`\`python
+def hello_carousel():
+    print("Nested fenced code blocks work!")
+\`\`\`
+<!-- slide -->
+\`\`\`mermaid
+flowchart LR
+    A[Slide 1] --> B[Slide 2] --> C[Slide 3]
+\`\`\`
+\`\`\`\`\n`;
             break;
         }
 

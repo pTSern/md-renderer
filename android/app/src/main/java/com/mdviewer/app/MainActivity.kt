@@ -75,6 +75,17 @@ class MainActivity : AppCompatActivity() {
                             popover.classList.remove('show');
                             return 'closed_trans';
                         }
+                        const diagModal = document.getElementById('diagram-modal');
+                        if (diagModal && diagModal.classList.contains('show')) {
+                            diagModal.classList.remove('show');
+                            if (typeof DiagramPanZoom !== 'undefined' && DiagramPanZoom.modalInstance && DiagramPanZoom.modalInstance.cleanup) {
+                                DiagramPanZoom.modalInstance.cleanup();
+                                DiagramPanZoom.modalInstance = null;
+                            }
+                            const mc = document.getElementById('modal-canvas');
+                            if (mc) mc.innerHTML = '';
+                            return 'closed_diagram_modal';
+                        }
                         const kbModal = document.getElementById('keybindings-modal');
                         if (kbModal && kbModal.classList.contains('show')) {
                             kbModal.classList.remove('show');
